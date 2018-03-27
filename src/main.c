@@ -9,6 +9,7 @@ void read_cables(instance *inst);
 void read_turbines(instance *inst);
 void parse_command_line(int argc, char** argv, instance *inst); 
 
+
 void debug(const char *err) 
 { 
 	printf("\nDEBUG: %s \n", err); 
