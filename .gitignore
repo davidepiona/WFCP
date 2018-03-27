@@ -1,0 +1,7 @@
+*.o
+*.log
+wfcp
+data
+Documentation
+bin
+runs
