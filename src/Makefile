@@ -19,7 +19,6 @@ OS := $(shell uname)
 # 
 
 
-
 ifeq ($(OS),Linux) 													 		 					# ---------------------------------- Linux (login/razor)
 	setting = 1
     CPLEX_HOME = /opt/ibm/ILOG/CPLEX_Studio128/cplex

@@ -123,6 +123,12 @@ int CableOpt(instance *inst)
 	int error;
 	CPXENVptr env = CPXopenCPLEX(&error);
 	CPXLPptr lp = CPXcreateprob(env, &error, "WFCP"); 
+	if(inst->rins != -1)
+		if(CPXsetintparam(env,CPXPARAM_MIP_Strategy_RINSHeur,inst->rins))
+			print_error("Error set of rins");
+	if(inst->polishing_time > 0.0 )
+		if(CPXsetintparam(env,CPXPARAM_MIP_PolishAfter_Time,inst->polishing_time))
+			print_error("Error set of polishing time");
 			 
 /* 2. build initial model  ------------------------------------------------- */
 
@@ -245,7 +251,16 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
     			print_error(" wrong position for y var.s");
 		}
 	} 
-
+	///////////////////////////////////////////////////////////////////////////////////////////////// add s var
+	if(inst->relax == 1)
+	{
+		sprintf(cname[0], "s");
+		double obj = 1e9;
+		double ub = CPX_INFBOUND;
+		if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &continuous, cname) ) 
+				print_error(" wrong CPXnewcols on s var.s");
+		inst->sstart = CPXgetnumcols(env,lp)-1;
+	}
 	///////////////////////////////////////////////////////////////////////////////////////////////// y-constraints
 	for ( int h = 0; h < inst->nturbines; h++ )  // out edges constraints
 	{
@@ -275,6 +290,11 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 			for ( int i = 0; i < inst->nturbines; i++ )
 			{
 				if ( CPXchgcoef(env, lp, lastrow, ypos(i,h, inst), 1.0) ) 
+					print_error(" wrong CPXchgcoef [x1]");
+			}
+			if(inst->relax == 1)
+			{
+				if ( CPXchgcoef(env, lp, lastrow, inst->sstart, -1.0) ) 
 					print_error(" wrong CPXchgcoef [x1]");
 			}
 		}

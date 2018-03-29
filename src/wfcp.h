@@ -36,6 +36,9 @@ typedef struct {
 	double timelimit;						// overall time limit, in sec.s
 	char cables_file[1000];		  			// input file
 	char turbines_file[1000];	  			// input file
+	int rins;
+	int relax;
+	double polishing_time;
 
 	//global data
 	double tstart;								
@@ -48,6 +51,7 @@ typedef struct {
 	int xstart;
 	int ystart;
 	int fstart;
+	int sstart;
 	int C;
 
 } instance;        

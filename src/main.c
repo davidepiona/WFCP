@@ -9,7 +9,6 @@ void read_cables(instance *inst);
 void read_turbines(instance *inst);
 void parse_command_line(int argc, char** argv, instance *inst); 
 
-
 void debug(const char *err) 
 { 
 	printf("\nDEBUG: %s \n", err); 
@@ -165,7 +164,11 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->xstart = -1;
 	inst->ystart = -1;
 	inst->fstart = -1;
+	inst->sstart = -1;
 	inst->C = 7;
+	inst->rins = -1;
+	inst->relax = 0;
+	inst->polishing_time = -1.0;
 
     int help = 0; if( argc < 1 ) help = 1;	
 	for( int i = 1; i < argc; i++ ) 
@@ -176,9 +179,12 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-ft") == 0 ) { strcpy(inst->turbines_file,argv[++i]); continue; }				// input turbines file
 		if( strcmp(argv[i],"-C") == 0 ) { inst->C = atoi(argv[++i]); continue; } 							// Capacity of root
 		if( strcmp(argv[i],"-time_limit") == 0 ) { inst->timelimit = atof(argv[++i]); continue; }			// total time limit
-		if( strcmp(argv[i],"-model_type") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 		// model type
+		if( strcmp(argv[i],"-model_type") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 			// model type
 		if( strcmp(argv[i],"-model") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 				// model type
-		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 										// help
+		if( strcmp(argv[i],"-rins") == 0 ) { inst->rins = atoi(argv[++i]); continue; } 						// rins
+		if( strcmp(argv[i],"-relax") == 0 ) { inst->relax = atoi(argv[++i]); continue; }					// relax
+		if( strcmp(argv[i],"-polishing_time") == 0 ) { inst->polishing_time = atof(argv[++i]); continue; }	// polishing time
+		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 											// help
 		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 										// help
 		help = 1;
     }      
@@ -190,6 +196,9 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-turbines_file %s\n", inst->turbines_file); 
 		printf("-model_type %d\n", inst->model_type); 
 		printf("-C %d\n", inst->C);
+		printf("-rins %d\n", inst->rins);
+		printf("-relax %d\n", inst->relax);
+		printf("-polishing_time %lf\n", inst->polishing_time);
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("\nenter -help or --help for help\n");
 		printf("----------------------------------------------------------------------------------------------\n\n");
