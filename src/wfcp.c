@@ -129,6 +129,8 @@ int CableOpt(instance *inst)
 	if(inst->polishing_time > 0.0 )
 		if(CPXsetdblparam(env,CPXPARAM_MIP_PolishAfter_Time,inst->polishing_time))
 			print_error("Error set of polishing time");
+	if ( inst->randomseed != 0 ) 
+		CPXsetintparam(env, CPX_PARAM_RANDOMSEED, fabs(inst->randomseed));
 			 
 /* 2. build initial model  ------------------------------------------------- */
 
@@ -168,7 +170,8 @@ int CableOpt(instance *inst)
 	CPXgetbestobjval(env, lp, &inst->best_lb); 
 	mip_update_incumbent(env, lp, inst);                 
 
-	printf("STAT,%lf,%lf,%lf,%lf%%\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest));
+	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time\n");
+	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time);
 	
 	// free pools and close cplex model
 	CPXfreeprob(env, &lp);
@@ -189,6 +192,25 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 	char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
 	cname[0] = (char *) calloc(100, sizeof(char));
+
+	//////////////////////////////////////////////////////////////////////////////////////////////// add binary var.s y(i,j) 
+	if ( inst->ystart != -1 ) 
+		print_error(" ... error in build_model(): var. y cannot be redefined!");
+	inst->ystart = CPXgetnumcols(env,lp); 		// position of the first q(,) variable   
+	for ( int i = 0; i < inst->nturbines; i++ )
+	{
+		for ( int j = 0; j < inst->nturbines; j++ )
+		{
+			sprintf(cname[0], "y(%d,%d)", i+1,j+1);
+			double obj = 0.0;
+			double ub = ( i == j ) ?  0.0 : 1.0;
+			if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &binary, cname) ) 
+				print_error(" wrong CPXnewcols on y var.s");
+			//if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &integer, cname) ) print_error(" wrong CPXnewcols on q var.s");
+    		if ( CPXgetnumcols(env,lp)-1 != ypos(i,j, inst) ) 
+    			print_error(" wrong position for y var.s");
+		}
+	} 
 
 	//////////////////////////////////////////////////////////////////////////////////////////// add binary var.s x(i,j)   
 	if ( inst->xstart != -1 ) 
@@ -216,7 +238,6 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 		}
 	} 
 
-	
 	//////////////////////////////////////////////////////////////////////////////////////////////// add continuous var.s f(i,j) = flux throws (i,j) edge
 	if ( inst->fstart != -1 ) 
 		print_error(" ... error in build_model(): var. f cannot be redefined!");
@@ -235,24 +256,6 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	    }
 	} 
 	
-	//////////////////////////////////////////////////////////////////////////////////////////////// add binary var.s y(i,j) 
-	if ( inst->ystart != -1 ) 
-		print_error(" ... error in build_model(): var. y cannot be redefined!");
-	inst->ystart = CPXgetnumcols(env,lp); 		// position of the first q(,) variable   
-	for ( int i = 0; i < inst->nturbines; i++ )
-	{
-		for ( int j = 0; j < inst->nturbines; j++ )
-		{
-			sprintf(cname[0], "y(%d,%d)", i+1,j+1);
-			double obj = 0.0;
-			double ub = ( i == j ) ?  0.0 : 1.0;
-			if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &binary, cname) ) 
-				print_error(" wrong CPXnewcols on y var.s");
-			//if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &integer, cname) ) print_error(" wrong CPXnewcols on q var.s");
-    		if ( CPXgetnumcols(env,lp)-1 != ypos(i,j, inst) ) 
-    			print_error(" wrong position for y var.s");
-		}
-	} 
 	///////////////////////////////////////////////////////////////////////////////////////////////// add s var
 	if(inst->relax == 1)
 	{
@@ -263,7 +266,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 				print_error(" wrong CPXnewcols on s var.s");
 		inst->sstart = CPXgetnumcols(env,lp)-1;
 	}
-	///////////////////////////////////////////////////////////////////////////////////////////////// y-constraints
+	///////////////////////////////////////////////////////////////////////////////////////////////// 
 	for ( int h = 0; h < inst->nturbines; h++ )  // out edges constraints
 	{
 		int lastrow = CPXgetnumrows(env,lp);
@@ -281,7 +284,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for ( int h = 0; h < inst->nturbines; h++ )  // in root edges constraints
 	{
-		if(inst->power[h] == -1)
+		if(inst->power[h] <= 0.0)
 		{
 			int lastrow = CPXgetnumrows(env,lp);
 			double rhs = inst->C; 
@@ -304,7 +307,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for ( int h = 0; h < inst->nturbines; h++ )  // flux constraints
 	{
-		if(inst->power[h] >= 0)
+		if(inst->power[h] >= 0.0)
 		{
 			int lastrow = CPXgetnumrows(env,lp);
 			double rhs = inst->power[h]; 
@@ -316,10 +319,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 			{
 				if ( CPXchgcoef(env, lp, lastrow, fpos(h,j, inst), 1.0) ) 
 					print_error(" wrong CPXchgcoef [x1]");
-			}
-			for ( int i = 0; i < inst->nturbines; i++ )
-			{
-				if ( CPXchgcoef(env, lp, lastrow, fpos(i,h, inst), -1.0) ) 
+				if ( CPXchgcoef(env, lp, lastrow, fpos(j,h, inst), -1.0) ) 
 					print_error(" wrong CPXchgcoef [x1]");
 			}
 			

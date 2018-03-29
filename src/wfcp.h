@@ -36,9 +36,10 @@ typedef struct {
 	double timelimit;						// overall time limit, in sec.s
 	char cables_file[1000];		  			// input file
 	char turbines_file[1000];	  			// input file
-	int rins;
-	int relax;
-	double polishing_time;
+	int randomseed;							// random seed
+	int rins;								// rins
+	int relax;								// relax on nturbines in root
+	double polishing_time;					// polishing time
 
 	//global data
 	double tstart;								
