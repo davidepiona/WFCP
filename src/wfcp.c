@@ -127,7 +127,7 @@ int CableOpt(instance *inst)
 		if(CPXsetintparam(env,CPXPARAM_MIP_Strategy_RINSHeur,inst->rins))
 			print_error("Error set of rins");
 	if(inst->polishing_time > 0.0 )
-		if(CPXsetintparam(env,CPXPARAM_MIP_PolishAfter_Time,inst->polishing_time))
+		if(CPXsetdblparam(env,CPXPARAM_MIP_PolishAfter_Time,inst->polishing_time))
 			print_error("Error set of polishing time");
 			 
 /* 2. build initial model  ------------------------------------------------- */
@@ -168,6 +168,8 @@ int CableOpt(instance *inst)
 	CPXgetbestobjval(env, lp, &inst->best_lb); 
 	mip_update_incumbent(env, lp, inst);                 
 
+	printf("STAT,%lf,%lf,%lf,%lf%%\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest));
+	
 	// free pools and close cplex model
 	CPXfreeprob(env, &lp);
 	CPXcloseCPLEX(&env); 	
