@@ -1,6 +1,8 @@
 # WFCP
 make
 cd ..
+dir=$(date +"%Y-%m-%d_%H-%M-%S")
+mkdir runs/${dir}
 path=$(pwd)
 cd ${path}'/data'
 for t in `find . -type d -name 'w*' | cut -c 3-`
@@ -12,8 +14,8 @@ do
 	do
 		echo "---"$c
 		cd ${path}'/src'
-		./wfcp -ft ${path}'/data/'${t}'/'${t}'.turb' -fc ${path}'/data/'${t}'/'${c} -C 10 -time_limit 15 -rins 10 -relax 1 > ../runs/run_${c}.log
+		./wfcp -ft ${path}'/data/'${t}'/'${t}'.turb' -fc ${path}'/data/'${t}'/'${c} -C 10 -time_limit 15 -rins 10 -relax 1 > ../runs/${dir}/run_${c}.log
 	done
 done
-cd ${path}'/data/runs'
+cd ${path}'/runs/'${dir}
 grep "STAT" *.log |sort > results.csv
