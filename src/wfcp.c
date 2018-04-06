@@ -11,7 +11,7 @@ void mip_timelimit(CPXENVptr env, double timelimit, instance *inst);
 int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst);
 
 FILE *gp;
-
+char color[20][20];
 int xpos(int i, int j, int k, instance *inst) 
 { 
 	return inst->xstart + i * (inst->nturbines * inst->ncables) + j * inst->ncables + k; 
@@ -23,20 +23,60 @@ int ypos(int i, int j, instance *inst)
 int fpos(int i, int j, instance *inst) 
 { 
 	return inst->fstart + i * inst->nturbines + j; 
-}                   
-int plot(CPXENVptr env, CPXLPptr lp, instance *inst)
+}               
+int setColor()
+{
+	sprintf(color[0],"#FF0000");
+	sprintf(color[1],"#00FF00");
+	sprintf(color[2],"#0000FF");
+	sprintf(color[3],"#FFFF00");
+	sprintf(color[4],"#00FFFF");
+	sprintf(color[5],"#FF00FF");
+	sprintf(color[6],"#C0C0C0");
+	sprintf(color[7],"#800000");
+	sprintf(color[8],"#808000");
+	sprintf(color[9],"#008000");
+	sprintf(color[10],"#800080");
+	sprintf(color[11],"#008080");
+	sprintf(color[12],"#000080");
+	sprintf(color[13],"#808080");
+	sprintf(color[14],"#000000");
+	return 0;
+}
+int makeScript(CPXENVptr env, CPXLPptr lp, instance *inst)
+{
+	FILE *s;	
+	setColor();
+
+	s = fopen("plot/script_plot.p","w");
+	fprintf(s,"set autoscale\n");
+	for(int k = 0; k < inst->ncables; k++)
+	{
+		if(k != 0)
+			fprintf(s, "\nre" );	
+		
+		fprintf(s, "plot \\\n\t\'plot/plot%d.dat\' using 1:2 with lines lc rgb \"%s\" lw 2 title \"Cable %d\",\\\n",k,color[k],k+1);
+		fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:(0.6) with circles fill solid lc rgb \"black\" notitle,\\\n",k);
+		fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:3     with labels tc rgb \"black\" offset (0,0) font \'Arial Bold\' notitle",k );
+	}
+	fclose(s);
+	return 0;
+}
+int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
 	double *x;
 	x = (double *) calloc(CPXgetnumcols(env, lp), sizeof(double)); 
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
 	FILE *f;
-	f = fopen("plot.dat","w");
-	fprintf(f,"# Plotting data\n");
+	char filename[30];
+	
+	
+	makeScript(env, lp, inst);
+
 	for(int k = 0; k < inst->ncables; k++)
 	{
-		if(k != 0)
-			printf("\n\n");
-		fprintf(f,"# Cable used (index %d)\n# X Y\n",k);
+		sprintf(filename,"plot/plot%d.dat",k);
+		f = fopen(filename,"w");
 		for(int i = 0; i < inst->nturbines; i++)
 		{
 			for(int j = 0; j < inst->nturbines; j++)
@@ -49,10 +89,9 @@ int plot(CPXENVptr env, CPXLPptr lp, instance *inst)
 				}
 			}
 		}
+		fclose(f);
 	}
-	
-	fclose(f);
-	fprintf(gp, "load 'script_plot.p'\n");
+	fprintf(gp, "load 'plot/script_plot.p'\n");
 	return 0;
 }
 
@@ -125,7 +164,7 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 		inst->tbest = second() - inst->tstart;
 		inst->zbest = mip_value(env, lp);
 		CPXgetx(env, lp, inst->best_sol, 0, ncols-1);
-		plot(env, lp, inst);
+		plotGraph(env, lp, inst);
 		if ( VERBOSE >= 40 ) printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
 		newsol = 1;
 	}     
