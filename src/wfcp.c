@@ -10,6 +10,7 @@ int time_limit_expired(instance *inst);
 void mip_timelimit(CPXENVptr env, double timelimit, instance *inst);
 int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst);
 
+FILE *gp;
 
 int xpos(int i, int j, int k, instance *inst) 
 { 
@@ -23,6 +24,37 @@ int fpos(int i, int j, instance *inst)
 { 
 	return inst->fstart + i * inst->nturbines + j; 
 }                   
+int plot(CPXENVptr env, CPXLPptr lp, instance *inst)
+{
+	double *x;
+	x = (double *) calloc(CPXgetnumcols(env, lp), sizeof(double)); 
+	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
+	FILE *f;
+	f = fopen("plot.dat","w");
+	fprintf(f,"# Plotting data\n");
+	for(int k = 0; k < inst->ncables; k++)
+	{
+		if(k != 0)
+			printf("\n\n");
+		fprintf(f,"# Cable used (index %d)\n# X Y\n",k);
+		for(int i = 0; i < inst->nturbines; i++)
+		{
+			for(int j = 0; j < inst->nturbines; j++)
+			{
+				if(x[xpos(i,j,k,inst)] > 0.5)
+				{
+					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
+					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
+
+				}
+			}
+		}
+	}
+	
+	fclose(f);
+	fprintf(gp, "load 'script_plot.p'\n");
+	return 0;
+}
 
 double dist(int i, int j, instance *inst)
 {
@@ -93,6 +125,7 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 		inst->tbest = second() - inst->tstart;
 		inst->zbest = mip_value(env, lp);
 		CPXgetx(env, lp, inst->best_sol, 0, ncols-1);
+		plot(env, lp, inst);
 		if ( VERBOSE >= 40 ) printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
 		newsol = 1;
 	}     
@@ -133,7 +166,7 @@ int CableOpt(instance *inst)
 		CPXsetintparam(env, CPX_PARAM_RANDOMSEED, fabs(inst->randomseed));
 			 
 /* 2. build initial model  ------------------------------------------------- */
-
+	gp = popen("gnuplot -p","w");
 	build_model(inst, env, lp);
 	
 	
@@ -176,7 +209,7 @@ int CableOpt(instance *inst)
 	// free pools and close cplex model
 	CPXfreeprob(env, &lp);
 	CPXcloseCPLEX(&env); 	
-	
+	fclose(gp);
 	return 0;
 }  
  
