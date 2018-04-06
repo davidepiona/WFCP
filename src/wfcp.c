@@ -69,8 +69,7 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
 	FILE *f;
 	char filename[30];
-	
-	
+
 	makeScript(env, lp, inst);
 
 	for(int k = 0; k < inst->ncables; k++)
@@ -93,6 +92,42 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	}
 	fprintf(gp, "load 'plot/script_plot.p'\n");
 	return 0;
+}
+
+int noCross(int p1, int p2, int p3, int p4, instance *inst) // p1 < - > p2 cross with p3 < - > p4 ?
+{
+	double lambda = 0;
+	double mu = 0;
+
+	double x1 = inst->xcoord[p1];
+	double y1 = inst->ycoord[p1];
+
+	double x2 = inst->xcoord[p2];
+	double y2 = inst->ycoord[p2];
+
+	double x3 = inst->xcoord[p3];
+	double y3 = inst->ycoord[p3];
+
+	double x4 = inst->xcoord[p4];
+	double y4 = inst->ycoord[p4];
+
+	double a = x2 - x1;
+	double b = x3 - x4;
+	double c = x3 - x1;
+	double d = y2 - y1;
+	double e = y3 - y4;
+	double f = y3 - y1;
+
+	if( abs(a) < EPSILON || abs(e) < EPSILON)
+		return 1;
+
+	lambda = (c - (f * b / e)) / (a - (d * b / e));
+	mu = (f - (c * d / a)) / (e - (b * d / a));
+
+	if(((lambda > XSMALL) && (lambda < 1 - XSMALL)) || ((mu > XSMALL) && (mu < 1 - XSMALL)))
+		return 0;
+
+	return 1;
 }
 
 double dist(int i, int j, instance *inst)
