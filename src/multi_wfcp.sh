@@ -14,7 +14,7 @@ do
 	do
 		echo "---"$c
 		cd ${path}'/src'
-		./wfcp -ft ${path}'/data/'${t}'/'${t}'.turb' -fc ${path}'/data/'${t}'/'${c} -C 10 -time_limit 15 -rins 10 -relax 1 > ../runs/${dir}/run_${c}.log
+		./wfcp -ft ${path}'/data/'${t}'/'${t}'.turb' -fc ${path}'/data/'${t}'/'${c} -C 10 -time_limit 250 -rins 10 -relax 1 -polishing_time 150 > ../runs/${dir}/run_${c}.log
 	done
 done
 cd ${path}'/runs/'${dir}
