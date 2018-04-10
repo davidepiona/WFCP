@@ -171,6 +171,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->relax = 0;
 	inst->polishing_time = -1.0;
 	inst->randomseed = 0; 
+	inst->noCross = 1;
 
     int help = 0; if( argc < 1 ) help = 1;	
 	for( int i = 1; i < argc; i++ ) 
@@ -186,7 +187,9 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-rins") == 0 ) { inst->rins = atoi(argv[++i]); continue; } 						// rins
 		if( strcmp(argv[i],"-relax") == 0 ) { inst->relax = atoi(argv[++i]); continue; }					// relax
 		if( strcmp(argv[i],"-polishing_time") == 0 ) { inst->polishing_time = atof(argv[++i]); continue; }	// polishing time
-		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 		// random seed
+		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 			// random seed
+		if ( strcmp(argv[i],"-Cross_Constraints") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}	// Cross Constraints
+		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}				// Cross Constraints
 		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 											// help
 		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 										// help
 		help = 1;
@@ -203,6 +206,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-relax %d\n", inst->relax);
 		printf("-polishing_time %lf\n", inst->polishing_time);
 		printf("-seed %d\n", inst->randomseed);
+		printf("-Cross_Constraints %d\n", inst->noCross); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("\nenter -help or --help for help\n");
 		printf("----------------------------------------------------------------------------------------------\n\n");

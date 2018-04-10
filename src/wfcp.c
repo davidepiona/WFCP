@@ -12,6 +12,7 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst);
 
 FILE *gp;
 char color[20][20];
+int plt[20];
 int xpos(int i, int j, int k, instance *inst) 
 { 
 	return inst->xstart + i * (inst->nturbines * inst->ncables) + j * inst->ncables + k; 
@@ -47,17 +48,20 @@ int makeScript(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
 	FILE *s;	
 	setColor();
-
+	int flag = 0;
 	s = fopen("plot/script_plot.p","w");
 	fprintf(s,"set autoscale\n");
 	for(int k = 0; k < inst->ncables; k++)
 	{
-		if(k != 0)
-			fprintf(s, "\nre" );	
-		
-		fprintf(s, "plot \\\n\t\'plot/plot%d.dat\' using 1:2 with lines lc rgb \"%s\" lw 2 title \"Cable %d\",\\\n",k,color[k],k+1);
-		fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:(0.6) with circles fill solid lc rgb \"black\" notitle,\\\n",k);
-		fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:3     with labels tc rgb \"black\" offset (0,0) font \'Arial Bold\' notitle",k );
+		if(plt[k] > 0)
+		{
+			if(k != 0 && flag != 0)
+				fprintf(s, "\nre" );	
+			fprintf(s, "plot \\\n\t\'plot/plot%d.dat\' using 1:2 with lines lc rgb \"%s\" lw 2 title \"Cable %d\",\\\n",k,color[k],k+1);
+			fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:(0.6) with circles fill solid lc rgb \"black\" notitle,\\\n",k);
+			fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:3     with labels tc rgb \"black\" offset (0,0) font \'Arial Bold\' notitle",k );
+			flag++;
+		}
 	}
 	fclose(s);
 	return 0;
@@ -70,10 +74,10 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	FILE *f;
 	char filename[30];
 
-	makeScript(env, lp, inst);
 
 	for(int k = 0; k < inst->ncables; k++)
 	{
+		plt[k] = 0;
 		sprintf(filename,"plot/plot%d.dat",k);
 		f = fopen(filename,"w");
 		for(int i = 0; i < inst->nturbines; i++)
@@ -84,12 +88,13 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 				{
 					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
 					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
-
+					plt[k]++;
 				}
 			}
 		}
 		fclose(f);
 	}
+	makeScript(env, lp, inst);
 	fprintf(gp, "load 'plot/script_plot.p'\n");
 	return 0;
 }
@@ -111,22 +116,29 @@ int noCross(int p1, int p2, int p3, int p4, instance *inst) // p1 < - > p2 cross
 	double x4 = inst->xcoord[p4];
 	double y4 = inst->ycoord[p4];
 
-	double a = x2 - x1;
-	double b = x3 - x4;
-	double c = x3 - x1;
-	double d = y2 - y1;
-	double e = y3 - y4;
-	double f = y3 - y1;
+	double a = x2 - x1;			//					Matrix	
+	double b = x3 - x4;			//			|	a 	b	=	c 	|
+	double c = x3 - x1;			//
+								//			|	d 	e 	=	f	|
+	double d = y2 - y1;			//
+	double e = y3 - y4;			//
+	double f = y3 - y1;			//
 
-	if( abs(a) < EPSILON || abs(e) < EPSILON)
+	double det = (a * e) - (b * d);
+
+	if( abs(det) < EPSILON )
+	{
+		//printf("Non c'è Crossing\n");
 		return 1;
-
-	lambda = (c - (f * b / e)) / (a - (d * b / e));
-	mu = (f - (c * d / a)) / (e - (b * d / a));
-
+	}
+	lambda = ((c * e) - (b * f) )/ det;
+	mu = ((a * f) - (c * d)) / det;
 	if(((lambda > XSMALL) && (lambda < 1 - XSMALL)) || ((mu > XSMALL) && (mu < 1 - XSMALL)))
+	{
+		//printf("C'è Crossing\n");
 		return 0;
-
+	}
+	//printf("Non C'è Crossing\n");
 	return 1;
 }
 
@@ -472,8 +484,91 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 				print_error(" wrong CPXchgcoef [x1]");
 		}
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(inst->noCross == 0)
+	{
+		for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
+		{
+			for ( int j = i+1; j < inst->nturbines; j++ )  
+			{
+				for ( int k = 0; k < inst->nturbines; k++ )
+				{
+					int lastrow = CPXgetnumrows(env,lp);
+					double rhs = 1.0; 
+					char sense = 'L'; 
+					sprintf(cname[0], "CrossON(%d, %d) by OutEdgeFrom(%d)", i+1, j+1,k+1);   
+					if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
+						print_error(" wrong CPXaddlazyconstraints [x1]");
+					if ( CPXchgcoef(env, lp, lastrow, ypos(i, j, inst), 1.0) ) 
+						print_error(" wrong CPXchgcoef [x1]");
+					if ( CPXchgcoef(env, lp, lastrow, ypos(j, i, inst), 1.0) ) 
+						print_error(" wrong CPXchgcoef [x1]");
+					for ( int l = k+1; l < inst->nturbines; l++ )
+					{
+						if(noCross(i,j,k,l, inst) == 0)
+						{
+							if ( CPXchgcoef(env, lp, lastrow, ypos(k, l, inst), 1.0) ) 
+								print_error(" wrong CPXchgcoef [x1]");
+
+						}
+					}
+				}
+			}
+		}
+	}
+	else if(inst->noCross == 1)
+	{
+		for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition add to pool of lazy constraints
+		{
+			for ( int j = i+1; j < inst->nturbines; j++ )  
+			{
+				for ( int k = 0; k < inst->nturbines; k++ )
+				{
+					if(k == i || k == j)
+						continue;
+
+					int vectInd[inst->nturbines];			// specifies the column index of the corresponding coefficient
+					double vectVal[inst->nturbines];		// corrisponding coefficient
+					int vectBag[inst->nturbines];			// The nonzero elements of every lazy constraint must be stored in sequential locations in this array from position rmatbeg[i] to rmatbeg[i+1]-1
+					int nzcnt = 0;							// An integer that specifies the number of nonzero constraint coefficients to be added to the constraint matrix. This specifies the length of the arrays rmatind and rmatval.
+															// if 1 it work better and there isn't crossing ?!?
+					int index = 2;
+									
+					vectBag[0] = 0;
+
+					vectInd[0] = ypos(i,j,inst);
+					vectVal[0] = 1.0;
+					
+					vectInd[1] = ypos(j,i,inst);
+					vectVal[1] = 1.0;
+					
+					for ( int l = k+1; l < inst->nturbines; l++ )
+					{
+						if(noCross(i,j,k,l, inst) == 0)
+						{
+							vectInd[index] = ypos(k,l,inst);
+							vectVal[index] = 1.0;
+							index++;
+						}
+					}
+					vectBag[1] = index;
+					nzcnt = index;
+					if(nzcnt > 0)
+					{
+						double rhs = 1.0; 
+						char sense = 'L'; 
+						sprintf(cname[0], "CrossON(%d, %d) by OutEdgeFrom(%d)", i+1, j+1,k+1);  
+						if ( CPXaddlazyconstraints (env, lp, 1, nzcnt, &rhs, &sense, vectBag, vectInd, vectVal, cname) ) 
+							print_error(" wrong CPXaddlazyconstraints [x1]");
+					}
+				}
+			}
+		}
+	} 
 	free(cname[0]);
 	free(cname);
+	//printf("Fine creazione vincoli\n");
 	   
 }
 
