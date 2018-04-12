@@ -9,6 +9,9 @@ int time_limit_expired(instance *inst);
 
 void mip_timelimit(CPXENVptr env, double timelimit, instance *inst);
 int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst);
+int compute_nocross_cut(instance *inst, int i, int j, int k, int *index, double *value);
+int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst);
+int installplotfunction( CPXENVptr env, CPXLPptr lp, instance *inst);
 
 FILE *gp;
 char color[20][20];
@@ -44,7 +47,7 @@ int setColor()
 	sprintf(color[14],"#000000");
 	return 0;
 }
-int makeScript(CPXENVptr env, CPXLPptr lp, instance *inst)
+int makeScript(instance *inst)
 {
 	FILE *s;	
 	setColor();
@@ -94,7 +97,7 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 		}
 		fclose(f);
 	}
-	makeScript(env, lp, inst);
+	makeScript(inst);
 	fprintf(gp, "load 'plot/script_plot.p'\n");
 	return 0;
 }
@@ -206,15 +209,13 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 
 	int newsol = 0;
 
-	if ( mip_value(env,lp) < inst->zbest - EPSILON )
-	{
-		inst->tbest = second() - inst->tstart;
-		inst->zbest = mip_value(env, lp);
-		CPXgetx(env, lp, inst->best_sol, 0, ncols-1);
-		plotGraph(env, lp, inst);
-		if ( VERBOSE >= 40 ) printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
-		newsol = 1;
-	}     
+	inst->tbest = second() - inst->tstart;
+	inst->zbest = mip_value(env, lp);
+	CPXgetx(env, lp, inst->best_sol, 0, ncols-1);
+	plotGraph(env, lp, inst);
+	if ( VERBOSE >= 40 ) printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
+	newsol = 1;
+    
 	
 	// save the solution in a file (does not work if the callbacks changed it...)
 	if ( newsol && (VERBOSE >= 10) )
@@ -231,13 +232,12 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 int CableOpt(instance *inst)
 /**************************************************************************************************************************/
 {  
-
 /* 1. initialization ------------------------------------------------- */
 
 	//time_t tt_1 = time(NULL); 		// seconds since the epoch    
 	inst->tstart = second();   
 	inst->best_lb = -CPX_INFBOUND;   
-	
+	int done = 0;
 	// open cplex model
 	int error;
 	CPXENVptr env = CPXopenCPLEX(&error);
@@ -250,7 +250,6 @@ int CableOpt(instance *inst)
 			print_error("Error set of polishing time");
 	if ( inst->randomseed != 0 ) 
 		CPXsetintparam(env, CPX_PARAM_RANDOMSEED, fabs(inst->randomseed));
-			 
 /* 2. build initial model  ------------------------------------------------- */
 	gp = popen("gnuplot -p","w");
 	build_model(inst, env, lp);
@@ -259,7 +258,6 @@ int CableOpt(instance *inst)
 	int ncols = CPXgetnumcols(env, lp);
 	inst->best_sol = (double *) calloc(ncols, sizeof(double)); 	// all entries to zero  
 	inst->zbest = CPX_INFBOUND;  
-
 /* 3. final MIP run ------------------------------------------------------ */
 
 
@@ -280,18 +278,19 @@ int CableOpt(instance *inst)
 	if ( VERBOSE >= 100 ) 
 		CPXwriteprob(env, lp, "model/final.lp", NULL);  
 	     
-	CPXmipopt(env,lp);     
-
-
-/* 99. final statistics ------------------------------------------------- */
-	
-	
-	CPXgetbestobjval(env, lp, &inst->best_lb); 
-	mip_update_incumbent(env, lp, inst);                 
-
+	while(!done)
+	{
+		CPXmipopt(env,lp);     
+		CPXgetbestobjval(env, lp, &inst->best_lb); 
+		mip_update_incumbent(env, lp, inst);
+		done = 1;
+		if(nocross_separation(env, lp, inst))
+		{
+			done = 0;
+		}
+	}	
 	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time\n");
 	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time);
-	
 	// free pools and close cplex model
 	CPXfreeprob(env, &lp);
 	CPXcloseCPLEX(&env); 	
@@ -532,29 +531,29 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 					double vectVal[inst->nturbines];		// corrisponding coefficient
 					int vectBag[inst->nturbines];			// The nonzero elements of every lazy constraint must be stored in sequential locations in this array from position rmatbeg[i] to rmatbeg[i+1]-1
 					int nzcnt = 0;							// An integer that specifies the number of nonzero constraint coefficients to be added to the constraint matrix. This specifies the length of the arrays rmatind and rmatval.
-															// if 1 it work better and there isn't crossing ?!?
-					int index = 2;
 									
 					vectBag[0] = 0;
 
 					vectInd[0] = ypos(i,j,inst);
 					vectVal[0] = 1.0;
+					nzcnt ++;
 					
 					vectInd[1] = ypos(j,i,inst);
 					vectVal[1] = 1.0;
-					
+					nzcnt ++;
+
 					for ( int l = k+1; l < inst->nturbines; l++ )
 					{
 						if(noCross(i,j,k,l, inst) == 0)
 						{
-							vectInd[index] = ypos(k,l,inst);
-							vectVal[index] = 1.0;
-							index++;
+							vectInd[nzcnt] = ypos(k,l,inst);
+							vectVal[nzcnt] = 1.0;
+							nzcnt ++;
 						}
 					}
-					vectBag[1] = index;
-					nzcnt = index;
-					if(nzcnt > 0)
+					
+					vectBag[1] = nzcnt;
+					if(nzcnt > 2)
 					{
 						double rhs = 1.0; 
 						char sense = 'L'; 
@@ -568,8 +567,6 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	} 
 	free(cname[0]);
 	free(cname);
-	//printf("Fine creazione vincoli\n");
-	   
 }
 
 /***************************************************************************************************************************/
@@ -580,7 +577,7 @@ void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 	switch (inst->model_type) 	
 	{
-		case 0 : 								// basic model with asymmetric x and q
+		case 0 : 								
 			build_model0(inst, env,lp);
 			break;
 		default: 
@@ -593,3 +590,106 @@ void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 	if ( VERBOSE >= -100 ) CPXwriteprob(env, lp, "model/model.lp", NULL); 
 	
 }  
+
+static int CPXPUBLIC plotcallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, double objval,  double *x, int *isfeas_p,  int *useraction_p)
+{
+
+	instance *inst = (instance *)cbhandle;
+	inst->zbest = objval;
+	inst->tbest = second() - inst->tstart;
+	FILE *f;
+	char filename[30];
+
+
+	for(int k = 0; k < inst->ncables; k++)
+	{
+		plt[k] = 0;
+		sprintf(filename,"plot/plot%d.dat",k);
+		f = fopen(filename,"w");
+		for(int i = 0; i < inst->nturbines; i++)
+		{
+			for(int j = 0; j < inst->nturbines; j++)
+			{
+				if(x[xpos(i,j,k,inst)] > 0.5)
+				{
+					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
+					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
+					plt[k]++;
+				}
+			}
+		}
+		fclose(f);
+	}
+	makeScript(inst);
+	fprintf(gp, "load 'plot/script_plot.p'\n"); 
+	return 0;
+}
+int installplotfunction( CPXENVptr env, CPXLPptr lp, instance *inst)
+{
+	if(CPXsetincumbentcallbackfunc(env, plotcallback, (void *)inst))
+		print_error("Error lazy callback function");
+	return 0;
+}
+
+int compute_nocross_cut(instance *inst, int i, int j, int k, int *index, double *value)
+{
+	int count = 0;
+	index[count] =  ypos(j,i,inst);
+	value[count] = 1.0;
+	count++;
+	index[count] = ypos(i,j,inst);
+	value[count] = 1.0;
+	
+	for ( int l = k + 1; l < inst->nturbines; l++ )
+	{
+		if( l == k)
+			continue;
+		if(noCross(i,j,k,l, inst) == 0)
+		{
+			index[count] = ypos(k,l,inst);
+			value[count] = 1.0;
+			count++;
+		}
+	}
+	if(count == 3)
+		count = 0;
+	return count;
+}
+int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
+{
+	int count = 0;
+	double *x;
+	x = (double *) calloc(CPXgetnumcols(env, lp), sizeof(double)); 
+	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
+	for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
+	{
+		for ( int j = i+1; j < inst->nturbines; j++ )  
+		{
+
+			if(x[ypos(i,j,inst)] < 1 && x[ypos(j,i,inst)] < 1)
+				continue;
+			for ( int k = 0; k < inst->nturbines; k++ )
+			{
+	
+				int *index;
+				double *values;
+				index = (int *) calloc(inst->nturbines - k + 3, sizeof(int ));
+				values = (double *) calloc(inst->nturbines- k + 3, sizeof(double ));
+				int nnz = compute_nocross_cut(inst, i, j, k, index, values);
+				double rhs = 1.0; 
+				char sense = 'L';
+				int vectBag[1]; 
+				vectBag[0] = 0;
+				char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
+				cname[0] = (char *) calloc(100, sizeof(char));
+				sprintf(cname[0], "CrossON(%d, %d) by OutEdgeFrom(%d)", i+1, j+1,k+1); 
+				if ( CPXaddrows(env, lp,0, 1, nnz, &rhs, &sense, vectBag, index, values, NULL,cname) ) 
+					print_error(" wrong addRows [x1]");
+				free(index);
+				free(values);
+				count++;
+			}
+		}
+	}
+	return count;
+}

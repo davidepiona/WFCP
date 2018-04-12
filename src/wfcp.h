@@ -17,7 +17,8 @@
 
 #define TICKS_PER_SECOND 	  1000.0  	// cplex's ticks on Intel Core i7 quadcore @2.3GHZ
 #define EPSILON		  		  1e-9		// 1e-9		// very small numerical tolerance 
-#define XSMALL		  		  1e-5 		// 1e-4*	// tolerance used to decide ingerality of 0-1 var.s
+#define XSMALL		  		  1e-8 		// 1e-4*	// tolerance used to decide ingerality of 0-1 var.s
+#define MIN_CUT_VIOL          0.1		// min cut violation
 //data structures  
 
 typedef struct {   

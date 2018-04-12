@@ -3,3 +3,5 @@
 wfcp
 Documentation
 bin
+*.dat
+*.lp
