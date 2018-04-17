@@ -657,12 +657,13 @@ int compute_nocross_cut(instance *inst, double *x,int i, int j, int k, int *inde
 	for ( int l = k+1; l < inst->nturbines; l++ )
 	{
 		if(l == i || l == j)continue;
-		//if(x[ypos(k,l,inst)] < 0.5)continue;
-		if(!noCross(i,j,k,l, inst))
+		if(x[ypos(k,l,inst)] < 0.5)continue;
+		if(noCross(i,j,k,l, inst))
 		{
 			index[count] = ypos(k,l,inst);
 			value[count] = 1.0;
 			count++;
+			printf("ADD constraints %d %d %d %d \n",i,j,k,l);
 		}
 	}
 	if(count < 3)
