@@ -47,3 +47,7 @@ replot \
 	'plot/plot11.dat' using 1:2 with lines lc rgb "#008080" lw 2 title "Cable 12",\
 	'plot/plot11.dat' using 1:2:(0.6) with circles fill solid lc rgb "black" notitle,\
 	'plot/plot11.dat' using 1:2:3     with labels tc rgb "black" offset (0,0) font 'Arial Bold' notitle
+replot \
+	'plot/plot12.dat' using 1:2 with lines lc rgb "#000080" lw 2 title "Cable 13",\
+	'plot/plot12.dat' using 1:2:(0.6) with circles fill solid lc rgb "black" notitle,\
+	'plot/plot12.dat' using 1:2:3     with labels tc rgb "black" offset (0,0) font 'Arial Bold' notitle

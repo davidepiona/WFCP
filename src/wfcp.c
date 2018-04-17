@@ -76,7 +76,7 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
 	FILE *f;
 	char filename[30];
-
+	printf("PLOT GRAPH\n");
 
 	for(int k = 0; k < inst->ncables; k++)
 	{
@@ -106,7 +106,6 @@ int noCross(int p1, int p2, int p3, int p4, instance *inst) // p1 < - > p2 cross
 {
 	double lambda = 0;
 	double mu = 0;
-
 	double x1 = inst->xcoord[p1];
 	double y1 = inst->ycoord[p1];
 
@@ -118,31 +117,19 @@ int noCross(int p1, int p2, int p3, int p4, instance *inst) // p1 < - > p2 cross
 
 	double x4 = inst->xcoord[p4];
 	double y4 = inst->ycoord[p4];
-
-	double a = x2 - x1;			//					Matrix	
-	double b = x3 - x4;			//			|	a 	b	=	c 	|
-	double c = x3 - x1;			//
-								//			|	d 	e 	=	f	|
-	double d = y2 - y1;			//
-	double e = y3 - y4;			//
-	double f = y3 - y1;			//
-
-	double det = (a * e) - (b * d);
-
-	if( abs(det) < EPSILON )
+	double det = (((x2-x1)*(y4-y3)) - ((x4-x3)*(y2-y1)));
+	if(fabs(det)>= EPSILON)
 	{
-		//printf("Non c'è Crossing\n");
-		return 1;
+		double dmu = (x1-x3)*(y1-y2) - (y1-y3) * (x1-x2);
+		double dlambda = (x4-x3)*(y1-y3) - (y4-y3)*(x1-x3);
+		mu=dmu/det;
+		lambda=dlambda/det;
+		if(mu>=XSMALL && mu<=1-XSMALL && lambda >= XSMALL && lambda<= 1-XSMALL)
+			return 1;
 	}
-	lambda = ((c * e) - (b * f) )/ det;
-	mu = ((a * f) - (c * d)) / det;
-	if(((lambda > XSMALL) && (lambda < 1 - XSMALL)) || ((mu > XSMALL) && (mu < 1 - XSMALL)))
-	{
-		//printf("C'è Crossing\n");
-		return 0;
-	}
+	return 0;
 	//printf("Non C'è Crossing\n");
-	return 1;
+	
 }
 
 double dist(int i, int j, instance *inst)
@@ -287,14 +274,27 @@ int CableOpt(instance *inst)
 	{
 		CPXmipopt(env,lp);     
 		CPXgetbestobjval(env, lp, &inst->best_lb); 
+		//plotGraph(env, lp, inst);
 		mip_update_incumbent(env, lp, inst);
 		done = 1;
 		if(nocross_separation(env, lp, inst))
 		{
+			/*
+			inst->timelimit = inst->timelimit - (second() - inst->tstart);
+			mip_timelimit(env, CPX_INFBOUND, inst);
+			inst->tstart = second();
+			*/
 			done = 0;
 		}
 		else
 		{
+			/*
+			inst->timelimit = inst->timelimit - (second() - inst->tstart);
+			mip_timelimit(env, CPX_INFBOUND, inst);
+			inst->tstart = second();
+			*/
+			printf("NO CROSS CONSTRAINTS TO ADD\n");
+			mip_update_incumbent(env, lp, inst);
 			if(CPXsetdblparam(env,CPX_PARAM_EPGAP,0.0))
 				print_error("Error set of minimum gap");
 			 done = 0;
@@ -518,7 +518,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 						print_error(" wrong CPXchgcoef [x1]");
 					for ( int l = k+1; l < inst->nturbines; l++ )
 					{
-						if(noCross(i,j,k,l, inst) == 0)
+						if(!noCross(i,j,k,l, inst))
 						{
 							if ( CPXchgcoef(env, lp, lastrow, ypos(k, l, inst), 1.0) ) 
 								print_error(" wrong CPXchgcoef [x1]");
@@ -557,7 +557,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 					for ( int l = k+1; l < inst->nturbines; l++ )
 					{
-						if(noCross(i,j,k,l, inst) == 0)
+						if(!noCross(i,j,k,l, inst))
 						{
 							vectInd[nzcnt] = ypos(k,l,inst);
 							vectVal[nzcnt] = 1.0;
@@ -653,19 +653,19 @@ int compute_nocross_cut(instance *inst, double *x,int i, int j, int k, int *inde
 	count++;
 	index[count] = ypos(i,j,inst);
 	value[count] = 1.0;
-	
-	for ( int l = k + 1; l < inst->nturbines; l++ )
+	count++;
+	for ( int l = k+1; l < inst->nturbines; l++ )
 	{
-		if(x[ypos(k,l,inst)] < EPSILON )
-				continue;
-		if(noCross(i,j,k,l, inst) == 0)
+		if(l == i || l == j)continue;
+		//if(x[ypos(k,l,inst)] < 0.5)continue;
+		if(!noCross(i,j,k,l, inst))
 		{
 			index[count] = ypos(k,l,inst);
 			value[count] = 1.0;
 			count++;
 		}
 	}
-	if(count == 3)
+	if(count < 3)
 		count = 0;
 	return count;
 }
@@ -680,17 +680,18 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 		for ( int j = i+1; j < inst->nturbines; j++ )  
 		{
 
-			if(x[ypos(i,j,inst)] < EPSILON && x[ypos(j,i,inst)] < EPSILON)
+			if(x[ypos(i,j,inst)] < 0.5 && x[ypos(j,i,inst)] < 0.5)
 				continue;
-			for ( int k = 0; k < inst->nturbines; k++ )
+			for ( int k = i+1; k < inst->nturbines; k++ )
 			{
-	
+				if(i == k || j == k)continue;
 				int *index;
 				double *values;
 				index = (int *) calloc(inst->nturbines - k + 3, sizeof(int ));
 				values = (double *) calloc(inst->nturbines- k + 3, sizeof(double ));
 				int nnz = compute_nocross_cut(inst, x, i, j, k, index, values);
-				
+				if(nnz == 0)
+					break;
 				double rhs = 1.0; 
 				char sense = 'L';
 				int vectBag[1]; 
@@ -700,6 +701,7 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 				sprintf(cname[0], "CrossON(%d, %d) by OutEdgeFrom(%d)", i+1, j+1,k+1); 
 				if ( CPXaddrows(env, lp,0, 1, nnz, &rhs, &sense, vectBag, index, values, NULL,cname) ) 
 					print_error(" wrong addRows [x1]");
+				
 				free(index);
 				free(values);
 				count++;
@@ -708,3 +710,8 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 	}
 	return count;
 }
+/*
+	callback per mettere il separatore dentro il branch and bound
+
+
+*/
