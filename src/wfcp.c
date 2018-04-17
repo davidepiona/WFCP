@@ -238,6 +238,7 @@ int CableOpt(instance *inst)
 	inst->tstart = second();   
 	inst->best_lb = -CPX_INFBOUND;   
 	int done = 0;
+	int solved = 2;
 	// open cplex model
 	int error;
 	CPXENVptr env = CPXopenCPLEX(&error);
@@ -250,6 +251,9 @@ int CableOpt(instance *inst)
 			print_error("Error set of polishing time");
 	if ( inst->randomseed != 0 ) 
 		CPXsetintparam(env, CPX_PARAM_RANDOMSEED, fabs(inst->randomseed));
+	if( inst->gap >= 0.0 && inst->gap < 1.0)
+		if(CPXsetdblparam(env,CPX_PARAM_EPGAP,inst->gap))
+			print_error("Error set of minimum gap");
 /* 2. build initial model  ------------------------------------------------- */
 	gp = popen("gnuplot -p","w");
 	build_model(inst, env, lp);
@@ -278,7 +282,8 @@ int CableOpt(instance *inst)
 	if ( VERBOSE >= 100 ) 
 		CPXwriteprob(env, lp, "model/final.lp", NULL);  
 	     
-	while(!done)
+	//installplotfunction(env, lp, inst);
+	while(!done && solved)
 	{
 		CPXmipopt(env,lp);     
 		CPXgetbestobjval(env, lp, &inst->best_lb); 
@@ -288,10 +293,18 @@ int CableOpt(instance *inst)
 		{
 			done = 0;
 		}
+		else
+		{
+			if(CPXsetdblparam(env,CPX_PARAM_EPGAP,0.0))
+				print_error("Error set of minimum gap");
+			 done = 0;
+			 solved --;
+		}
 	}	
+	
 	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time\n");
 	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time);
-	// free pools and close cplex model
+	
 	CPXfreeprob(env, &lp);
 	CPXcloseCPLEX(&env); 	
 	fclose(gp);
@@ -591,11 +604,11 @@ void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 	
 }  
 
-static int CPXPUBLIC plotcallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, double objval,  double *x, int *isfeas_p,  int *useraction_p)
+int CPXPUBLIC plotcallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, double *objval_p,  double *x, int *checkfeas_p,  int *useraction_p)
 {
 
 	instance *inst = (instance *)cbhandle;
-	inst->zbest = objval;
+	inst->zbest = objval_p[0];
 	inst->tbest = second() - inst->tstart;
 	FILE *f;
 	char filename[30];
@@ -624,14 +637,15 @@ static int CPXPUBLIC plotcallback(CPXCENVptr env, void *cbdata, int wherefrom, v
 	fprintf(gp, "load 'plot/script_plot.p'\n"); 
 	return 0;
 }
+
 int installplotfunction( CPXENVptr env, CPXLPptr lp, instance *inst)
 {
-	if(CPXsetincumbentcallbackfunc(env, plotcallback, (void *)inst))
+	if(CPXsetheuristiccallbackfunc(env, plotcallback, (void *)inst))
 		print_error("Error lazy callback function");
 	return 0;
 }
 
-int compute_nocross_cut(instance *inst, int i, int j, int k, int *index, double *value)
+int compute_nocross_cut(instance *inst, double *x,int i, int j, int k, int *index, double *value)
 {
 	int count = 0;
 	index[count] =  ypos(j,i,inst);
@@ -642,8 +656,8 @@ int compute_nocross_cut(instance *inst, int i, int j, int k, int *index, double 
 	
 	for ( int l = k + 1; l < inst->nturbines; l++ )
 	{
-		if( l == k)
-			continue;
+		if(x[ypos(k,l,inst)] < EPSILON )
+				continue;
 		if(noCross(i,j,k,l, inst) == 0)
 		{
 			index[count] = ypos(k,l,inst);
@@ -666,7 +680,7 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 		for ( int j = i+1; j < inst->nturbines; j++ )  
 		{
 
-			if(x[ypos(i,j,inst)] < 1 && x[ypos(j,i,inst)] < 1)
+			if(x[ypos(i,j,inst)] < EPSILON && x[ypos(j,i,inst)] < EPSILON)
 				continue;
 			for ( int k = 0; k < inst->nturbines; k++ )
 			{
@@ -675,7 +689,8 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 				double *values;
 				index = (int *) calloc(inst->nturbines - k + 3, sizeof(int ));
 				values = (double *) calloc(inst->nturbines- k + 3, sizeof(double ));
-				int nnz = compute_nocross_cut(inst, i, j, k, index, values);
+				int nnz = compute_nocross_cut(inst, x, i, j, k, index, values);
+				
 				double rhs = 1.0; 
 				char sense = 'L';
 				int vectBag[1]; 

@@ -42,6 +42,7 @@ typedef struct {
 	int relax;								// relax on nturbines in root
 	double polishing_time;					// polishing time
 	int noCross;							// no cross constraints: 0 add to costraints. 1 add to lazy constraints. 2 callback 
+	double gap;
 
 	//global data
 	double tstart;								
