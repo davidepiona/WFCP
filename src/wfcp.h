@@ -35,9 +35,11 @@ typedef struct {
 	// parameters 
 	int model_type; 
 	double timelimit;						// overall time limit, in sec.s
+	double timeloop;						// time for execution of loop method
 	char cables_file[1000];		  			// input file
 	char turbines_file[1000];	  			// input file
 	int randomseed;							// random seed
+	int num_threads;						// number of threads to use
 	int rins;								// rins
 	int relax;								// relax on nturbines in root
 	double polishing_time;					// polishing time
@@ -50,6 +52,7 @@ typedef struct {
 	double tbest;							// time for the best sol. available  
 	double *best_sol;						// best sol. available        
 	double	best_lb;						// best lower bound available 
+	int ncols;
 	
 	// model;     
 	int xstart;

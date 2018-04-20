@@ -161,6 +161,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	strcpy(inst->cables_file, "NULL");
 	strcpy(inst->turbines_file, "NULL");
 	inst->timelimit = CPX_INFBOUND;
+	inst->timeloop = CPX_INFBOUND;
 	inst->model_type = 0;
 	inst->xstart = -1;
 	inst->ystart = -1;
@@ -171,6 +172,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->relax = 0;
 	inst->polishing_time = -1.0;
 	inst->randomseed = 0; 
+	inst->num_threads = 0;
 	inst->noCross = 1;
 	inst->gap = 0.0;
 
@@ -182,6 +184,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-fc") == 0 )  { strcpy(inst->cables_file,argv[++i]); continue; }				// input cables file
 		if( strcmp(argv[i],"-ft") == 0 ) { strcpy(inst->turbines_file,argv[++i]); continue; }				// input turbines file
 		if( strcmp(argv[i],"-C") == 0 ) { inst->C = atoi(argv[++i]); continue; } 							// Capacity of root
+		if( strcmp(argv[i],"-time_loop") == 0 ) { inst->timeloop = atof(argv[++i]); continue; }			// total time limit
 		if( strcmp(argv[i],"-time_limit") == 0 ) { inst->timelimit = atof(argv[++i]); continue; }			// total time limit
 		if( strcmp(argv[i],"-model_type") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 			// model type
 		if( strcmp(argv[i],"-model") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 				// model type
@@ -190,6 +193,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-polishing_time") == 0 ) { inst->polishing_time = atof(argv[++i]); continue; }	// polishing time
 		if( strcmp(argv[i],"-gap") == 0 ) { inst->gap = atof(argv[++i]); continue; }
 		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 			// random seed
+		if ( strcmp(argv[i],"-threads") == 0 ) { inst->num_threads = atoi(argv[++i]); continue; } 		// n. threads
 		if ( strcmp(argv[i],"-Cross_Constraints") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}	// Cross Constraints
 		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}				// Cross Constraints
 		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 											// help
@@ -209,8 +213,10 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-polishing_time %lf\n", inst->polishing_time);
 		printf("-gap %lf\n", inst->gap);
 		printf("-seed %d\n", inst->randomseed);
+		printf("-threads %d\n", inst->num_threads); 
 		printf("-Cross_Constraints %d\n", inst->noCross); 
 		printf("-time_limit %lf\n", inst->timelimit); 
+		printf("-time_loop %lf\n", inst->timeloop); 
 		printf("\nenter -help or --help for help\n");
 		printf("----------------------------------------------------------------------------------------------\n\n");
 	}        

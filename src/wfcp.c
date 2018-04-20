@@ -9,9 +9,9 @@ int time_limit_expired(instance *inst);
 
 void mip_timelimit(CPXENVptr env, double timelimit, instance *inst);
 int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst);
-int compute_nocross_cut(instance *inst, int i, int j, int k, int *index, double *value);
+int compute_nocross_cut(instance *inst, double *x, int i, int j, int k, int *index, double *value);
 int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst);
-int installplotfunction( CPXENVptr env, CPXLPptr lp, instance *inst);
+int installLazyCallback( CPXENVptr env, CPXLPptr lp, instance *inst);
 
 FILE *gp;
 char color[20][20];
@@ -56,6 +56,7 @@ int makeScript(instance *inst)
 	fprintf(s,"set autoscale\n");
 	for(int k = 0; k < inst->ncables; k++)
 	{
+		//printf("Script cavo < %d >\n",k);
 		if(plt[k] > 0)
 		{
 			if(k != 0 && flag != 0)
@@ -76,10 +77,10 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
 	FILE *f;
 	char filename[30];
-	printf("PLOT GRAPH\n");
 
 	for(int k = 0; k < inst->ncables; k++)
 	{
+		//printf("File data < %d >\n",k);
 		plt[k] = 0;
 		sprintf(filename,"plot/plot%d.dat",k);
 		f = fopen(filename,"w");
@@ -99,6 +100,37 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	}
 	makeScript(inst);
 	fprintf(gp, "load 'plot/script_plot.p'\n");
+	fflush(NULL);
+	return 0;
+}
+int plotGraphCallback(instance *inst, double *x)
+{
+	FILE *f;
+	char filename[30];
+
+	for(int k = 0; k < inst->ncables; k++)
+	{
+		//printf("File data < %d >\n",k);
+		plt[k] = 0;
+		sprintf(filename,"plot/plot%d.dat",k);
+		f = fopen(filename,"w");
+		for(int i = 0; i < inst->nturbines; i++)
+		{
+			for(int j = 0; j < inst->nturbines; j++)
+			{
+				if(x[xpos(i,j,k,inst)] > 0.5)
+				{
+					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
+					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
+					plt[k]++;
+				}
+			}
+		}
+		fclose(f);
+	}
+	makeScript(inst);
+	fprintf(gp, "load 'plot/script_plot.p'\n");
+	fflush(NULL);
 	return 0;
 }
 
@@ -155,22 +187,35 @@ int is_all_integer(int n, const double *x) 			// it works for x_j in [0,1] only
 	return 1;
 }                                                                                                                               
                          
+int num_cores(instance *inst)
+{                          
+	int ncores = inst->num_threads;
+	if ( ncores == 0 ) 
+	{
+		int error;
+		CPXENVptr env = CPXopenCPLEX(&error);
+		CPXgetnumcores(env, &ncores);  
+		CPXcloseCPLEX(&env);  
+	}
+	return ncores;
+}
 
-int time_limit_expired(instance *inst)	 
+int time_limit_expired(instance *inst, double time)	 
 {
 	double tspan = second() - inst->tstart;
-	if (  tspan > inst->timelimit ) 
+	if (  tspan > time ) 
 	{
 		if ( VERBOSE >= 100 ) 
-			printf("\n\n$$$ time limit of %10.1lf sec.s expired after %10.1lf sec.s $$$\n\n", inst->timelimit, tspan);
+			printf("\n\n$$$ time limit of %10.1lf sec.s expired after %10.1lf sec.s $$$\n\n", time, tspan);
 		//exit(0); 
 		return 1;
 	}  
 	return 0;
 }
-void mip_timelimit(CPXENVptr env, double timelimit, instance *inst)
+
+void mip_timelimit(CPXENVptr env, double timelimit, instance *inst, double time)
 {
-	double residual_time = inst->tstart + inst->timelimit - second();
+	double residual_time = inst->tstart + time - second();
 	if ( residual_time < 0.0 ) residual_time = 0.0;
 	CPXsetintparam(env, CPX_PARAM_CLOCKTYPE, 2);
 	CPXsetdblparam(env, CPX_PARAM_TILIM, residual_time); 							// real time
@@ -192,38 +237,61 @@ double mip_value(CPXENVptr env, CPXLPptr lp)
 
 int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
-	int ncols = CPXgetnumcols(env, lp);
-
 	int newsol = 0;
-
-	inst->tbest = second() - inst->tstart;
-	inst->zbest = mip_value(env, lp);
-	CPXgetx(env, lp, inst->best_sol, 0, ncols-1);
-	plotGraph(env, lp, inst);
-	if ( VERBOSE >= 40 ) printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
-	newsol = 1;
-    
+	plotGraph(env,lp,inst);
+	if ( mip_value(env,lp) < inst->zbest - EPSILON )
+	{
+		inst->tbest = second() - inst->tstart;
+		inst->zbest = mip_value(env, lp);
+		CPXgetx(env, lp, inst->best_sol, 0, inst->ncols-1);
+		if ( VERBOSE >= 40 ) 
+			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
+		newsol = 1;
+	}     
 	
 	// save the solution in a file (does not work if the callbacks changed it...)
 	if ( newsol && (VERBOSE >= 10) )
 	{
 		if ( VERBOSE >= 100 ) CPXwritemipstarts(env, lp, "model.mst", 0, 0);
-		printf("... New incumbent of value %20.5lf found after %7.2lf sec.s \n", inst->zbest,  inst->tbest);
+		printf("... New incumbent of value %20.5lf found after %7.2lf sec.s \n", inst->zbest, inst->tbest);
 		fflush(NULL);
 	}
 
 	return newsol;
 }
+int mip_update_incumbent(instance *inst, double *x, double z)
+{
+	int newsol = 0;
+	plotGraphCallback(inst, x);
+	if ( z < inst->zbest - EPSILON )
+	{
+		inst->tbest = second() - inst->tstart;
+		inst->zbest = z;
+		inst->best_sol = x;
+		if ( VERBOSE >= 40 ) 
+			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
+		newsol = 1;
+	}     
+	
+	// save the solution in a file (does not work if the callbacks changed it...)
+	if ( newsol && (VERBOSE >= 10) )
+	{
+		if ( VERBOSE >= 100 )
+		printf("... New incumbent of value %20.5lf found after %7.2lf sec.s \n", inst->zbest, inst->tbest);
+		fflush(NULL);
+	}
 
+	return newsol;
+}
 /**************************************************************************************************************************/
 int CableOpt(instance *inst)
 /**************************************************************************************************************************/
 {  
 /* 1. initialization ------------------------------------------------- */
-
-	//time_t tt_1 = time(NULL); 		// seconds since the epoch    
+  
 	inst->tstart = second();   
-	inst->best_lb = -CPX_INFBOUND;   
+	inst->best_lb = -CPX_INFBOUND; 
+	inst->num_threads = num_cores(inst);  
 	int done = 0;
 	int solved = 2;
 	// open cplex model
@@ -241,21 +309,25 @@ int CableOpt(instance *inst)
 	if( inst->gap >= 0.0 && inst->gap < 1.0)
 		if(CPXsetdblparam(env,CPX_PARAM_EPGAP,inst->gap))
 			print_error("Error set of minimum gap");
+	if(inst->num_threads > 1)
+	{
+		if ( VERBOSE >= 2 ) printf(" ... Cplex in opportunistic mode with %d thread(s)\n", inst->num_threads);
+		CPXsetintparam(env, CPX_PARAM_PARALLELMODE, -1); 	
+	} 
 /* 2. build initial model  ------------------------------------------------- */
 	gp = popen("gnuplot -p","w");
 	build_model(inst, env, lp);
 	
 	
-	int ncols = CPXgetnumcols(env, lp);
-	inst->best_sol = (double *) calloc(ncols, sizeof(double)); 	// all entries to zero  
+	inst->ncols = CPXgetnumcols(env, lp);
+	inst->best_sol = (double *) calloc(inst->ncols, sizeof(double)); 	// all entries to zero  
 	inst->zbest = CPX_INFBOUND;  
 /* 3. final MIP run ------------------------------------------------------ */
 
 
-	mip_timelimit(env, CPX_INFBOUND, inst);
 	if ( VERBOSE >= 50 ) 
 		CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON); 
-	if ( time_limit_expired(inst) ) 
+	if ( time_limit_expired(inst, inst->timelimit) ) 
 	{
 		CPXgetbestobjval(env, lp, &inst->best_lb); 
 		mip_update_incumbent(env, lp, inst);                 
@@ -269,45 +341,56 @@ int CableOpt(instance *inst)
 	if ( VERBOSE >= 100 ) 
 		CPXwriteprob(env, lp, "model/final.lp", NULL);  
 	     
-	//installplotfunction(env, lp, inst);
-	while(!done && solved)
+	if(inst->noCross == 3)
+	{
+		mip_timelimit(env, CPX_INFBOUND, inst, inst->timelimit);
+		CPXsetintparam(env, CPX_PARAM_MIPCBREDLP, CPX_OFF);	
+		installLazyCallback(env,lp,inst);
+		CPXmipopt(env,lp);     
+		CPXgetbestobjval(env, lp, &inst->best_lb); 
+		mip_update_incumbent(env, lp, inst);
+	}
+	else if(inst->noCross == 2)
+	{
+		while(!done && solved)
+		{
+			CPXmipopt(env,lp);     
+			CPXgetbestobjval(env, lp, &inst->best_lb); 
+			plotGraph(env, lp, inst);
+			done = 1;
+			if(nocross_separation(env, lp, inst))
+			{
+				done = 0;
+			}
+			else
+			{
+				printf("NO CROSS CONSTRAINTS TO ADD\n");
+				mip_update_incumbent(env, lp, inst);
+				double t = inst->timelimit - second() + inst->tstart;
+				printf("\n\n time %lf \n\n",t);
+				mip_timelimit(env, CPX_INFBOUND, inst, t);
+				if(CPXsetdblparam(env,CPX_PARAM_EPGAP,0.0))
+					print_error("Error set of minimum gap");
+				 done = 0;
+				 solved --;
+			}
+			if(time_limit_expired(inst, inst->timelimit))
+				solved = 0;
+		}
+	}	
+	else
 	{
 		CPXmipopt(env,lp);     
 		CPXgetbestobjval(env, lp, &inst->best_lb); 
-		//plotGraph(env, lp, inst);
 		mip_update_incumbent(env, lp, inst);
-		done = 1;
-		if(nocross_separation(env, lp, inst))
-		{
-			/*
-			inst->timelimit = inst->timelimit - (second() - inst->tstart);
-			mip_timelimit(env, CPX_INFBOUND, inst);
-			inst->tstart = second();
-			*/
-			done = 0;
-		}
-		else
-		{
-			/*
-			inst->timelimit = inst->timelimit - (second() - inst->tstart);
-			mip_timelimit(env, CPX_INFBOUND, inst);
-			inst->tstart = second();
-			*/
-			printf("NO CROSS CONSTRAINTS TO ADD\n");
-			mip_update_incumbent(env, lp, inst);
-			if(CPXsetdblparam(env,CPX_PARAM_EPGAP,0.0))
-				print_error("Error set of minimum gap");
-			 done = 0;
-			 solved --;
-		}
-	}	
-	
+	}
 	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time\n");
 	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time);
-	
+	fprintf(gp, "exit\n");
+	fclose(gp);
+	printf("1\n");
 	CPXfreeprob(env, &lp);
 	CPXcloseCPLEX(&env); 	
-	fclose(gp);
 	return 0;
 }  
  
@@ -498,7 +581,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(inst->noCross == 0)
+	if(inst->noCross == 10)
 	{
 		for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
 		{
@@ -577,7 +660,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 				}
 			}
 		}
-	} 
+	}
 	free(cname[0]);
 	free(cname);
 }
@@ -604,43 +687,77 @@ void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 	
 }  
 
-int CPXPUBLIC plotcallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, double *objval_p,  double *x, int *checkfeas_p,  int *useraction_p)
+
+int myseparation(instance *inst, double *x, CPXCENVptr env, void *cbdata, int wherefrom)
 {
-
-	instance *inst = (instance *)cbhandle;
-	inst->zbest = objval_p[0];
-	inst->tbest = second() - inst->tstart;
-	FILE *f;
-	char filename[30];
-
-
-	for(int k = 0; k < inst->ncables; k++)
+	
+	int count = 0;
+	//printf("\n\nCONSTRAINT ADD :\n");
+	for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
 	{
-		plt[k] = 0;
-		sprintf(filename,"plot/plot%d.dat",k);
-		f = fopen(filename,"w");
-		for(int i = 0; i < inst->nturbines; i++)
+		for ( int j = i+1; j < inst->nturbines; j++ )  
 		{
-			for(int j = 0; j < inst->nturbines; j++)
+			if(i == j)continue;
+
+			if(x[ypos(i,j,inst)] < 0.1 && x[ypos(j,i,inst)] < 0.1)
+				continue;
+			//printf("i< %d > j< %d >\n",i,j );
+			for ( int k = i+1; k < inst->nturbines; k++ )
 			{
-				if(x[xpos(i,j,k,inst)] > 0.5)
+				if(i == k || j == k)continue;
+				int *index;
+				double *values;
+				index = (int *) calloc(inst->nturbines - k + 3, sizeof(int ));
+				values = (double *) calloc(inst->nturbines -k + 3 , sizeof(double ));
+				int nnz = compute_nocross_cut(inst, x, i, j, k, index, values);
+				if(nnz == 0)
 				{
-					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
-					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
-					plt[k]++;
+					free(index);
+					free(values);
+					continue;
 				}
+				double rhs = 1.0; 
+				char sense = 'L';
+				if(CPXcutcallbackadd(env,cbdata,wherefrom,nnz,rhs,sense,index,values,0))
+					print_error("USER_SEPARATION_CUT_ERROR");
+				
+				free(index);
+				free(values);
+				count++;
 			}
 		}
-		fclose(f);
 	}
-	makeScript(inst);
-	fprintf(gp, "load 'plot/script_plot.p'\n"); 
-	return 0;
+	//printf("\n\n");
+	return count;
 }
-
-int installplotfunction( CPXENVptr env, CPXLPptr lp, instance *inst)
+static int CPXPUBLIC lazyCallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, int *useraction_p)
 {
-	if(CPXsetheuristiccallbackfunc(env, plotcallback, (void *)inst))
+	*useraction_p = CPX_CALLBACK_DEFAULT;
+	instance *inst = (instance*)cbhandle;
+	double z = CPX_INFBOUND;
+	CPXgetcallbacknodeobjval(env, cbdata, wherefrom, &z);
+	double *xstar = (double*) malloc(inst->ncols * sizeof(double));
+	if ( CPXgetcallbacknodex(env, cbdata, wherefrom, xstar, 0, inst->ncols-1) )
+		return 1;
+	
+	int ncuts = myseparation(inst, xstar, env,cbdata, wherefrom);
+
+	if(ncuts >= 1)
+	{
+		plotGraphCallback(inst, xstar);
+		*useraction_p = CPX_CALLBACK_SET;
+	}
+	else
+	{
+		mip_update_incumbent(inst, xstar, z);
+	}
+	free(xstar);
+	return 0;
+
+}
+int installLazyCallback( CPXENVptr env, CPXLPptr lp, instance *inst)
+{
+	if(CPXsetlazyconstraintcallbackfunc(env, lazyCallback, (void *)inst))
 		print_error("Error lazy callback function");
 	return 0;
 }
@@ -654,18 +771,20 @@ int compute_nocross_cut(instance *inst, double *x,int i, int j, int k, int *inde
 	index[count] = ypos(i,j,inst);
 	value[count] = 1.0;
 	count++;
+	
 	for ( int l = k+1; l < inst->nturbines; l++ )
 	{
-		if(l == i || l == j)continue;
-		if(x[ypos(k,l,inst)] < 0.5)continue;
+		if(l == i || l == j || l == k)continue;
+		//if(x[ypos(k,l,inst)] < 0.1)continue;
 		if(noCross(i,j,k,l, inst))
 		{
 			index[count] = ypos(k,l,inst);
 			value[count] = 1.0;
 			count++;
-			printf("ADD constraints %d %d %d %d \n",i,j,k,l);
+			//printf("ADD constraints %d %d %d %d\n",i,j,k,l);
 		}
 	}
+	
 	if(count < 3)
 		count = 0;
 	return count;
@@ -676,23 +795,30 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 	double *x;
 	x = (double *) calloc(CPXgetnumcols(env, lp), sizeof(double)); 
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
+	printf("\n\nCONSTRAINT ADD :\n");
 	for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
 	{
 		for ( int j = i+1; j < inst->nturbines; j++ )  
 		{
+			if(i == j)continue;
 
-			if(x[ypos(i,j,inst)] < 0.5 && x[ypos(j,i,inst)] < 0.5)
+			if(x[ypos(i,j,inst)] < 0.1 && x[ypos(j,i,inst)] < 0.1)
 				continue;
+			//printf("i< %d > j< %d >\n",i,j );
 			for ( int k = i+1; k < inst->nturbines; k++ )
 			{
 				if(i == k || j == k)continue;
 				int *index;
 				double *values;
-				index = (int *) calloc(inst->nturbines - k + 3, sizeof(int ));
-				values = (double *) calloc(inst->nturbines- k + 3, sizeof(double ));
+				index = (int *) calloc(inst->nturbines + 3, sizeof(int ));
+				values = (double *) calloc(inst->nturbines + 3, sizeof(double ));
 				int nnz = compute_nocross_cut(inst, x, i, j, k, index, values);
 				if(nnz == 0)
-					break;
+				{
+					free(index);
+					free(values);
+					continue;
+				}
 				double rhs = 1.0; 
 				char sense = 'L';
 				int vectBag[1]; 
@@ -709,10 +835,13 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 			}
 		}
 	}
+	printf("\n\n");
 	return count;
 }
 /*
 	callback per mettere il separatore dentro il branch and bound
+	
+	cpxgetcallbacknodex
 
 
 */
