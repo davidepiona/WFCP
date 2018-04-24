@@ -107,7 +107,6 @@ int plotGraphCallback(instance *inst, double *x)
 {
 	FILE *f;
 	char filename[30];
-
 	for(int k = 0; k < inst->ncables; k++)
 	{
 		//printf("File data < %d >\n",k);
@@ -744,7 +743,7 @@ static int CPXPUBLIC lazyCallback(CPXCENVptr env, void *cbdata, int wherefrom, v
 	printf("Cut added : < %d >\n",ncuts );
 	if(ncuts >= 1)
 	{
-		plotGraphCallback(inst, xstar);
+		//plotGraphCallback(inst, xstar);
 		*useraction_p = CPX_CALLBACK_SET;
 	}
 	else
@@ -839,9 +838,6 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 	return count;
 }
 /*
-	callback per mettere il separatore dentro il branch and bound
-	
-	cpxgetcallbacknodex
 
 
 */
