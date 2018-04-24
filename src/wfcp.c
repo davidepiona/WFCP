@@ -338,7 +338,7 @@ int CableOpt(instance *inst)
 /* 2. build initial model  ------------------------------------------------- */
 	gp = popen("gnuplot -p","w");
 	build_model(inst, env, lp);
-	
+		
 	
 	inst->ncols = CPXgetnumcols(env, lp);
 	inst->best_sol = (double *) calloc(inst->ncols, sizeof(double)); 	// all entries to zero  
@@ -728,8 +728,8 @@ int myseparation(instance *inst, double *x, CPXCENVptr env, void *cbdata, int wh
 				if(i == k || j == k)continue;
 				int *index;
 				double *values;
-				index = (int *) calloc(inst->nturbines - k + 3, sizeof(int ));
-				values = (double *) calloc(inst->nturbines -k + 3 , sizeof(double ));
+				index = (int *) calloc(inst->nturbines, sizeof(int ));
+				values = (double *) calloc(inst->nturbines , sizeof(double ));
 				int nnz = compute_nocross_cut(inst, x, i, j, k, index, values);
 				if(nnz == 0)
 				{
