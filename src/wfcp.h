@@ -52,7 +52,7 @@ typedef struct {
 	double tbest;							// time for the best sol. available  
 	double *best_sol;						// best sol. available        
 	double	best_lb;						// best lower bound available 
-	int ncols;
+	int ncols;	
 	
 	// model;     
 	int xstart;

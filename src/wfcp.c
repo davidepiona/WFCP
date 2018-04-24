@@ -740,8 +740,8 @@ static int CPXPUBLIC lazyCallback(CPXCENVptr env, void *cbdata, int wherefrom, v
 	if ( CPXgetcallbacknodex(env, cbdata, wherefrom, xstar, 0, inst->ncols-1) )
 		return 1;
 	
-	int ncuts = myseparation(inst, xstar, env,cbdata, wherefrom);
-
+	int ncuts = myseparation(inst, xstar, env, cbdata, wherefrom);
+	printf("Cut added : < %d >\n",ncuts );
 	if(ncuts >= 1)
 	{
 		plotGraphCallback(inst, xstar);
@@ -772,10 +772,10 @@ int compute_nocross_cut(instance *inst, double *x,int i, int j, int k, int *inde
 	value[count] = 1.0;
 	count++;
 	
-	for ( int l = k+1; l < inst->nturbines; l++ )
+	for ( int l = 0; l < inst->nturbines; l++ )
 	{
 		if(l == i || l == j || l == k)continue;
-		//if(x[ypos(k,l,inst)] < 0.1)continue;
+		if(x[ypos(k,l,inst)] < 0.1)continue;
 		if(noCross(i,j,k,l, inst))
 		{
 			index[count] = ypos(k,l,inst);
