@@ -174,6 +174,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->randomseed = 0; 
 	inst->num_threads = 0;
 	inst->noCross = 1;
+	inst->names = 0;
 	inst->gap = 0.0;
 
     int help = 0; if( argc < 1 ) help = 1;	
@@ -196,6 +197,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if ( strcmp(argv[i],"-threads") == 0 ) { inst->num_threads = atoi(argv[++i]); continue; } 		// n. threads
 		if ( strcmp(argv[i],"-Cross_Constraints") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}	// Cross Constraints
 		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}				// Cross Constraints
+		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}				// Names
 		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 											// help
 		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 										// help
 		help = 1;
@@ -215,6 +217,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-seed %d\n", inst->randomseed);
 		printf("-threads %d\n", inst->num_threads); 
 		printf("-Cross_Constraints %d\n", inst->noCross); 
+		printf("-Names %d\n", inst->names); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("-time_loop %lf\n", inst->timeloop); 
 		printf("\nenter -help or --help for help\n");

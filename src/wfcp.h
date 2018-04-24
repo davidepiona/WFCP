@@ -45,6 +45,7 @@ typedef struct {
 	double polishing_time;					// polishing time
 	int noCross;							// no cross constraints: 0 add to costraints. 1 add to lazy constraints. 2 callback 
 	double gap;
+	int names;
 
 	//global data
 	double tstart;								

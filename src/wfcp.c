@@ -47,6 +47,18 @@ int setColor()
 	sprintf(color[14],"#000000");
 	return 0;
 }
+void fileNames(instance* inst, char* p){
+	if(inst->names)	
+		{
+			char* path = inst->cables_file;
+			memcpy(p, path+strlen(path)-11, 7); 
+		}
+		else
+		{	
+			memcpy(p, "datastd", 7);
+		}
+		
+}
 int makeScript(instance *inst)
 {
 	FILE *s;	
@@ -54,16 +66,22 @@ int makeScript(instance *inst)
 	int flag = 0;
 	s = fopen("plot/script_plot.p","w");
 	fprintf(s,"set autoscale\n");
+	char p[8];
+	fileNames(inst, p);
+	//printf("\n\n----%s----\n\n", p);
 	for(int k = 0; k < inst->ncables; k++)
 	{
 		//printf("Script cavo < %d >\n",k);
 		if(plt[k] > 0)
 		{
+			//fprintf(s,"\nset term png\n");
+			//fprintf(s,"set output '%s.png'\n", p);
+			//fprintf(s,"set datafile separator \" \"\n");
 			if(k != 0 && flag != 0)
 				fprintf(s, "\nre" );	
-			fprintf(s, "plot \\\n\t\'plot/plot%d.dat\' using 1:2 with lines lc rgb \"%s\" lw 2 title \"Cable %d\",\\\n",k,color[k],k+1);
-			fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:(0.6) with circles fill solid lc rgb \"black\" notitle,\\\n",k);
-			fprintf(s, "\t\'plot/plot%d.dat\' using 1:2:3     with labels tc rgb \"black\" offset (0,0) font \'Arial Bold\' notitle",k );
+			fprintf(s, "plot \\\n\t\'plot/plot_%s_%d.dat\' using 1:2 with lines lc rgb \"%s\" lw 2 title \"Cable %d\",\\\n", p,k,color[k],k+1);
+			fprintf(s, "\t\'plot/plot_%s_%d.dat\' using 1:2:(0.6) with circles fill solid lc rgb \"black\" notitle,\\\n",p ,k);
+			fprintf(s, "\t\'plot/plot_%s_%d.dat\' using 1:2:3     with labels tc rgb \"black\" offset (0,0) font \'Arial Bold\' notitle",p, k );
 			flag++;
 		}
 	}
@@ -77,12 +95,13 @@ int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
 	FILE *f;
 	char filename[30];
-
+	char p[8];
+	fileNames(inst, p);
 	for(int k = 0; k < inst->ncables; k++)
 	{
 		//printf("File data < %d >\n",k);
 		plt[k] = 0;
-		sprintf(filename,"plot/plot%d.dat",k);
+		sprintf(filename,"plot/plot_%s_%d.dat",p ,k);
 		f = fopen(filename,"w");
 		for(int i = 0; i < inst->nturbines; i++)
 		{
@@ -107,11 +126,14 @@ int plotGraphCallback(instance *inst, double *x)
 {
 	FILE *f;
 	char filename[30];
+	char p[8];
+	fileNames(inst, p);
+
 	for(int k = 0; k < inst->ncables; k++)
 	{
 		//printf("File data < %d >\n",k);
 		plt[k] = 0;
-		sprintf(filename,"plot/plot%d.dat",k);
+		sprintf(filename,"plot/plot_%s_%d.dat",p,k);
 		f = fopen(filename,"w");
 		for(int i = 0; i < inst->nturbines; i++)
 		{
@@ -743,7 +765,7 @@ static int CPXPUBLIC lazyCallback(CPXCENVptr env, void *cbdata, int wherefrom, v
 	printf("Cut added : < %d >\n",ncuts );
 	if(ncuts >= 1)
 	{
-		//plotGraphCallback(inst, xstar);
+		plotGraphCallback(inst, xstar);
 		*useraction_p = CPX_CALLBACK_SET;
 	}
 	else
@@ -774,7 +796,7 @@ int compute_nocross_cut(instance *inst, double *x,int i, int j, int k, int *inde
 	for ( int l = 0; l < inst->nturbines; l++ )
 	{
 		if(l == i || l == j || l == k)continue;
-		if(x[ypos(k,l,inst)] < 0.1)continue;
+		//if(x[ypos(k,l,inst)] < 0.1)continue;
 		if(noCross(i,j,k,l, inst))
 		{
 			index[count] = ypos(k,l,inst);
