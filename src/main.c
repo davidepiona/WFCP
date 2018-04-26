@@ -162,6 +162,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	strcpy(inst->turbines_file, "NULL");
 	inst->timelimit = CPX_INFBOUND;
 	inst->timeloop = CPX_INFBOUND;
+	inst->timeStartSol = CPX_INFBOUND; 
 	inst->model_type = 0;
 	inst->xstart = -1;
 	inst->ystart = -1;
@@ -187,6 +188,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-C") == 0 ) { inst->C = atoi(argv[++i]); continue; } 							// Capacity of root
 		if( strcmp(argv[i],"-time_loop") == 0 ) { inst->timeloop = atof(argv[++i]); continue; }			// total time limit
 		if( strcmp(argv[i],"-time_limit") == 0 ) { inst->timelimit = atof(argv[++i]); continue; }			// total time limit
+		if( strcmp(argv[i],"-time_start") == 0 ) { inst->timeStartSol = atof(argv[++i]); continue; }
 		if( strcmp(argv[i],"-model_type") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 			// model type
 		if( strcmp(argv[i],"-model") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 				// model type
 		if( strcmp(argv[i],"-rins") == 0 ) { inst->rins = atoi(argv[++i]); continue; } 						// rins
@@ -220,6 +222,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-Names %d\n", inst->names); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("-time_loop %lf\n", inst->timeloop); 
+		printf("-time_start %lf\n", inst->timeStartSol); 
 		printf("\nenter -help or --help for help\n");
 		printf("----------------------------------------------------------------------------------------------\n\n");
 	}        

@@ -33,7 +33,8 @@ typedef struct {
 	double *cablecost;
 
 	// parameters 
-	int model_type; 
+	int model_type;
+	double timeStartSol; 
 	double timelimit;						// overall time limit, in sec.s
 	double timeloop;						// time for execution of loop method
 	char cables_file[1000];		  			// input file
