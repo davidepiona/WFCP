@@ -175,33 +175,39 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->randomseed = 0; 
 	inst->num_threads = 0;
 	inst->noCross = 1;
+	inst->cableReg = 1;
+	inst->cableRegF = 10;
+	inst->cableRegFA = 0;
 	inst->names = 0;
 	inst->gap = 0.0;
 
     int help = 0; if( argc < 1 ) help = 1;	
 	for( int i = 1; i < argc; i++ ) 
 	{ 
-		if( strcmp(argv[i],"-cables_file") == 0 ) { strcpy(inst->cables_file,argv[++i]); continue; } 		// input cables file
-		if( strcmp(argv[i],"-turbines_file") == 0 ) { strcpy(inst->turbines_file,argv[++i]); continue; } 	// input turbines file
-		if( strcmp(argv[i],"-fc") == 0 )  { strcpy(inst->cables_file,argv[++i]); continue; }				// input cables file
-		if( strcmp(argv[i],"-ft") == 0 ) { strcpy(inst->turbines_file,argv[++i]); continue; }				// input turbines file
-		if( strcmp(argv[i],"-C") == 0 ) { inst->C = atoi(argv[++i]); continue; } 							// Capacity of root
-		if( strcmp(argv[i],"-time_loop") == 0 ) { inst->timeloop = atof(argv[++i]); continue; }			// total time limit
-		if( strcmp(argv[i],"-time_limit") == 0 ) { inst->timelimit = atof(argv[++i]); continue; }			// total time limit
-		if( strcmp(argv[i],"-time_start") == 0 ) { inst->timeStartSol = atof(argv[++i]); continue; }
-		if( strcmp(argv[i],"-model_type") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 			// model type
-		if( strcmp(argv[i],"-model") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 				// model type
-		if( strcmp(argv[i],"-rins") == 0 ) { inst->rins = atoi(argv[++i]); continue; } 						// rins
-		if( strcmp(argv[i],"-relax") == 0 ) { inst->relax = atoi(argv[++i]); continue; }					// relax
-		if( strcmp(argv[i],"-polishing_time") == 0 ) { inst->polishing_time = atof(argv[++i]); continue; }	// polishing time
-		if( strcmp(argv[i],"-gap") == 0 ) { inst->gap = atof(argv[++i]); continue; }
-		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 			// random seed
-		if ( strcmp(argv[i],"-threads") == 0 ) { inst->num_threads = atoi(argv[++i]); continue; } 		// n. threads
-		if ( strcmp(argv[i],"-Cross_Constraints") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}	// Cross Constraints
-		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}				// Cross Constraints
-		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}				// Names
-		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 											// help
-		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 										// help
+		if( strcmp(argv[i],"-cables_file") == 0 ) { strcpy(inst->cables_file,argv[++i]); continue; } 			// input cables file
+		if( strcmp(argv[i],"-turbines_file") == 0 ) { strcpy(inst->turbines_file,argv[++i]); continue; } 		// input turbines file
+		if( strcmp(argv[i],"-fc") == 0 )  { strcpy(inst->cables_file,argv[++i]); continue; }					// input cables file
+		if( strcmp(argv[i],"-ft") == 0 ) { strcpy(inst->turbines_file,argv[++i]); continue; }					// input turbines file
+		if( strcmp(argv[i],"-C") == 0 ) { inst->C = atoi(argv[++i]); continue; } 								// Capacity of root
+		if( strcmp(argv[i],"-time_loop") == 0 ) { inst->timeloop = atof(argv[++i]); continue; }					// time for loop in loop/heuristic method
+		if( strcmp(argv[i],"-time_limit") == 0 ) { inst->timelimit = atof(argv[++i]); continue; }				// total time limit
+		if( strcmp(argv[i],"-time_start") == 0 ) { inst->timeStartSol = atof(argv[++i]); continue; }			// time start to heuristic method
+		if( strcmp(argv[i],"-model_type") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 				// model type
+		if( strcmp(argv[i],"-model") == 0 ) { inst->model_type = atoi(argv[++i]); continue; } 					// model type
+		if( strcmp(argv[i],"-rins") == 0 ) { inst->rins = atoi(argv[++i]); continue; } 							// rins
+		if( strcmp(argv[i],"-relax") == 0 ) { inst->relax = atoi(argv[++i]); continue; }						// relax
+		if( strcmp(argv[i],"-polishing_time") == 0 ) { inst->polishing_time = atof(argv[++i]); continue; }		// polishing time
+		if( strcmp(argv[i],"-gap") == 0 ) { inst->gap = atof(argv[++i]); continue; }							// gap to terminate
+		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 				// random seed
+		if ( strcmp(argv[i],"-threads") == 0 ) { inst->num_threads = atoi(argv[++i]); continue; } 				// n. threads
+		if ( strcmp(argv[i],"-Cross_Constraints") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}		// Cross Constraints
+		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}					// Cross Constraints
+		if ( strcmp(argv[i],"-Cable_Regularization") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}	// Cable regularization
+		if ( strcmp(argv[i],"-CR") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}					// Cable regularization
+		if ( strcmp(argv[i],"-CRF") == 0 ) { inst->cableRegF = abs(atoi(argv[++i])); continue;}					// Cable regularization
+		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}					// Names
+		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 												// help
+		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 											// help
 		help = 1;
     }      
 
@@ -218,7 +224,9 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-gap %lf\n", inst->gap);
 		printf("-seed %d\n", inst->randomseed);
 		printf("-threads %d\n", inst->num_threads); 
-		printf("-Cross_Constraints %d\n", inst->noCross); 
+		printf("-Cross_Constraints %d\n", inst->noCross);
+		printf("-Cable_Regularization %d\n", inst->cableReg); 
+		printf("-CRF %d\n", inst->cableRegF); 
 		printf("-Names %d\n", inst->names); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("-time_loop %lf\n", inst->timeloop); 
