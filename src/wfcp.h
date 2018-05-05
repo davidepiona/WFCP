@@ -48,14 +48,18 @@ typedef struct {
 	int cableReg;							// cables assignement heuristic callback : 0 no 1 yes
 	int cableRegF;							// cables assignement frequency
 	int cableRegFA;							// cables assignement frequency
+	int K;									//
+	int softF;								// soft fixing : 1 assimmetric 2 simmetric
 	double gap;
 	int names;
 
 	//global data
 	double tstart;								
-	double zbest;							// best sol. available  
+	double zbest;							// best sol. available 
+	double second_zbest; 
 	double tbest;							// time for the best sol. available  
-	double *best_sol;						// best sol. available        
+	double *best_sol;						// best sol. available  
+	double *second_best_sol;      
 	double	best_lb;						// best lower bound available 
 	int ncols;	
 	

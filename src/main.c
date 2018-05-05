@@ -30,6 +30,7 @@ void free_instance(instance *inst)
 	free(inst->cablecapacity);
 	free(inst->cablecost);
 	free(inst->best_sol);
+	free(inst->second_best_sol);
 }
 
 int CableOpt(instance *inst);    
@@ -180,6 +181,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->cableRegFA = 0;
 	inst->names = 0;
 	inst->gap = 0.0;
+	inst->softF = 1;
 
     int help = 0; if( argc < 1 ) help = 1;	
 	for( int i = 1; i < argc; i++ ) 
@@ -205,6 +207,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if ( strcmp(argv[i],"-Cable_Regularization") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}	// Cable regularization
 		if ( strcmp(argv[i],"-CR") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}					// Cable regularization
 		if ( strcmp(argv[i],"-CRF") == 0 ) { inst->cableRegF = abs(atoi(argv[++i])); continue;}					// Cable regularization
+		if ( strcmp(argv[i],"-soft_fix") == 0 ) { inst->softF = abs(atoi(argv[++i])); continue;}				// Type of soft fixing
 		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}					// Names
 		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 												// help
 		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 											// help
@@ -227,6 +230,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-Cross_Constraints %d\n", inst->noCross);
 		printf("-Cable_Regularization %d\n", inst->cableReg); 
 		printf("-CRF %d\n", inst->cableRegF); 
+		printf("-soft_fix %d\n", inst->softF); 
 		printf("-Names %d\n", inst->names); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("-time_loop %lf\n", inst->timeloop); 

@@ -17,7 +17,11 @@ int installheuristicCallback( CPXENVptr env, CPXLPptr lp, instance *inst);
 int compute_nocross_cut_all(instance *inst, double *x,int i, int j, int k, int *index, double *value);
 int resetHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index, char *lu, double *bd, int count );
 int setHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd);
-int cableregularize(instance *inst, double *x, double z );
+int resetSoftFix(CPXENVptr env, CPXLPptr lp);
+int setSoftFix(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
+int setSoftFixA(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
+int setSoftFixS(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
+int cableregularize(instance *inst, double *x, long double z );
 
 FILE *gp;
 char color[20][20];
@@ -43,6 +47,7 @@ void wait(int time)
 	double t = second();
 	while(second() - t < time);
 }
+
 int setColor()
 {
 	sprintf(color[0],"#FF0000");
@@ -239,7 +244,7 @@ int num_cores(instance *inst)
 int time_limit_expired(instance *inst, double time)	 
 {
 	double tspan = second() - inst->tstart;
-	printf("----------------------------------------------------time %lf tspan %lf\n",time,tspan );
+	//printf("----------------------------------------------------time %lf tspan %lf\n",time,tspan );
 	if (  tspan > time ) 
 	{
 		if ( VERBOSE >= 100 ) 
@@ -279,11 +284,19 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 	plotGraph(env,lp,inst);
 	if ( mip_value(env,lp) < inst->zbest - EPSILON )
 	{
+		printf("------------------------------- ADD SOLUTION\n");
+		if(inst->zbest < inst->second_zbest)
+		{
+			inst->second_zbest = inst->zbest;
+			inst->second_best_sol = inst->best_sol; 	
+		}
 		inst->tbest = second() - inst->tstart;
 		inst->zbest = mip_value(env, lp);
 		CPXgetx(env, lp, inst->best_sol, 0, inst->ncols-1);
+		
+
 		if ( VERBOSE >= 40 ) 
-			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
+			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf , the second best solution is %lf <<<<<<<<\n", inst->zbest, inst->tbest, inst->second_zbest);
 		newsol = 1;
 	}     
 	
@@ -304,11 +317,19 @@ int mip_update_incumbent(instance *inst, double *x, double z)
 	plotGraph(inst, x);
 	if ( z < inst->zbest - EPSILON )
 	{
-		inst->tbest = second() - inst->tstart;
-		inst->zbest = z;
-		inst->best_sol = x;
+		printf("------------------------------- ADD SOLUTION\n");
+		
+		if(inst->zbest < inst->second_zbest)
+		{
+			inst->second_zbest = inst->zbest;
+			inst->second_best_sol = inst->best_sol; 	
+		}
+			inst->zbest = z;
+			inst->best_sol = x;
+			inst->tbest = second() - inst->tstart;	
+
 		if ( VERBOSE >= 40 ) 
-			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf <<<<<<<<\n", inst->zbest, inst->tbest);
+			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf , the second best solution is %lf <<<<<<<<\n", inst->zbest, inst->tbest, inst->second_zbest);
 		newsol = 1;
 	}     
 	
@@ -408,7 +429,9 @@ int CableOpt(instance *inst)
 	
 	inst->ncols = CPXgetnumcols(env, lp);
 	inst->best_sol = (double *) calloc(inst->ncols, sizeof(double)); 	// all entries to zero  
+	inst->second_best_sol = (double *) calloc(inst->ncols, sizeof(double)); 	// all entries to zero  
 	inst->zbest = CPX_INFBOUND;  
+	inst->second_zbest = CPX_INFBOUND;  
 /* 3. final MIP run ------------------------------------------------------ */
 
 
@@ -428,7 +451,7 @@ int CableOpt(instance *inst)
 	if ( VERBOSE >= 100 ) 
 		CPXwriteprob(env, lp, "model/final.lp", NULL);  
 	 
-	if( inst->noCross == 4) 		// HardFixing
+	if( inst->noCross == 4 || inst->noCross == 5) 		// HardFixing 4		// SoftFixing 5
 	{
 		int done = 0;
 		if(inst->timeStartSol > 0)
@@ -443,11 +466,13 @@ int CableOpt(instance *inst)
 		if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 		CPXmipopt(env,lp); 
 		CPXgetbestobjval(env, lp, &inst->best_lb);    
-		printf("Hard Fixing start\n");
+		//printf("Hard Fixing start\n");
 		int times = 1;
+		int K = 3;
+		double z = inst->zbest;
 		while(!done)
 		{
-			if(inst->timeloop > 0 && (inst->timelimit - (second() - inst->tstart) > inst->timeloop))
+			if(inst->timeloop > 0 && (inst->timelimit - (second() - inst->tstart )- inst->polishing_time) > inst->timeloop)
 			{
 				//printf("---------------------------------------------------------------- time loop %lf\n", inst->timeloop);
 				mip_timelimit(env, CPX_INFBOUND, inst, inst->timeloop + second() - inst->tstart );
@@ -461,9 +486,9 @@ int CableOpt(instance *inst)
 				if(inst->polishing_time > 0.0 )
 					if(CPXsetdblparam(env,CPXPARAM_MIP_PolishAfter_Time,(inst->timelimit - (second() - inst->tstart) - inst->polishing_time)))
 						print_error("Error set of polishing time");
+				done = 1;
 			}
 			
-			times++;
 			int *index;
 			char *lu;
 			double *bd;
@@ -472,16 +497,20 @@ int CableOpt(instance *inst)
 			lu = (char *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(char ));
 			bd = (double *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(double ));
 			
-			int nzcnt = setHardFix( env,  lp, inst, index, lu, bd);
-
 			mip_reload_solution(env, lp, inst->ncols,inst, inst->best_sol);
+			int nzcnt = (inst->noCross == 4) ? setHardFix( env,  lp, inst, index, lu, bd) : setSoftFix( env,  lp, inst, K);
+
 
 			installLazyCallback(env,lp,inst);
 			if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
+			//printf("-----------------------------------START MIP OPT----------------------------------\n");
 			CPXmipopt(env,lp); 
+			//printf("-----------------------------------END MIP OPT------------------------------------\n");
 			
-			
-			resetHardFix( env,  lp, inst, index, lu, bd, nzcnt );
+			if(inst->noCross == 4) 
+				resetHardFix( env,  lp, inst, index, lu, bd, nzcnt );
+			else
+				resetSoftFix( env,  lp);
 			free(index);
 			free(lu);
 			free(bd);
@@ -489,6 +518,7 @@ int CableOpt(instance *inst)
 			
 			if(time_limit_expired(inst, inst->timelimit) || times > 1000)
 			{
+				printf("----------------------------------------------------------------- ULTIMA ESECUZIONE PRIMA DI USCIRE\n");
 				mip_timelimit(env, CPX_INFBOUND, inst, inst->timelimit - (second() - inst->tstart));
 				if(inst->polishing_time > 0.0 )
 					if(CPXsetdblparam(env,CPXPARAM_MIP_PolishAfter_Time,(inst->timelimit - (second() - inst->tstart) - inst->polishing_time)))
@@ -498,6 +528,17 @@ int CableOpt(instance *inst)
 				CPXmipopt(env,lp);
 				done = 1;
 			}
+			if(K < 20 && z == inst->zbest)
+			{
+				K = K + 2;
+			}
+			else 
+			{
+				if(K > 20)
+					K = 3;
+				z = inst->zbest;
+			}
+			times++;
 		}
 		plotGraph( inst, inst->best_sol);
 	}   
@@ -645,7 +686,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 				print_error(" wrong CPXnewcols on s var.s");
 		inst->sstart = CPXgetnumcols(env,lp)-1;
 	}
-	else if(inst->relax == 2)
+	else if(inst->relax == 2 || inst->relax == 3)
 	{
 		if ( inst->sstart != -1 ) 
 			print_error(" ... error in build_model(): var. f cannot be redefined!");
@@ -666,7 +707,11 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	{
 		int lastrow = CPXgetnumrows(env,lp);
 		double rhs = ( inst->power[h] >= 0 ) ? 1.0 : 0.0; 
-		char sense = 'E'; 
+		char sense = 'E';
+		if(inst->relax == 3) 
+			if(inst->power[h] >= 0)
+				sense = 'L';
+		
 		sprintf(cname[0], "OutEdges(%d)", h+1);   
 		if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
 			print_error(" wrong CPXnewrows [x1]");
@@ -717,7 +762,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 				if ( CPXchgcoef(env, lp, lastrow, fpos(j,h, inst), -1.0) ) 
 					print_error(" wrong CPXchgcoef [x1]");
 			}
-			if(inst->relax == 2)
+			if(inst->relax == 2 || inst->relax == 3)
 				if ( CPXchgcoef(env, lp, lastrow, spos(h, inst), 1.0) ) 
 					print_error(" wrong CPXchgcoef [x1]");	
 		}
@@ -944,7 +989,7 @@ int installLazyCallback( CPXENVptr env, CPXLPptr lp, instance *inst)
 	return 0;
 }
 
-int cableregularize(instance *inst, double *x, double z )
+int cableregularize(instance *inst, double *x, long double z )
 {
 	int count = 0;
 	double sol = z;
@@ -970,7 +1015,7 @@ int cableregularize(instance *inst, double *x, double z )
 					x[xpos(i,j,cable, inst)] = 0.0;
 					x[xpos(i,j,k, inst)] = 1.0;
 					sol = sol - (dist(i,j,inst)*inst->cablecost[cable]) + (dist(i,j,inst)*inst->cablecost[k]);
-					printf("Cable switched < %d > with < %d > in edge ( %d , %d )\n",cable+1, k+1, i ,j);
+					//printf("Cable switched < %d > with < %d > in edge ( %d , %d )\n",cable+1, k+1, i ,j);
 					z = sol;
 					cable = k;
 					count ++;
@@ -990,14 +1035,15 @@ static int CPXPUBLIC heuristicCallback(CPXCENVptr env, void *cbdata, int wherefr
 	instance *inst = (instance*)cbhandle;
 	*checkfeas_p = 0;
 	*useraction_p = CPX_CALLBACK_DEFAULT;
-	double zbest; 
+	long double zbest; 
 	CPXgetcallbackinfo(env, cbdata, wherefrom, CPX_CALLBACK_INFO_BEST_INTEGER, &zbest);
-	if(zbest < 1) return 0;
+	//if(zbest < 1) return 0;
 	if(inst->cableRegFA == 0 )
-	{	int count = cableregularize(inst, x, zbest);
-		printf("Cables switched < %d >\n",count);
+	{	
+		int count = cableregularize(inst, x, zbest);
 		if(count > 0)
 		{
+			printf("Cables switched < %d >\n",count);
 			*checkfeas_p = 1;
 			*useraction_p = CPX_CALLBACK_SET;
 		}
@@ -1018,9 +1064,10 @@ static int CPXPUBLIC incumbentCallback(CPXCENVptr env, void *cbdata, int wherefr
 	if(objval < 1) return 0;
 	if(inst->cableRegFA == 0 )
 	{	int count = cableregularize(inst, x, objval);
-		printf("Cables switched < %d >\n",count);
+		
 		if(count > 0)
 		{
+			printf("Cables switched < %d >\n",count);
 			*isfeas_p = 1;
 			*useraction_p = CPX_CALLBACK_SET;
 		}
@@ -1035,7 +1082,12 @@ static int CPXPUBLIC incumbentCallback(CPXCENVptr env, void *cbdata, int wherefr
 int installheuristicCallback( CPXENVptr env, CPXLPptr lp, instance *inst)
 {
 	if(CPXsetheuristiccallbackfunc(env, heuristicCallback, (void *)inst))
+	{
 		print_error("Error heuristic Callback function");
+		CPXsetincumbentcallbackfunc(env, incumbentCallback, (void *)inst);
+	}
+	
+		
 	return 0;
 }
 
@@ -1173,6 +1225,107 @@ int resetHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index, char *l
 	CPXchgbds (env, lp, count, index, lu, bd);	
 	return 0;
 }
+int simmetricHamming(double *yr, int s, int l, int *index)
+{
+	int k = 0;
+
+	for(int i = 0; i < l; i++)
+	{
+		if( yr[i] > 0.5 )
+			k ++;
+		
+		index[i] = i+s;
+		
+	}
+	return k;
+}
+int asimmetricHamming(double *yr, int s, int l, int *index)
+{
+	int k = 0;
+	for(int i = 0; i < l; i++)
+	{
+		if( yr[i] > 0.5 )
+		{
+			index[k] = i+s;
+			k++;
+			//printf("add value 1 to cols %d - %d\n",i, l);
+		}
+		
+	}
+	return k;
+}
+int setSoftFixA(CPXENVptr env, CPXLPptr lp, instance *inst, int K)		//Sum (for every (i,j) of yr = 1)( 1 - yij )>= (n - 1) - K
+{
+	printf("Asimmetric Local Branching with k = < %d >\n",K);
+	int l = xpos(0,0,0,inst);
+	int *index = (int *) calloc(inst->nturbines * inst->nturbines, sizeof(int ));
+	int count = asimmetricHamming(inst->best_sol,ypos(0,0,inst), l, index);
+
+	char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
+	cname[0] = (char *) calloc(100, sizeof(char));
+
+
+	int lastrow = CPXgetnumrows(env,lp);
+	double rhs = count - 1 - K ; 
+	char sense = 'G'; 
+	sprintf(cname[0], "Local Branching");   
+	if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
+		print_error(" wrong CPXnewrows [x1]");
+	for ( int i = 0; i < count; i++ )
+	{
+
+		if ( CPXchgcoef(env, lp, lastrow, index[i], 1.0) ) 
+			print_error(" wrong CPXchgcoef [x1]");
+	}	
+
+	free(index);
+	free(cname);
+	return count;
+}
+int setSoftFixS(CPXENVptr env, CPXLPptr lp, instance *inst, int K)	//Sum (for every (i,j) of yr = 0)( yij ) + Sum (for every (i,j) of yr = 1)( 1 - yij )<= K 
+{
+	printf("Simmetric Local Branching with k = < %d >\n",K);
+	int l = xpos(0,0,0,inst);
+	int *index = (int *) calloc(inst->nturbines * inst->nturbines, sizeof(int ));
+	int count = asimmetricHamming(inst->best_sol,ypos(0,0,inst), l, index);
+
+	char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
+	cname[0] = (char *) calloc(100, sizeof(char));
+
+	int lastrow = CPXgetnumrows(env,lp);
+	double rhs = K - count; 
+	char sense = 'L'; 
+	sprintf(cname[0], "Local Branching");   
+	if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
+		print_error(" wrong CPXnewrows [x1]");
+	for ( int i = 0; i < count; i++ )
+	{
+		if ( CPXchgcoef(env, lp, lastrow, index[i], 1.0) ) 
+			print_error(" wrong CPXchgcoef [x1]");
+
+	}
+	free(index);
+	free(cname);
+	return count;
+}
+int setSoftFix(CPXENVptr env, CPXLPptr lp, instance *inst, int K)
+{
+	int res = 0;
+	if(inst->softF == 1)
+		res = setSoftFixA( env,  lp, inst, K);
+	else if(inst->softF == 2)
+		res = setSoftFixS( env,  lp, inst, K);
+	CPXwriteprob(env, lp, "model/model_softFix.lp", NULL);
+	return res;
+}
+int resetSoftFix(CPXENVptr env, CPXLPptr lp)
+{
+	int begin = CPXgetnumrows(env,lp)-1;
+	int end = begin;	
+	CPXdelrows(env, lp, begin,  end);
+
+	return 0;
+}
 /*
 	Algoritmi euristici
 	Cercano una soluzione ottima senza dimostrarne l'ottimalità.
@@ -1214,4 +1367,41 @@ int resetHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index, char *l
 
 		}
 	}
+
+
+	Nuovo modello - soft fixing - euristico
+
+			________________________
+  input	--->|	     Algoritmo  	| --->	Soluzione 
+	+	--->|         esatto        | --->   ottima
+ vincolo--->|_______________________| --->
+
+	il vincolo dice di fissare almeno il 90% degli archi nella soluzione di riferimento
+
+	Soluzione di riferimento : yr = (...)
+	Data una soluzione generica y = (...)
+	Calcolo la distanza di hamming d
+	il numero di flip consentiti è limitato ( <= K)
+
+
+	E' come guardare solo l'intorno della soluzione generica y
+	>>>>>>>>>>>>>>>>>>>> Local Branching >>>>>>>>>>>>> Vincolo simmetrico: siccome vengono contati sia i flip da 0 a 1 che da 1 a 0
+										 >>>>>>>>>>>>> Vincolo assimmetrico: vengono contati solo i flip da 1 a 0
+
+	vincolo simmetrico
+	Sum (for every (i,j) of yr = 0)( yij ) + Sum (for every (i,j) of yr = 1)( 1 - yij )<= K 
+	
+	Vincolo Assimmetrico
+	//Sum (for every (i,j) of yr = 1)( 1 - yij )>= (n - 1) - K
+
+	Il valore di K va variato secondo politiche di "buon senso" 
+		- partendo da k molto piccoli ( 3 / 5, quando non riesco a migliorare la soluzione aumento, massimo 20)
+		//- partendo da k molto grandi\\
+
+	loop iniziale
+		prendiamo la prima soluzione 
+		cambiamo i bound data quella soluzione di riferimento
+		fino ad un time limit
+	ripeti
+
 */
