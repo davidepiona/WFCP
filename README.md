@@ -26,10 +26,15 @@
 
 -soft_fix				// Type of soft fixing 	----> 1 : Asimmetric Local Branching
 													  2 : Simmetric Local Branching
+													  3 : rins asimmetric 
+													  4 : rins simmetric 
+													  
+-hard_fix				// Type of hard fixing  ----> 1 : Random hard fixing
+													  2 : rins
 
 											EXAMPLE OF STRING 
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -C 10 -rins 5 -relax 3 -seed 9 -CC 5 -time_start 300 -time loop 30 -time_limit 1200 -CR 0 -soft_fix 2
 
 												TESTING
--CR						// Cable regularization  ---> NOW MUST BE TO 0
+-CR						// Cable regularization 
 -CRF					// Cable regularization

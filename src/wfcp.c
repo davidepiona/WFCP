@@ -17,8 +17,10 @@ int installheuristicCallback( CPXENVptr env, CPXLPptr lp, instance *inst);
 int compute_nocross_cut_all(instance *inst, double *x,int i, int j, int k, int *index, double *value);
 int resetHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index, char *lu, double *bd, int count );
 int setHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd);
+int setHardRins(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd);
 int resetSoftFix(CPXENVptr env, CPXLPptr lp);
 int setSoftFix(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
+int setSoftRinsA(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
 int setSoftFixA(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
 int setSoftFixS(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
 int cableregularize(instance *inst, double *x, long double z );
@@ -282,18 +284,23 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
 	int newsol = 0;
 	plotGraph(env,lp,inst);
-	if ( mip_value(env,lp) < inst->zbest - EPSILON )
+	if ( mip_value(env,lp) < inst->second_zbest - EPSILON )
 	{
 		printf("------------------------------- ADD SOLUTION\n");
-		if(inst->zbest < inst->second_zbest)
+		if( mip_value(env, lp) < inst->zbest)
 		{
 			inst->second_zbest = inst->zbest;
-			inst->second_best_sol = inst->best_sol; 	
+			inst->second_best_sol = inst->best_sol;
+
+			inst->tbest = second() - inst->tstart;
+			inst->zbest = mip_value(env, lp);
+			CPXgetx(env, lp, inst->best_sol, 0, inst->ncols-1);
 		}
-		inst->tbest = second() - inst->tstart;
-		inst->zbest = mip_value(env, lp);
-		CPXgetx(env, lp, inst->best_sol, 0, inst->ncols-1);
-		
+		else
+		{
+			inst->second_zbest = mip_value(env, lp);
+			CPXgetx(env, lp, inst->second_best_sol, 0, inst->ncols-1);	
+		}
 
 		if ( VERBOSE >= 40 ) 
 			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf , the second best solution is %lf <<<<<<<<\n", inst->zbest, inst->tbest, inst->second_zbest);
@@ -315,18 +322,24 @@ int mip_update_incumbent(instance *inst, double *x, double z)
 {
 	int newsol = 0;
 	plotGraph(inst, x);
-	if ( z < inst->zbest - EPSILON )
+	if ( z < inst->second_zbest )
 	{
 		printf("------------------------------- ADD SOLUTION\n");
 		
-		if(inst->zbest < inst->second_zbest)
+		if(z < inst->zbest )
 		{
 			inst->second_zbest = inst->zbest;
 			inst->second_best_sol = inst->best_sol; 	
-		}
+			
 			inst->zbest = z;
 			inst->best_sol = x;
 			inst->tbest = second() - inst->tstart;	
+		}
+		else
+		{
+			inst->second_zbest = z;
+			inst->second_best_sol = x; 	
+		}
 
 		if ( VERBOSE >= 40 ) 
 			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf , the second best solution is %lf <<<<<<<<\n", inst->zbest, inst->tbest, inst->second_zbest);
@@ -1195,7 +1208,7 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 	return count;
 }
 
-int setHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd)
+int setHardFixRandom(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd)
 {
 	int count = 0;
 	for(int i = 0; i < inst->nturbines; i++)
@@ -1209,10 +1222,54 @@ int setHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, 
 				index[count] = ypos(i,j,inst);
 				lu[count] = 'L';
 				bd[count] = 1;
+				count++;
+
 			}
 		}
 	
 	CPXchgbds (env, lp, count, index, lu, bd);		
+	return count;
+}
+int setHardRins(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd)
+{
+	printf("Hard Fixing - Rins\n");
+	int count = 0;
+	for(int i = 0; i < inst->nturbines; i++)
+		for(int j = i + 1; j < inst->nturbines; j++)
+		{
+			if(i == j) continue;
+			
+			if((inst->best_sol[ypos(i,j,inst)] > 0.5 ) && (inst->second_best_sol[ypos(i,j,inst)] > 0.5 ) && (rand() % 100) > 50)
+			{
+				//printf("Fixing beetween ( %d ) - ( %d )\n", i,j);
+				index[count] = ypos(i,j,inst);
+				lu[count] = 'U';
+				bd[count] = 1;
+				count++;
+			}
+			else if((inst->best_sol[ypos(i,j,inst)] < 0.5 ) && (inst->second_best_sol[ypos(i,j,inst)] < 0.5 ) && (rand() % 100) > 50)
+			{
+				//printf("Fixing beetween ( %d ) - ( %d )\n", i,j);
+				index[count] = ypos(i,j,inst);
+				lu[count] = 'L';
+				bd[count] = 0;
+				count++;				
+			}
+		}
+	
+	CPXchgbds (env, lp, count, index, lu, bd);
+	
+	
+	return count;
+}
+int setHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu, double *bd)
+{
+	int count = 0;
+	if(inst->hardF == 1)
+		count = setHardFixRandom(env, lp, inst, index, lu, bd);
+	else if(inst->hardF == 2)
+		count = setHardRins(env, lp, inst, index, lu, bd);
+	printf("Setting of  < %d > edges\n", count );
 	return count;
 }
 int resetHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index, char *lu, double *bd, int count )
@@ -1250,6 +1307,35 @@ int asimmetricHamming(double *yr, int s, int l, int *index)
 			k++;
 			//printf("add value 1 to cols %d - %d\n",i, l);
 		}
+		
+	}
+	return k;
+}
+int RinsAHamming(double *yr1, double *yr2, int s, int l, int *index)
+{
+	int k = 0;
+	for(int i = 0; i < l; i++)
+	{
+		if( yr1[i] > 0.5 && yr2[i] > 0.5)
+		{
+			index[k] = i+s;
+			k++;
+			//printf("add value 1 to cols %d - %d\n",i, l);
+		}
+		
+	}
+	return k;
+}
+int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index)
+{
+	int k = 0;
+
+	for(int i = 0; i < l; i++)
+	{
+		if( yr1[i] > 0.5 && yr2[i] > 0.5 )
+			k ++;
+		
+		index[i] = i+s;
 		
 	}
 	return k;
@@ -1293,7 +1379,61 @@ int setSoftFixS(CPXENVptr env, CPXLPptr lp, instance *inst, int K)	//Sum (for ev
 	cname[0] = (char *) calloc(100, sizeof(char));
 
 	int lastrow = CPXgetnumrows(env,lp);
-	double rhs = K - count; 
+	double rhs = count - K ; 
+	char sense = 'L'; 
+	sprintf(cname[0], "Local Branching");   
+	if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
+		print_error(" wrong CPXnewrows [x1]");
+	for ( int i = 0; i < count; i++ )
+	{
+		if ( CPXchgcoef(env, lp, lastrow, index[i], 1.0) ) 
+			print_error(" wrong CPXchgcoef [x1]");
+
+	}
+	free(index);
+	free(cname);
+	return count;
+}
+int setSoftRinsA(CPXENVptr env, CPXLPptr lp, instance *inst, int K)
+{
+	printf("Rins Local Branching with k = < %d >\n",K);
+	int l = xpos(0,0,0,inst);
+	int *index = (int *) calloc(inst->nturbines * inst->nturbines, sizeof(int ));
+	int count = RinsAHamming(inst->best_sol, inst->second_best_sol,ypos(0,0,inst), l, index);
+
+	char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
+	cname[0] = (char *) calloc(100, sizeof(char));
+
+
+	int lastrow = CPXgetnumrows(env,lp);
+	double rhs = count - 1 - K ; 
+	char sense = 'G'; 
+	sprintf(cname[0], "Local Branching");   
+	if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
+		print_error(" wrong CPXnewrows [x1]");
+	for ( int i = 0; i < count; i++ )
+	{
+
+		if ( CPXchgcoef(env, lp, lastrow, index[i], 1.0) ) 
+			print_error(" wrong CPXchgcoef [x1]");
+	}	
+
+	free(index);
+	free(cname);
+	return count;
+}
+int setSoftRinsS(CPXENVptr env, CPXLPptr lp, instance *inst, int K)	
+{
+	printf("Simmetric Local Branching with k = < %d >\n",K);
+	int l = xpos(0,0,0,inst);
+	int *index = (int *) calloc(inst->nturbines * inst->nturbines, sizeof(int ));
+	int count = RinsSHamming(inst->best_sol,inst->second_best_sol,ypos(0,0,inst), l, index);
+
+	char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
+	cname[0] = (char *) calloc(100, sizeof(char));
+
+	int lastrow = CPXgetnumrows(env,lp);
+	double rhs = count - K; 
 	char sense = 'L'; 
 	sprintf(cname[0], "Local Branching");   
 	if ( CPXnewrows(env, lp, 1, &rhs, &sense, NULL, cname) ) 
@@ -1315,6 +1455,10 @@ int setSoftFix(CPXENVptr env, CPXLPptr lp, instance *inst, int K)
 		res = setSoftFixA( env,  lp, inst, K);
 	else if(inst->softF == 2)
 		res = setSoftFixS( env,  lp, inst, K);
+	else if(inst->softF == 3)
+		res = setSoftRinsA(env, lp, inst, K);
+	else if(inst->softF == 4)
+		res = setSoftRinsS(env, lp, inst, K);
 	CPXwriteprob(env, lp, "model/model_softFix.lp", NULL);
 	return res;
 }

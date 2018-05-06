@@ -176,12 +176,13 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->randomseed = 0; 
 	inst->num_threads = 0;
 	inst->noCross = 1;
-	inst->cableReg = 1;
+	inst->cableReg = 0;
 	inst->cableRegF = 10;
 	inst->cableRegFA = 0;
 	inst->names = 0;
 	inst->gap = 0.0;
 	inst->softF = 1;
+	inst->hardF = 1;
 
     int help = 0; if( argc < 1 ) help = 1;	
 	for( int i = 1; i < argc; i++ ) 
@@ -208,6 +209,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if ( strcmp(argv[i],"-CR") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}					// Cable regularization
 		if ( strcmp(argv[i],"-CRF") == 0 ) { inst->cableRegF = abs(atoi(argv[++i])); continue;}					// Cable regularization
 		if ( strcmp(argv[i],"-soft_fix") == 0 ) { inst->softF = abs(atoi(argv[++i])); continue;}				// Type of soft fixing
+		if ( strcmp(argv[i],"-hard_fix") == 0 ) { inst->hardF = abs(atoi(argv[++i])); continue;}				// Type of hard fixing
 		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}					// Names
 		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 												// help
 		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 											// help
@@ -231,6 +233,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-Cable_Regularization %d\n", inst->cableReg); 
 		printf("-CRF %d\n", inst->cableRegF); 
 		printf("-soft_fix %d\n", inst->softF); 
+		printf("-hard_fix %d\n", inst->hardF); 
 		printf("-Names %d\n", inst->names); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("-time_loop %lf\n", inst->timeloop); 
