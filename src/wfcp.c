@@ -1547,5 +1547,12 @@ int resetSoftFix(CPXENVptr env, CPXLPptr lp)
 		cambiamo i bound data quella soluzione di riferimento
 		fino ad un time limit
 	ripeti
+	
 
+	Heuristic 
+	---> constractive
+	---> refining
+
+	Constractive : Greedy
+	
 */
