@@ -6,7 +6,9 @@
 * **time_loop**             : time for loop in loop/heuristic method
 * **time_limit**            : total time limit
 * **time_start**            : time start to heuristic method
-* **model**                 : model type for now 0
+* **model**                 : model type 
+	* **0** : Cplex model
+	* **1** : Matrix model
 * **rins**                  : rins
 * **relax**                 : relax 	
 	* **1** : relax on station capacity

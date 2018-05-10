@@ -1,5 +1,6 @@
 #include "wfcp.h"
 #include <time.h>
+#include "float.h" 
 
 void execute(instance *inst, CPXENVptr env, CPXLPptr lp);
 void build_model(instance *inst, CPXENVptr env, CPXLPptr lp);
@@ -41,6 +42,9 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index);
 int myseparation(instance *inst, double *x, CPXCENVptr env, void *cbdata, int wherefrom);
 int cableregularize(instance *inst, double *x, long double z );
 int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst);
+int PrimDijkstra(double *mat, int nodes, int *pred);
+int fluxCalculator(int *suc, double *flux, int nodes);
+int cableregularize(instance *inst, double *x, double *flux );
 
 /*****************************************************************************************************************/
 
@@ -54,6 +58,8 @@ int setSoftFix(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
 int setSoftRinsA(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
 int setSoftFixA(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
 int setSoftFixS(CPXENVptr env, CPXLPptr lp, instance *inst, int K);
+int PrimDijkstraMat(instance *inst);
+
 
 FILE *gp;
 char color[20][20];
@@ -186,6 +192,39 @@ int plotGraph(instance *inst, double *x)
 	fflush(NULL);
 	return 0;
 }
+int plotGraph(instance *inst, double **x)
+{
+	FILE *f;
+	char filename[30];
+	char p[8];
+	fileNames(inst, p);
+
+	for(int k = 0; k < inst->ncables; k++)
+	{
+		//printf("File data < %d >\n",k);
+		plt[k] = 0;
+		sprintf(filename,"plot/plot_%s_%d.dat",p,k);
+		f = fopen(filename,"w");
+		for(int i = 0; i < inst->nturbines; i++)
+		{
+			for(int j = 0; j < inst->nturbines; j++)
+			{
+				if(x[i][j] == (k - 1.0 ))
+				{
+					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
+					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
+					plt[k]++;
+				}
+			}
+		}
+		fclose(f);
+	}
+	makeScript(inst);
+	fprintf(gp, "load 'plot/script_plot.p'\n");
+	fflush(NULL);
+	return 0;
+}
+
 
 /**************************************************************************************************************************/
 int CableOpt(instance *inst)
@@ -553,7 +592,30 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	free(cname[0]);
 	free(cname);
 }
+/**************************************************************************************************************************/
+void build_model1(instance *inst, CPXENVptr env, CPXLPptr lp) 
+/**************************************************************************************************************************/
+{
+	inst->mat = (double *) calloc(inst->nturbines * inst->nturbines, sizeof(double ));	
 
+	int *suc;
+	suc = (int *) calloc(inst->nturbines, sizeof(int));
+	double *flux;
+	flux = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+	double *x;
+	x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));	
+	printf("Creo la matrice dei costi ( distanze )\n");
+	PrimDijkstraMat(inst);
+	printf("Eseguo PrimDijkstra\n");
+	PrimDijkstra(inst->mat, inst->nturbines, suc);
+	printf("Calcolo il flusso\n");
+	fluxCalculator(suc, flux, inst->nturbines);
+	printf("Metto i cavi\n");
+	cableregularize(inst, x, flux );
+	printf("Plotto\n");
+	plotGraph(inst, x);
+
+}
 /***************************************************************************************************************************/
 void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 /**************************************************************************************************************************/
@@ -564,6 +626,9 @@ void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 	{
 		case 0 : 								
 			build_model0(inst, env,lp);
+			break;
+		case 1 : 								
+			build_model1(inst, env,lp);
 			break;
 		default: 
 			print_error(" model type unknown!!"); 
@@ -1162,5 +1227,24 @@ int resetSoftFix(CPXENVptr env, CPXLPptr lp)
 	int end = begin;	
 	CPXdelrows(env, lp, begin,  end);
 
+	return 0;
+}
+int PrimDijkstraMat(instance *inst)
+{
+	for(int i = 0; i < inst->nturbines; i++)
+	{
+		for(int j = 0; j < inst->nturbines; j++)
+		{
+			if(i == j)
+			{
+				inst->mat[i+j*inst->nturbines] = DBL_MAX; 
+			}
+			else
+			{
+				inst->mat[i+j*inst->nturbines] = dist(i,j,inst);
+			}
+			//printf("[ %d ] [ %d ]",i,j);
+		}
+	}
 	return 0;
 }

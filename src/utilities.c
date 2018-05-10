@@ -414,30 +414,22 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index)
 	return k;
 }
 
-int PrimDijkstraMat(instance *inst)
-{
-	inst->mat = (double **) calloc(inst->nturbines, sizeof(double *));	////////////////////////////////////////////////////////////
-	for(int i = 0; i < inst->nturbines; i++)
-		for(int j = 0; j < inst->nturbines; j++)
-			if(i == j)
-				inst->mat[i][j] = DBL_MAX;
-			else
-				inst->mat[i][j] = dist(i,j,inst);
-	return 0;
-}
-int PrimDijkstra(double **mat, int nodes, int *pred)
+
+int PrimDijkstra(double*mat, int nodes, int *pred)
 {
 	int *flag;
 	flag = (int *) calloc(nodes, sizeof(int));	
 	double *L;
 	L = (double *) calloc(nodes, sizeof(double));	
+	double *P;
+	P = (double *) calloc(nodes, sizeof(double));	
 	flag[0] = 1;
 	pred[0] = 1;
 
 	for(int j = 1; j < nodes ; j++)
 	{
 		flag[j] = 0;
-		L[j] = mat[0][j];
+		L[j] = mat[0+j*nodes];
 		pred[j] = 1;
 	}
 	for(int k = 0; k < nodes-1; k++)
@@ -446,7 +438,7 @@ int PrimDijkstra(double **mat, int nodes, int *pred)
 		int h = 0;
 		for(int j = 1; j < nodes; j++)
 		{
-			if(flag[j] == 0 && L[j] < min)
+			if(flag[j] == 0 && L[j] + P[j] < min)
 			{
 				min = L[j];
 				h = j;
@@ -455,14 +447,64 @@ int PrimDijkstra(double **mat, int nodes, int *pred)
 		flag[h] = 1;
 		for(int j = 1; j < nodes; j++)
 		{
-			if(flag[j] == 0 && mat[h][j] < L[j])
+			if(flag[j] == 0 && mat[h+j*nodes] < L[j])
 			{
-				L[j] = mat[h][j];
+				L[j] = mat[h+j*nodes];
 				pred[j] = h;
+			}
+			if(flag[j] == 1)
+			{
+				P[j]++;
 			}
 		}
 	}
 	free(flag);
 	free(L);
 	return 0;
+}
+
+int fluxCalculator(int *suc, double*flux, int nodes)
+{
+	for(int i = nodes-1; i >= 0; i--)
+	{
+		flux[i+nodes*suc[i]] = flux[i+nodes*suc[i]] + 1.0;
+	}
+	return 0;
+}
+
+int cableregularize(instance *inst, double*x, double*flux )
+{
+	int count = 0;
+	int cable_max = 0;
+	for(int k = 0 ; k < inst->ncables ; k++)
+	{
+		if(inst->cablecost[k] > inst->cablecost[cable_max])
+			cable_max = k;
+	}
+	for(int i = 0 ; i < inst->nturbines ; i++)
+	{
+		for(int j = 0 ; j < inst->nturbines ; j++)
+		{
+			if(flux[i+j*inst->nturbines] < 0.5) continue;
+			int cable = cable_max;
+			for(int k = 0 ; k < inst->ncables ; k++)
+			{
+
+				if(inst->cablecost[k] < inst->cablecost[cable] && flux[i+j*inst->nturbines] < inst->cablecapacity[k])
+				{
+					x[i+j*inst->nturbines] = k + 1;
+					//sol = sol - (dist(i,j,inst)*inst->cablecost[cable]) + (dist(i,j,inst)*inst->cablecost[k]);
+					cable = k;
+					count ++;
+				}
+			}
+		}
+	}
+
+	return count;
+}
+
+double objectiveFunction(instance *inst, double*x)
+{
+	return 0.0;
 }

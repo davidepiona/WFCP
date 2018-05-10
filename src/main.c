@@ -31,6 +31,7 @@ void free_instance(instance *inst)
 	free(inst->cablecost);
 	free(inst->best_sol);
 	free(inst->second_best_sol);
+	free(inst->mat);
 }
 
 int CableOpt(instance *inst);    
