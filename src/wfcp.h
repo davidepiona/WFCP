@@ -52,6 +52,7 @@ typedef struct {
 	int softF;								// soft fixing : 1 assimmetric 2 simmetric
 	int hardF;								// hard fixing : 1 random 2 rins
 	double gap;
+	double **mat;
 	int names;
 
 	//global data

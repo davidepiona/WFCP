@@ -92,7 +92,7 @@
 	TO DO
 	- Prim-Dijkstra 
 	- Regolarizzare flusso
-	- scleta cavi (cable regularize)
+	- scelta cavi (cable regularize)
 	- Calcolo funzione obbiettivo + M1(#edges in substation - C )  + M2(#crossing) : M1 ~ 10e9 , M2 ~ 10e8
 
 	Si può provare a far partire l'algoritmo da punti diversi, MULTI-START ---> Da noi non può funzionare

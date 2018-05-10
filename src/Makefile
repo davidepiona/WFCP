@@ -1,4 +1,4 @@
-OBJS = main.o wfcp.o chrono.o            
+OBJS = main.o wfcp.o chrono.o  utilities.o
 HEADERS = wfcp.h 
 EXE = wfcp
 all: $(EXE) 
