@@ -2,6 +2,7 @@
 #include <time.h>
 #include "wfcp.h"
 #include "float.h" 
+#include <stdlib.h>
 
 double second();  
 void print_error(const char *err);
@@ -414,7 +415,6 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index)
 	return k;
 }
 
-
 int PrimDijkstra(double*mat, int nodes, int *pred)
 {
 	int *flag;
@@ -423,38 +423,54 @@ int PrimDijkstra(double*mat, int nodes, int *pred)
 	L = (double *) calloc(nodes, sizeof(double));	
 	double *P;
 	P = (double *) calloc(nodes, sizeof(double));	
+	
 	flag[0] = 1;
-	pred[0] = 1;
+	pred[0] = -1;
+	//P[0] = -800;
+
 
 	for(int j = 1; j < nodes ; j++)
 	{
 		flag[j] = 0;
-		L[j] = mat[0+j*nodes];
-		pred[j] = 1;
+		L[j] = mat[0+j*nodes] ;//+ P[0];
+		pred[j] = 0;
 	}
+
 	for(int k = 0; k < nodes-1; k++)
 	{
 		double min = DBL_MAX;
+		int pool[nodes];
+		int npool = 0;
 		int h = 0;
 		for(int j = 1; j < nodes; j++)
 		{
 			if(flag[j] == 0 && L[j] + P[j] < min)
 			{
-				min = L[j];
+				min = L[j] + P[j];
 				h = j;
 			}
 		}
+		for(int j = 1; j < nodes; j++)
+		{
+			if(L[j] + P[j] == min)
+			{
+				pool[npool] = j;
+				npool++;
+			}
+		}
+		if(0)//npool > 0)
+		{
+			h = pool[rand()%npool];
+			P[h] = P[h] - 1;
+		}
 		flag[h] = 1;
+		
 		for(int j = 1; j < nodes; j++)
 		{
 			if(flag[j] == 0 && mat[h+j*nodes] < L[j])
 			{
-				L[j] = mat[h+j*nodes];
+				L[j] = mat[h+j*nodes] + P[h];
 				pred[j] = h;
-			}
-			if(flag[j] == 1)
-			{
-				P[j]++;
 			}
 		}
 	}
@@ -465,10 +481,44 @@ int PrimDijkstra(double*mat, int nodes, int *pred)
 
 int fluxCalculator(int *suc, double*flux, int nodes)
 {
-	for(int i = nodes-1; i >= 0; i--)
+	double *acc;
+	acc = (double *) calloc(nodes, sizeof(double ));
+	double *start;
+	start = (double *) calloc(nodes, sizeof(double ));
+	int n = 0;
+	
+	for( int i = 0; i < nodes; i++)
 	{
-		flux[i+nodes*suc[i]] = flux[i+nodes*suc[i]] + 1.0;
+		acc[suc[i]]++;
 	}
+	
+	for(int j = 0; j < nodes-1; j++)
+	{
+		n = 0;
+		for( int i = 0; i < nodes; i++)
+		{
+			if(acc[i] == j )
+			{
+				start[n] = i;
+				n++;
+			}
+		}
+		//printf("ci sono %d nodi con %d rami entranti\n",n,j);	
+		for(int i = 0; i < n; i++)
+		{
+			int s = start[i];
+			while(s != -1)
+			{
+				flux[s+suc[s]*nodes]++;
+				s = suc[s];
+			}
+		}
+		
+	}/*
+	for(int i= 0; i<nodes;i++)
+		for(int j=0;j<nodes;j++)
+			if(flux[j+i*nodes] > 0)printf("(j-i) (%d - %d) flux : %.0f\n",j,i, flux[j+i*nodes] );
+	*/
 	return 0;
 }
 
@@ -481,18 +531,21 @@ int cableregularize(instance *inst, double*x, double*flux )
 		if(inst->cablecost[k] > inst->cablecost[cable_max])
 			cable_max = k;
 	}
+	//printf("cable max %d\n", cable_max);
 	for(int i = 0 ; i < inst->nturbines ; i++)
 	{
 		for(int j = 0 ; j < inst->nturbines ; j++)
 		{
 			if(flux[i+j*inst->nturbines] < 0.5) continue;
+
 			int cable = cable_max;
+			x[i+j*inst->nturbines] = cable;
+
 			for(int k = 0 ; k < inst->ncables ; k++)
 			{
-
-				if(inst->cablecost[k] < inst->cablecost[cable] && flux[i+j*inst->nturbines] < inst->cablecapacity[k])
+				if((inst->cablecost[k] < inst->cablecost[cable]) && (flux[i+j*inst->nturbines] < inst->cablecapacity[k]) && (flux[i+j*inst->nturbines] > 0.5))
 				{
-					x[i+j*inst->nturbines] = k + 1;
+					x[i+j*inst->nturbines] = k;
 					//sol = sol - (dist(i,j,inst)*inst->cablecost[cable]) + (dist(i,j,inst)*inst->cablecost[k]);
 					cable = k;
 					count ++;
@@ -500,11 +553,9 @@ int cableregularize(instance *inst, double*x, double*flux )
 			}
 		}
 	}
-
+	
+	
+	
 	return count;
 }
 
-double objectiveFunction(instance *inst, double*x)
-{
-	return 0.0;
-}

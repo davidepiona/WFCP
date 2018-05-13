@@ -31,7 +31,7 @@ void free_instance(instance *inst)
 	free(inst->cablecost);
 	free(inst->best_sol);
 	free(inst->second_best_sol);
-	free(inst->mat);
+	//free(inst->mat);
 }
 
 int CableOpt(instance *inst);    
@@ -185,7 +185,9 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->softF = 1;
 	inst->hardF = 1;
 
-    int help = 0; if( argc < 1 ) help = 1;	
+    int help = 0; 
+    if( argc < 1 ) help = 100;	
+	
 	for( int i = 1; i < argc; i++ ) 
 	{ 
 		if( strcmp(argv[i],"-cables_file") == 0 ) { strcpy(inst->cables_file,argv[++i]); continue; } 			// input cables file
@@ -212,9 +214,9 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if ( strcmp(argv[i],"-soft_fix") == 0 ) { inst->softF = abs(atoi(argv[++i])); continue;}				// Type of soft fixing
 		if ( strcmp(argv[i],"-hard_fix") == 0 ) { inst->hardF = abs(atoi(argv[++i])); continue;}				// Type of hard fixing
 		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}					// Names
-		if( strcmp(argv[i],"-help") == 0 ) { help = 1; continue; } 												// help
-		if( strcmp(argv[i],"--help") == 0 ) { help = 1; continue; } 											// help
-		help = 1;
+		if( strcmp(argv[i],"-help") == 0 ) { help = 2; continue; } 												// help
+		if( strcmp(argv[i],"--help") == 0 ) { help = 2; continue; } 											// help
+		help = i;
     }      
 
 	if( help || (VERBOSE >= 10) )		// print current parameters
@@ -243,7 +245,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("----------------------------------------------------------------------------------------------\n\n");
 	}        
 	
-	if( help ) exit(1);
+	if( help ){ printf("---------------EXIT -help %d ------------------\n",help);exit(1);}
 
 }    
 

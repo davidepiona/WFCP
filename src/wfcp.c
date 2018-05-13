@@ -106,6 +106,8 @@ int makeScript(instance *inst)
 	char p[8];
 	fileNames(inst, p);
 	//printf("\n\n----%s----\n\n", p);
+	
+	fprintf(s,"\nset term wxt title '%Le'\n",(long double)inst->zbest);
 	for(int k = 0; k < inst->ncables; k++)
 	{
 		//printf("Script cavo < %d >\n",k);
@@ -125,6 +127,7 @@ int makeScript(instance *inst)
 	fclose(s);
 	return 0;
 }
+
 int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
 	double *x;
@@ -189,16 +192,16 @@ int plotGraph(instance *inst, double *x)
 	}
 	makeScript(inst);
 	fprintf(gp, "load 'plot/script_plot.p'\n");
+	
 	fflush(NULL);
 	return 0;
 }
-int plotGraph(instance *inst, double **x)
+int plotGraph(instance *inst, double *x, double *flux, double cost)
 {
 	FILE *f;
 	char filename[30];
 	char p[8];
 	fileNames(inst, p);
-
 	for(int k = 0; k < inst->ncables; k++)
 	{
 		//printf("File data < %d >\n",k);
@@ -209,8 +212,9 @@ int plotGraph(instance *inst, double **x)
 		{
 			for(int j = 0; j < inst->nturbines; j++)
 			{
-				if(x[i][j] == (k - 1.0 ))
+				if(x[i+j*inst->nturbines] == k && flux[i+j*inst->nturbines] > 0.5)
 				{
+					//printf("collego il cavo ( %d ) - ( %d ) con il cavo %d\n",i,j,k );
 					fprintf(f, "%lf %lf %d\n", inst->xcoord[i], inst->ycoord[i], i );
 					fprintf(f, "%lf %lf %d\n\n", inst->xcoord[j], inst->ycoord[j], j );
 					plt[k]++;
@@ -223,6 +227,19 @@ int plotGraph(instance *inst, double **x)
 	fprintf(gp, "load 'plot/script_plot.p'\n");
 	fflush(NULL);
 	return 0;
+}
+
+double objectiveFunction(instance *inst, double*x)
+{
+	double cost = 0;
+	for(int i = 0; i < inst->nturbines; i++)
+		for(int j = 0; j < inst->nturbines; j++)
+		{
+			int cable = x[i+j*inst->nturbines];
+			int d = dist(i,j,inst);
+			cost = cost + inst->cablecost[cable]*d;
+		}
+	return cost;
 }
 
 
@@ -597,23 +614,12 @@ void build_model1(instance *inst, CPXENVptr env, CPXLPptr lp)
 /**************************************************************************************************************************/
 {
 	inst->mat = (double *) calloc(inst->nturbines * inst->nturbines, sizeof(double ));	
+	inst->cablecapacity[inst->ncables] = 10e10;
+	inst->cablecost[inst->ncables] = 10e10;
+	inst->ncables++;
 
-	int *suc;
-	suc = (int *) calloc(inst->nturbines, sizeof(int));
-	double *flux;
-	flux = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
-	double *x;
-	x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));	
 	printf("Creo la matrice dei costi ( distanze )\n");
 	PrimDijkstraMat(inst);
-	printf("Eseguo PrimDijkstra\n");
-	PrimDijkstra(inst->mat, inst->nturbines, suc);
-	printf("Calcolo il flusso\n");
-	fluxCalculator(suc, flux, inst->nturbines);
-	printf("Metto i cavi\n");
-	cableregularize(inst, x, flux );
-	printf("Plotto\n");
-	plotGraph(inst, x);
 
 }
 /***************************************************************************************************************************/
@@ -865,7 +871,45 @@ void execute5(instance *inst, CPXENVptr env, CPXLPptr lp)
 	}
 	plotGraph( inst, inst->best_sol);
 }
+/***************************************************************************************************************************/
+void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
+/***************************************************************************************************************************/
+{
 
+	int *suc;
+	suc = (int *) calloc(inst->nturbines, sizeof(int));
+	double *flux;
+	flux = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+	double *x;
+	x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+
+
+
+	printf("Eseguo PrimDijkstra\n");
+	PrimDijkstra(inst->mat, inst->nturbines, suc);
+
+	printf("Calcolo il flusso\n");
+	fluxCalculator(suc, flux, inst->nturbines);
+	
+	printf("Metto i cavi\n");
+	cableregularize(inst, x, flux );
+
+	printf("Calcolo quanto costa la solutione\n");
+	double cost = objectiveFunction(inst, x);
+	inst->zbest = cost;
+	printf("La soluzione trovata costa : %Le\n",(long double)cost );
+
+	inst->cablecost[inst->ncables-1] = 0;
+	inst->best_lb = objectiveFunction(inst, x);
+	printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
+	inst->cablecost[inst->ncables-1] = 10e10;
+
+
+	printf("Plotto\n");
+	plotGraph(inst, x, flux, cost);
+
+
+}
 /***************************************************************************************************************************/
 void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 /**************************************************************************************************************************/
@@ -873,6 +917,7 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 	
 	if(inst->model_type == 0)
 	{
+		printf("Execution with Cplex\n");
 		switch (inst->noCross) 	
 		{
 			case 0 : 								
@@ -898,10 +943,12 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 				break;
 		}
 	} 
+	else if(inst->model_type == 1)
+	{
+		execute6(inst, env, lp);
+	}
 	
-} 
-
-
+}
 static int CPXPUBLIC lazyCallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, int *useraction_p)
 {
 	*useraction_p = CPX_CALLBACK_DEFAULT;
@@ -932,9 +979,6 @@ int installLazyCallback( CPXENVptr env, CPXLPptr lp, instance *inst)
 		print_error("Error lazy callback function");
 	return 0;
 }
-
-
-
 static int CPXPUBLIC heuristicCallback(CPXCENVptr env, void *cbdata, int wherefrom, void *cbhandle, double *objval_p, double *x, int *checkfeas_p, int *useraction_p)
 {
 	//printf("HEURISTIC CALLBACK START\n");
@@ -1097,8 +1141,6 @@ int resetHardFix(CPXENVptr env, CPXLPptr lp, instance *inst, int *index, char *l
 	CPXchgbds (env, lp, count, index, lu, bd);	
 	return 0;
 }
-
-
 int setSoftFixA(CPXENVptr env, CPXLPptr lp, instance *inst, int K)		//Sum (for every (i,j) of yr = 1)( 1 - yij )>= (n - 1) - K
 {
 	printf("Asimmetric Local Branching with k = < %d >\n",K);

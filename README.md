@@ -38,7 +38,7 @@
 
 ## EXAMPLE OF STRING 
 ```
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -C 10 -rins 5 -relax 3 -seed 9 -CC 5 -time_start 300 -time loop 30 -time_limit 1200 -CR 0 -soft_fix 2
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -C 10 -rins 5 -relax 3 -seed 9 -CC 5 -time_start 300 -time_loop 30 -time_limit 1200 -CR 0 -soft_fix 2
 ```
 ## TESTING
 * **CR**					: Cable regularization 
