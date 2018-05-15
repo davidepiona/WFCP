@@ -184,6 +184,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->gap = 0.0;
 	inst->softF = 1;
 	inst->hardF = 1;
+	inst->times = 1;
 
     int help = 0; 
     if( argc < 1 ) help = 100;	
@@ -213,6 +214,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if ( strcmp(argv[i],"-CRF") == 0 ) { inst->cableRegF = abs(atoi(argv[++i])); continue;}					// Cable regularization
 		if ( strcmp(argv[i],"-soft_fix") == 0 ) { inst->softF = abs(atoi(argv[++i])); continue;}				// Type of soft fixing
 		if ( strcmp(argv[i],"-hard_fix") == 0 ) { inst->hardF = abs(atoi(argv[++i])); continue;}				// Type of hard fixing
+		if ( strcmp(argv[i],"-times") == 0 ) { inst->times = abs(atoi(argv[++i])); continue;}					// T
 		if ( strcmp(argv[i],"-names") == 0 ) { inst->names = abs(atoi(argv[++i])); continue;}					// Names
 		if( strcmp(argv[i],"-help") == 0 ) { help = 2; continue; } 												// help
 		if( strcmp(argv[i],"--help") == 0 ) { help = 2; continue; } 											// help
@@ -237,6 +239,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-CRF %d\n", inst->cableRegF); 
 		printf("-soft_fix %d\n", inst->softF); 
 		printf("-hard_fix %d\n", inst->hardF); 
+		printf("-times %d\n", inst->times); 
 		printf("-Names %d\n", inst->names); 
 		printf("-time_limit %lf\n", inst->timelimit); 
 		printf("-time_loop %lf\n", inst->timeloop); 

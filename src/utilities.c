@@ -415,7 +415,7 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index)
 	return k;
 }
 
-int PrimDijkstra(double*mat, int nodes, int *pred)
+int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 {
 	int *flag;
 	flag = (int *) calloc(nodes, sizeof(int));	
@@ -426,13 +426,16 @@ int PrimDijkstra(double*mat, int nodes, int *pred)
 	
 	flag[0] = 1;
 	pred[0] = -1;
-	//P[0] = -800;
-
+	P[0] = -800;
+	if(r != 0)
+	{
+		srand(r);
+	}
 
 	for(int j = 1; j < nodes ; j++)
 	{
 		flag[j] = 0;
-		L[j] = mat[0+j*nodes] ;//+ P[0];
+		L[j] = mat[0+j*nodes] + P[0];
 		pred[j] = 0;
 	}
 
@@ -452,16 +455,16 @@ int PrimDijkstra(double*mat, int nodes, int *pred)
 		}
 		for(int j = 1; j < nodes; j++)
 		{
-			if(L[j] + P[j] == min)
+			if(L[j] + P[j] == min )
 			{
 				pool[npool] = j;
 				npool++;
 			}
 		}
-		if(0)//npool > 0)
+		if( r != 0 && npool > 0)
 		{
 			h = pool[rand()%npool];
-			P[h] = P[h] - 1;
+			P[h] = P[h] + 10;
 		}
 		flag[h] = 1;
 		
@@ -470,6 +473,91 @@ int PrimDijkstra(double*mat, int nodes, int *pred)
 			if(flag[j] == 0 && mat[h+j*nodes] < L[j])
 			{
 				L[j] = mat[h+j*nodes] + P[h];
+				pred[j] = h;
+			}
+		}
+	}
+	free(flag);
+	free(L);
+	free(P);
+	return 0;
+}
+int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r)
+{
+	int *flag;
+	flag = (int *) calloc(nodes, sizeof(int));	
+	double *L;
+	L = (double *) calloc(nodes, sizeof(double));	
+	int ngrasp = 5;
+
+	flag[0] = 1;
+	pred[0] = -1;
+	if(r != 0)
+	{
+		srand(r);
+	}
+
+	for(int j = 1; j < nodes ; j++)
+	{
+		flag[j] = 0;
+		L[j] = mat[0+j*nodes];
+		pred[j] = 0;
+	}
+
+	for(int k = 0; k < nodes-1; k++)
+	{
+		double min = DBL_MAX;
+		int pool[nodes];
+		int npool = 0;
+		int v = 0;
+		int h = 0;
+		for(int i = 0; i < ngrasp; i++)
+		{
+			h = 0;
+			min = DBL_MAX;
+			for(int j = 1; j < nodes; j++)
+			{
+				v = 0;
+				for(int t = 0; t < npool; t++)
+				{
+					if(j == pool[t])
+					{
+						v = 1;
+					}
+				}
+				if(flag[j] == 0 && L[j] < min && v != 1)
+				{
+
+					min = L[j];
+					h = j;
+				}
+			}
+			pool[npool] = h;
+			npool++;
+		}
+		for(int t = 0; t < npool; t++)
+		{
+			printf("- %d -",pool[t]);
+		}
+		printf("\n----------------------------------------------------------------------\n");
+		if( r != 0 && npool > 0)
+		{
+			int index = rand()%(2*npool);
+			if(index < npool)
+				h = pool[0];
+			else
+				h = pool[index - npool];
+
+			//h = pool[rand()%npool];
+		}
+		flag[h] = 1;
+
+		
+		for(int j = 1; j < nodes; j++)
+		{
+			if(flag[j] == 0 && mat[h+j*nodes] < L[j])
+			{
+				L[j] = mat[h+j*nodes];
 				pred[j] = h;
 			}
 		}

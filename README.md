@@ -25,6 +25,8 @@
 	* **3** : Normal execution + lazy callback
 	* **4** : Hard Fixing
 	* **5** : Soft Fixing
+	* **6** : Heuristic
+	* **7** : Heuristic Loop to have multiple solution
 	* **else** : Normal Execution
 	* **10** : Normal execution with no cross cable as normal constraints
 * **soft_fix**              : Type of soft fixing 	
@@ -35,7 +37,7 @@
 * **hard_fix**              : Type of hard fixing  
 	* **1** : Random hard fixing
 	* **2** : rins
-
+* **times** : times to do heuristic
 ## EXAMPLE OF STRING 
 ```
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -C 10 -rins 5 -relax 3 -seed 9 -CC 5 -time_start 300 -time_loop 30 -time_limit 1200 -CR 0 -soft_fix 2

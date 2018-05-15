@@ -42,9 +42,10 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index);
 int myseparation(instance *inst, double *x, CPXCENVptr env, void *cbdata, int wherefrom);
 int cableregularize(instance *inst, double *x, long double z );
 int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst);
-int PrimDijkstra(double *mat, int nodes, int *pred);
+int PrimDijkstra(double *mat, int nodes, int *pred, int r);
 int fluxCalculator(int *suc, double *flux, int nodes);
 int cableregularize(instance *inst, double *x, double *flux );
+int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r);
 
 /*****************************************************************************************************************/
 
@@ -886,7 +887,7 @@ void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 
 	printf("Eseguo PrimDijkstra\n");
-	PrimDijkstra(inst->mat, inst->nturbines, suc);
+	PrimDijkstra(inst->mat, inst->nturbines, suc, 0);
 
 	printf("Calcolo il flusso\n");
 	fluxCalculator(suc, flux, inst->nturbines);
@@ -908,6 +909,55 @@ void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
 	printf("Plotto\n");
 	plotGraph(inst, x, flux, cost);
 
+	free(x);
+	free(flux);
+	free(suc);
+}
+/***************************************************************************************************************************/
+void execute7(instance *inst, CPXENVptr env, CPXLPptr lp)
+/***************************************************************************************************************************/
+{
+
+	for(int i = 1; i <= inst->times; i++)
+	{
+
+		int *suc;
+		suc = (int *) calloc(inst->nturbines, sizeof(int));
+		double *flux;
+		flux = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+		double *x;
+		x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+
+		printf("Eseguo PrimDijkstra\n");
+		inst->randomseed = time(NULL);
+		PrimDijkstraGrasp(inst->mat, inst->nturbines, suc, inst->randomseed);
+
+		printf("Calcolo il flusso\n");
+		fluxCalculator(suc, flux, inst->nturbines);
+		
+		printf("Metto i cavi\n");
+		cableregularize(inst, x, flux );
+
+		printf("Calcolo quanto costa la solutione\n");
+		double cost = objectiveFunction(inst, x);
+		inst->zbest = cost;
+		printf("La soluzione trovata costa : %Le\n",(long double)cost );
+
+		inst->cablecost[inst->ncables-1] = 0;
+		inst->best_lb = objectiveFunction(inst, x);
+		printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
+		inst->cablecost[inst->ncables-1] = 10e10;
+
+		printf("Plotto\n");
+		plotGraph(inst, x, flux, cost);
+		fprintf(gp, "exit\n");
+		fclose(gp);
+		
+		gp = popen("gnuplot -p","w");
+		//wait(5);
+		
+		printf("------------------------------- [ %d ] --------------------------------\n", i);
+	}
 
 }
 /***************************************************************************************************************************/
@@ -945,7 +995,14 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 	} 
 	else if(inst->model_type == 1)
 	{
-		execute6(inst, env, lp);
+		switch (inst->noCross) 	
+		{
+			case 6:
+				execute6(inst, env, lp);
+				break;
+			case 7:
+				execute7(inst,env,lp);
+		}
 	}
 	
 }

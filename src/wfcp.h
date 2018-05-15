@@ -51,6 +51,7 @@ typedef struct {
 	int K;									//
 	int softF;								// soft fixing : 1 assimmetric 2 simmetric
 	int hardF;								// hard fixing : 1 random 2 rins
+	int times;								// times to do heuristic to find new solution
 	double gap;
 	double *mat;
 	int names;
