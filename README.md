@@ -38,10 +38,17 @@
 	* **1** : Random hard fixing
 	* **2** : rins
 * **times** : times to do heuristic
-## EXAMPLE OF STRING 
+
+## EXAMPLE OF STRING FOR CPLEX
 ```
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -C 10 -rins 5 -relax 3 -seed 9 -CC 5 -time_start 300 -time_loop 30 -time_limit 1200 -CR 0 -soft_fix 2
 ```
+
+## EXAMPLE OF STRING FOR HEURISTIC
+```
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 7 -times 10
+```
+
 ## TESTING
 * **CR**					: Cable regularization 
 * **CRF**					: Cable regularization
