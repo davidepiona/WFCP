@@ -27,6 +27,7 @@
 	* **5** : Soft Fixing
 	* **6** : Heuristic
 	* **7** : Heuristic Loop to have multiple solution
+	* **8** : Heuristic with 1-opt
 	* **else** : Normal Execution
 	* **10** : Normal execution with no cross cable as normal constraints
 * **soft_fix**              : Type of soft fixing 	
