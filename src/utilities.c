@@ -426,7 +426,7 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 	
 	flag[0] = 1;
 	pred[0] = -1;
-	P[0] = -800;
+	P[0] = -600;
 	if(r != 0)
 	{
 		srand(r);
@@ -464,7 +464,7 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 		if( r != 0 && npool > 0)
 		{
 			h = pool[rand()%npool];
-			P[h] = P[h] + 10;
+			P[h] = P[h] + 50;
 		}
 		flag[h] = 1;
 		
@@ -474,6 +474,8 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 			{
 				L[j] = mat[h+j*nodes] + P[h];
 				pred[j] = h;
+				P[h] = P[h] - 10;
+				P[j] = P[j] + 10;
 			}
 		}
 	}
@@ -488,7 +490,7 @@ int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r)
 	flag = (int *) calloc(nodes, sizeof(int));	
 	double *L;
 	L = (double *) calloc(nodes, sizeof(double));	
-	int ngrasp = 5;
+	int ngrasp = 10;
 
 	flag[0] = 1;
 	pred[0] = -1;
@@ -646,4 +648,3 @@ int cableregularize(instance *inst, double*x, double*flux )
 	
 	return count;
 }
-

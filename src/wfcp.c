@@ -46,6 +46,7 @@ int PrimDijkstra(double *mat, int nodes, int *pred, int r);
 int fluxCalculator(int *suc, double *flux, int nodes);
 int cableregularize(instance *inst, double *x, double *flux );
 int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r);
+int unoOpt(instance *inst, int* suc, int *best);
 
 /*****************************************************************************************************************/
 
@@ -233,13 +234,31 @@ int plotGraph(instance *inst, double *x, double *flux, double cost)
 double objectiveFunction(instance *inst, double*x)
 {
 	double cost = 0;
-	for(int i = 0; i < inst->nturbines; i++)
+	int M = 10e7;
+	for(int i = 0; i < inst->nturbines; i++){
 		for(int j = 0; j < inst->nturbines; j++)
 		{
 			int cable = x[i+j*inst->nturbines];
 			int d = dist(i,j,inst);
 			cost = cost + inst->cablecost[cable]*d;
 		}
+	}
+	int n = 0;
+	for(int i = 0; i < inst->nturbines; i++){
+		for(int j = 0; j < inst->nturbines; j++){
+			if(x[i+j*inst->nturbines] <= 0.5 || i == j) continue;
+			for(int k = 0; k < inst->nturbines; k++){
+				for(int l = 0; l < inst->nturbines; l++){
+					if(x[k+l*inst->nturbines] <= 0.5 || l == k) continue;
+					//printf("provo < %d - %d > -- < %d - %d >\n",i,j,k,l);
+					if(!noCross(i,j,k,l,inst))
+						n++;
+				}
+			}
+		}
+	}
+	//printf("Ci sono < %d > cross\n",n );
+	cost = cost + n * M;
 	return cost;
 }
 
@@ -880,9 +899,9 @@ void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
 	int *suc;
 	suc = (int *) calloc(inst->nturbines, sizeof(int));
 	double *flux;
-	flux = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+	flux = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
 	double *x;
-	x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+	x = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
 
 
 
@@ -909,6 +928,11 @@ void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
 	printf("Plotto\n");
 	plotGraph(inst, x, flux, cost);
 
+	fprintf(gp, "exit\n");
+	fclose(gp);
+		
+	gp = popen("gnuplot -p","w");
+
 	free(x);
 	free(flux);
 	free(suc);
@@ -929,7 +953,7 @@ void execute7(instance *inst, CPXENVptr env, CPXLPptr lp)
 		x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
 
 		printf("Eseguo PrimDijkstra\n");
-		inst->randomseed = time(NULL);
+		inst->randomseed = time(NULL)*i;
 		PrimDijkstraGrasp(inst->mat, inst->nturbines, suc, inst->randomseed);
 
 		printf("Calcolo il flusso\n");
@@ -961,6 +985,86 @@ void execute7(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 }
 /***************************************************************************************************************************/
+void execute8(instance *inst, CPXENVptr env, CPXLPptr lp)
+/***************************************************************************************************************************/
+{
+
+	int *suc;
+	suc = (int *) calloc(inst->nturbines, sizeof(int));
+	double *flux;
+	flux = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
+	double *x;
+	x = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
+
+
+
+	printf("Eseguo PrimDijkstra\n");
+	PrimDijkstra(inst->mat, inst->nturbines, suc, 0);
+
+	printf("Calcolo il flusso\n");
+	fluxCalculator(suc, flux, inst->nturbines);
+	
+	printf("Metto i cavi\n");
+	cableregularize(inst, x, flux );
+
+	printf("Calcolo quanto costa la solutione\n");
+	double cost = objectiveFunction(inst, x);
+	inst->zbest = cost;
+	printf("La soluzione trovata costa : %Le\n",(long double)cost );
+
+	inst->cablecost[inst->ncables-1] = 0;
+	inst->best_lb = objectiveFunction(inst, x);
+	printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
+	inst->cablecost[inst->ncables-1] = 10e10;
+
+
+	printf("Plotto\n");
+	plotGraph(inst, x, flux, cost);
+
+	fprintf(gp, "exit\n");
+	fclose(gp);
+		
+	gp = popen("gnuplot -p","w");
+
+
+	//-------------------------------------------------------------- uno opt --------------------
+	int *best;
+	best = (int *) calloc((inst->nturbines+1), sizeof(int));
+	double *flux_best;
+	flux_best = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
+	double *x_best;
+	x_best = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
+	unoOpt(inst, suc, best);
+
+	printf("Calcolo il flusso\n");
+	fluxCalculator(best, flux_best, inst->nturbines);
+	
+	printf("Metto i cavi\n");
+	cableregularize(inst, x_best, flux_best );
+
+	printf("Calcolo quanto costa la solutione\n");
+	cost = objectiveFunction(inst, x_best);
+	inst->zbest = cost;
+	printf("La soluzione trovata costa : %Le\n",(long double)cost );
+
+	inst->cablecost[inst->ncables-1] = 0;
+	inst->best_lb = objectiveFunction(inst, x_best);
+	printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
+	inst->cablecost[inst->ncables-1] = 10e10;
+
+
+	printf("Plotto\n");
+	plotGraph(inst, x_best, flux_best, cost);
+
+	fprintf(gp, "exit\n");
+	fclose(gp);
+	gp = popen("gnuplot -p","w");
+
+	free(x);
+	free(flux);
+	free(best);
+}
+/***************************************************************************************************************************/
 void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 /**************************************************************************************************************************/
 {    
@@ -983,10 +1087,10 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 				execute3(inst, env,lp); // with lazy callback
 				break;
 			case 4 : 								
-				execute4(inst, env,lp);
+				execute4(inst, env,lp); // hard fixing
 				break;
 			case 5 : 								
-				execute5(inst, env,lp);
+				execute5(inst, env,lp); // soft fixing
 				break;
 			default: 
 				print_error(" execution type unknown!!"); 
@@ -998,10 +1102,14 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 		switch (inst->noCross) 	
 		{
 			case 6:
-				execute6(inst, env, lp);
+				execute6(inst, env, lp);	// heuristic
 				break;
 			case 7:
-				execute7(inst,env,lp);
+				execute7(inst,env,lp);		// heuristic loop to have more solution
+				break;
+			case 8:
+				execute8(inst, env, lp);	// heuristic 1Opt
+				break;
 		}
 	}
 	
@@ -1345,5 +1453,89 @@ int PrimDijkstraMat(instance *inst)
 			//printf("[ %d ] [ %d ]",i,j);
 		}
 	}
+	return 0;
+}
+
+
+int unoOpt(instance *inst, int* suc, int* best)
+{
+	for(int h = 0; h < inst->nturbines; h++){
+		best[h] = suc[h];
+	}
+	double minobj = inst->zbest;
+	//printf("unoOpt\n");
+	int *newsuc;
+	newsuc = (int *) calloc((inst->nturbines+1), sizeof(int));
+	
+	for(int i = 0; i < inst->nturbines; i++){
+		newsuc[i] = suc[i];
+	}
+	for(int i = 0; i < inst->nturbines; i++){
+		if(suc[i] != -1){
+			//printf("Ramo uscente ----------------< %d >-----------------------\n",i);
+			int *prec;
+			prec = (int *) calloc(inst->nturbines, sizeof(int));
+			prec[0] = i;
+			int nprec = 0;
+			int iter = 0;
+			int flag = 1;
+			//printf("<- %d -",prec[0] );
+			for(int k = 0; flag > 0;k++){
+				flag--;
+				for(int j = 0; j < inst->nturbines; j++){
+					if(suc[j] == prec[iter])
+					{
+						flag ++;
+						nprec++;
+						prec[nprec] = j;
+						//printf("- %d -",prec[nprec]);
+					}
+				}
+				iter++;
+			}
+			//printf(">\n");
+			flag = 0;
+			nprec++;
+			for(int j = 0; j < inst->nturbines; j++){
+				flag = 0;
+				for(int k = 0; k < nprec && flag == 0; k++){
+					if(j == prec[k])
+					{
+						flag = 1;
+					}
+				}
+				if(suc[i] != -1 && flag == 0){
+					//printf("\tRamo entrante ----------------< %d >-----------------------\n",j);
+					double *flux;
+					flux = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
+					double *x;
+					x = (double *) calloc((inst->nturbines+1)*(inst->nturbines+1), sizeof(double ));
+					newsuc[i] = j;
+					//printf("Flusso\n");
+					fluxCalculator(newsuc, flux, inst->nturbines);
+					//printf("Cavi\n");
+					cableregularize(inst, x, flux );
+					//printf("Costo\n");
+					double cost = objectiveFunction(inst, x);
+					if(cost < minobj){
+						inst->zbest = cost;
+						minobj = cost;
+						printf("New incumbment %Le\n", (long double)cost );
+						for(int i = 0; i < inst->nturbines; i++){
+							best[i] = newsuc[i];
+						}
+						//plotGraph(inst, x, flux, cost);
+						//wait(5);
+					}
+
+					for(int h = 0; h < inst->nturbines; h++){
+						newsuc[h] = suc[h];
+					}
+				}
+			}
+			
+		}
+	}
+	//printf("FINE\n");
 	return 0;
 }

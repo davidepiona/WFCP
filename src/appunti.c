@@ -100,4 +100,36 @@
 	Si può provare con il "GRASP" : Greedy randomize adaptive ... 
 	Dove è lecito scegliere non scelgo sempre la scelta migliore, altrimenti avrei il greedy, ma scelgo le 5 scelte migliori ad ogni iterazione
 	e poi con il 50% di probabilità sclego la scelta migliore o una a caso delle altre
+
+
+	Eusristici di raffinamento 
+	Prende una soluzione e cerca di migliorarla in qualche modo, applicando una "mossa" (move).
+	- 1-opt : prendo la soluzione, elimino un arco non valido e ne aggiungo uno valido, ci muovimo in un intorno della soluzione
+			  si dice che le soluzioni trovate sono a distanza 1
+			  il problema di questo procedimento sono gli ottimi locali
+	- 2-opt : posso valutare due mosse in contemporanea per decidere qual'è la migliore 
+	- k-opt : valuto k mosse
+
+	MetaEuristici
+	Metaeuristico : modo euristico per descrivere euristici
+	Si puo uscire da un ottimo locale:
+	- Multistart : provo a partire da soluzioni diverse andando a finire, molto probabilmente, in ottimi locali differenti
+	- Tabu-Search : Posso fare anche mosse peggiorative se sono in un ottimo locale e tengo traccia di tutte le soluzioni precedenti in modo da non tornare indietro
+					quando trovo la possibilità di scendere senza tornare indietro posso cancellare la tabu-list tenendo comunque traccia della soluzione migliore mai trovata.
+					La tabu-list viene proposta come un oggetto dinamico che contiene una "tenuta" (tenure) ovvero dopo I iterazioni in cui una soluzione è presente nella lista
+					viene rimossa, valore ragionevole 10/40 < del numero di turbine.
+					Posso dichiarare tabu un vertice che ho appena cambiato al posto di tenere tutta la soluzione. Tengo un array dove memorizzo che il vertice i-esimo 
+					è stato messo nella lista nell'iterazion k e guardo se l'iterazione corrente - k è > della tenure.
+					Provo a far oscillare la tenure. Le fasi in cui si lascia poca libertà all'algoritmo (tenure << ) si chiamano di intensification mentre quelle con alta 
+					libertà	(tenure >> ) diversification.
+	- Simulated Annealing : Invece di cercare ogni volta la migliore soluzione, valuto un possibile scambio tra archi, questo scambio mi porta ad un delta-Costo e scelgo 
+					la soluzione in cui muovermi con una certa probabilità ( vedi letteratura ) che dipende dalla temperatura e dal delta
+	- Variable Neighborhood Search (VNS) : L'idea è di fare l'1-opt e quando arrivo ad un ottimo locale faccio una volta il 3-opt
+	- Algoritmo formiche : 
+	- Algoritmo genetico : Lavora con una popolazione di individui, ogni individuo è una soluzione. Nella prima generazione tutte le soluzioni vengono generate casualmente
+					Noi speriamo che la seconda generazione sia mediamente un po migliore. La fitness è una misura di quanto una soluzione è buona ( per noi è - costo ).
+					Passare da una soluzione ad una successiva: prendo due soluzioni e creo un figlio. Il patrimonio genetico dei genitori sono l'ordine di visita dei nodi, 
+					definisco un punto di taglio e creo il corredo genetico del figlio. Va bene ammazzare figli in base alla loro fitness ma in modo probabilistico.
+					Siccome potrei avere i figli "fatti male", devo fare una procedura di refinement in modo da sistemarli.
+
 */
