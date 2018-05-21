@@ -417,16 +417,16 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index)
 
 int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 {
-	int *flag;
-	flag = (int *) calloc(nodes, sizeof(int));	
-	double *L;
-	L = (double *) calloc(nodes, sizeof(double));	
-	double *P;
-	P = (double *) calloc(nodes, sizeof(double));	
+	int flag[nodes];
+	//flag = (int *) calloc(nodes, sizeof(int));	
+	double L[nodes];
+	//L = (double *) calloc(nodes, sizeof(double));	
+	double P[nodes];
+	//P = (double *) calloc(nodes, sizeof(double));	
 	
 	flag[0] = 1;
 	pred[0] = -1;
-	P[0] = -600;
+	P[0] = -600; // -600 dataset 7/8 -400 dataset 1
 	if(r != 0)
 	{
 		srand(r);
@@ -464,7 +464,7 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 		if( r != 0 && npool > 0)
 		{
 			h = pool[rand()%npool];
-			P[h] = P[h] + 50;
+			P[h] = P[h] + 50; // +50 dataset 7/8  +10 dataset 1
 		}
 		flag[h] = 1;
 		
@@ -479,9 +479,9 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 			}
 		}
 	}
-	free(flag);
-	free(L);
-	free(P);
+	//free(flag);
+	//free(L);
+	//free(P);
 	return 0;
 }
 int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r)
@@ -537,11 +537,11 @@ int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r)
 			pool[npool] = h;
 			npool++;
 		}
-		for(int t = 0; t < npool; t++)
+		/*for(int t = 0; t < npool; t++)
 		{
 			printf("- %d -",pool[t]);
-		}
-		printf("\n----------------------------------------------------------------------\n");
+		}*/
+		//printf("\n----------------------------------------------------------------------\n");
 		if( r != 0 && npool > 0)
 		{
 			int index = rand()%(2*npool);
@@ -571,23 +571,29 @@ int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r)
 
 int fluxCalculator(int *suc, double*flux, int nodes)
 {
-	double *acc;
-	acc = (double *) calloc(nodes, sizeof(double ));
-	double *start;
-	start = (double *) calloc(nodes, sizeof(double ));
+	int accumulator[nodes];
+	//accumulator = (int*) calloc(nodes, sizeof(int));
+
+	int start[nodes];
+	//	start = (int*) calloc(nodes, sizeof(int));
+	
 	int n = 0;
 	
+	for(int i = 0; i < nodes*nodes; i++){ flux[i] = 0;}
+	for(int i = 0; i < nodes; i++){ accumulator[i] = 0;}
+	for(int i = 0; i < nodes; i++){ start[i] = 0;}
+
 	for( int i = 0; i < nodes; i++)
 	{
-		acc[suc[i]]++;
+		accumulator[suc[i]]++;
 	}
-	
-	for(int j = 0; j < nodes-1; j++)
+	//printf("Accumulatore impostato \n");
+	for(int j = 0; j < nodes; j++)
 	{
 		n = 0;
 		for( int i = 0; i < nodes; i++)
 		{
-			if(acc[i] == j )
+			if(accumulator[i] == j )
 			{
 				start[n] = i;
 				n++;
@@ -602,13 +608,10 @@ int fluxCalculator(int *suc, double*flux, int nodes)
 				flux[s+suc[s]*nodes]++;
 				s = suc[s];
 			}
-		}
-		
-	}/*
-	for(int i= 0; i<nodes;i++)
-		for(int j=0;j<nodes;j++)
-			if(flux[j+i*nodes] > 0)printf("(j-i) (%d - %d) flux : %.0f\n",j,i, flux[j+i*nodes] );
-	*/
+		}	
+	}
+	//free(accumulator);
+	//free(start);
 	return 0;
 }
 
@@ -616,6 +619,8 @@ int cableregularize(instance *inst, double*x, double*flux )
 {
 	int count = 0;
 	int cable_max = 0;
+	for(int i = 0; i < inst->nturbines*inst->nturbines; i++){ x[i] = -1;}
+
 	for(int k = 0 ; k < inst->ncables ; k++)
 	{
 		if(inst->cablecost[k] > inst->cablecost[cable_max])
@@ -644,7 +649,30 @@ int cableregularize(instance *inst, double*x, double*flux )
 		}
 	}
 	
-	
-	
 	return count;
+}
+
+int arraycontainsINT(int *array, int length, int val)
+{
+	for(int i = 0; i < length ; i++){
+		if(array[i] == val)
+			return 1;
+	}
+	return 0;
+}
+
+int tabucontains(int *arrayout, int* arrayin, int n, int valout, int valin)
+{
+	//printf(" start : %d ")
+	for(int i = 0; i < n; i++)
+	{
+		//printf("tabu %d < - > %d test  %d < - > %d is tabu\n",arrayin[i], arrayout[i] , valin, valout);
+		if(arrayout[i] == valout && arrayin[i] == valin){
+			return 1;
+		}
+		if(arrayout[i] == 0 && arrayin[i] == 0){
+			break;
+		}
+	}
+	return 0;
 }

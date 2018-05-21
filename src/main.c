@@ -23,15 +23,22 @@ void print_error(const char *err)
 }   
 
 void free_instance(instance *inst)
-{     
+{    
+	//printf("a\n"); 
 	free(inst->power);
-	free(inst->xcoord);
+	//printf("a\n"); 
+	//free(inst->xcoord);
+	//printf("a\n"); 
 	free(inst->ycoord);
-	free(inst->cablecapacity);
-	free(inst->cablecost);
-	free(inst->best_sol);
-	free(inst->second_best_sol);
-	//free(inst->mat);
+	//printf("a\n"); 
+	//free(inst->cablecapacity);
+	//printf("a\n"); 
+	//free(inst->cablecost);
+	//printf("a\n"); 
+	//free(inst->best_sol);
+	//printf("a\n"); 
+	//free(inst->second_best_sol);
+	free(inst->mat);
 }
 
 int CableOpt(instance *inst);    

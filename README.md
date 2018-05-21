@@ -20,6 +20,7 @@
 * **seed**                  : random seed
 * **threads**               : n threads
 * **CC**                    : Cross Constraints	
+	* **0** : Normal execution with no cross cable as normal constraints
 	* **1** : Lazy constraints to the model
 	* **2** : loop Method
 	* **3** : Normal execution + lazy callback
@@ -28,8 +29,9 @@
 	* **6** : Heuristic
 	* **7** : Heuristic Loop to have multiple solution
 	* **8** : Heuristic with 1-opt
+	* **9** : Tabu Search
+	* **10** : Multi-start
 	* **else** : Normal Execution
-	* **10** : Normal execution with no cross cable as normal constraints
 * **soft_fix**              : Type of soft fixing 	
 	* **1** : Asimmetric Local Branching
 	* **2** : Simmetric Local Branching
