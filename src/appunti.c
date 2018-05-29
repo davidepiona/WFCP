@@ -126,6 +126,10 @@
 					la soluzione in cui muovermi con una certa probabilità ( vedi letteratura ) che dipende dalla temperatura e dal delta
 	- Variable Neighborhood Search (VNS) : L'idea è di fare l'1-opt e quando arrivo ad un ottimo locale faccio una volta il 3-opt
 	- Algoritmo formiche : 
+							Wikipedia
+							https://www.dbai.tuwien.ac.at/staff/musliu/ACO_online_final.pdf
+							https://ieeexplore.ieee.org/abstract/document/585892/
+							https://i11www.iti.kit.edu/_media/teaching/theses/ba-nedlin-17.pdf
 	- Algoritmo genetico : Lavora con una popolazione di individui, ogni individuo è una soluzione. Nella prima generazione tutte le soluzioni vengono generate casualmente
 					Noi speriamo che la seconda generazione sia mediamente un po migliore. La fitness è una misura di quanto una soluzione è buona ( per noi è - costo ).
 					Passare da una soluzione ad una successiva: prendo due soluzioni e creo un figlio. Il patrimonio genetico dei genitori sono l'ordine di visita dei nodi, 
@@ -133,3 +137,5 @@
 					Siccome potrei avere i figli "fatti male", devo fare una procedura di refinement in modo da sistemarli.
 
 */
+
+

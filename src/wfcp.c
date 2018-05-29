@@ -48,7 +48,10 @@ int cableregularize(instance *inst, double *x, double *flux );
 int PrimDijkstraGrasp(double*mat, int nodes, int *pred, int r);
 int arraycontainsINT(int *array, int length, int val);
 int tabucontains(int *arrayout, int* arrayin, int n, int valout, int valin);
-
+int antFindPath(double*mat, int nodes, int *pred, double *pheromones);
+int antFindPathKruskal(double*mat, int nodes, int *pred, double *pheromones, instance* inst);
+int updatepheromones(double *pheromones,double* x, double* flux,double *cost, int nodes, double *mat, double zsol);
+int removeloop(double*mat, int nodes, int *suc);
 /*****************************************************************************************************************/
 
 int installLazyCallback( CPXENVptr env, CPXLPptr lp, instance *inst);
@@ -234,16 +237,35 @@ int plotGraph(instance *inst, double *x, double *flux, double cost)
 	return 0;
 }
 
-double objectiveFunction(instance *inst, double*x)
+double objectiveFunction(instance *inst, double*x, double*flux)
 {
 	long double cost = 0;
-	double Mcrossing = 10e8;
+	double Mcrossing = BIG_M_CROSS;
+	double Minstation = BIG_M_SUBSTATION;
 	for(int i = 0; i < inst->nturbines; i++){
 		for(int j = 0; j < inst->nturbines; j++)
 		{
+			if(x[i+j*inst->nturbines] < -0.5)continue;
 			int cable = x[i+j*inst->nturbines];
 			int d = dist(i,j,inst);
+			if(cable == (inst->ncables-1))
+			{
+				d = d*flux[i+j*inst->nturbines];
+			}
+		
 			cost = cost + inst->cablecost[cable]*d;
+			
+		}
+	}
+	//printf("\n\n\nLa soluzione trovata costa di lunghezza dei cavi: %Le\n", cost);
+	if(cost < 1)
+	{
+		for(int i = 0; i < inst->nturbines; i++){
+			for(int j = 0; j < inst->nturbines; j++)
+			{
+				//if(x[i+j*inst->nturbines] < 0.5)continue;
+				//printf("x [ %d, %d ] = %f  dist : %f\n",i,j,x[i+j*inst->nturbines],dist(i,j,inst));
+			}
 		}
 	}
 	int n = 0;
@@ -260,8 +282,17 @@ double objectiveFunction(instance *inst, double*x)
 			}
 		}
 	}
-	//printf("Ci sono < %d > cross\n",n );
 	cost = cost + n * Mcrossing;
+	//printf("Ci sono < %d > cross quindi ora costa : %Le\n",n,cost );
+	n = 0;
+	for(int i = 0; i < inst->nturbines; i++){
+		if( x[i] != -1 ) n++;
+	}
+	//printf("Cavi entranti nella substation: %d\n",n );
+	if(n > inst->C ) 
+	{
+		cost = cost + (n - inst->C) * Minstation;	
+	}
 	//printf("La soluzione trovata costa : %Le\n", cost);
 	return cost;
 }
@@ -639,7 +670,7 @@ void build_model1(instance *inst, CPXENVptr env, CPXLPptr lp)
 {
 	inst->mat = (double *) calloc(inst->nturbines * inst->nturbines, sizeof(double ));	
 	inst->cablecapacity[inst->ncables] = DBL_MAX;
-	inst->cablecost[inst->ncables] = 10e9;
+	inst->cablecost[inst->ncables] = BIG_M_CABLE;
 	inst->ncables++;
 
 	printf("Creo la matrice dei costi ( distanze )\n");
@@ -919,12 +950,12 @@ void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
 	cableregularize(inst, x, flux );
 
 	printf("Calcolo quanto costa la solutione\n");
-	cost = objectiveFunction(inst, x);
+	cost = objectiveFunction(inst, x, flux);
 	inst->zbest = cost;
 	printf("La soluzione trovata costa : %Le\n",(long double)cost );
 
 	inst->cablecost[inst->ncables-1] = 0;
-	inst->best_lb = objectiveFunction(inst, x);
+	inst->best_lb = objectiveFunction(inst, x, flux);
 	printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
 	inst->cablecost[inst->ncables-1] = 10e10;
 
@@ -967,12 +998,12 @@ void execute7(instance *inst, CPXENVptr env, CPXLPptr lp)
 		cableregularize(inst, x, flux );
 
 		printf("Calcolo quanto costa la solutione\n");
-		double cost = objectiveFunction(inst, x);
+		double cost = objectiveFunction(inst, x, flux);
 		inst->zbest = cost;
 		printf("La soluzione trovata costa : %Le\n",(long double)cost );
 
 		inst->cablecost[inst->ncables-1] = 0;
-		inst->best_lb = objectiveFunction(inst, x);
+		inst->best_lb = objectiveFunction(inst, x, flux);
 		printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
 		inst->cablecost[inst->ncables-1] = 10e10;
 
@@ -1022,7 +1053,7 @@ void execute8(instance *inst, CPXENVptr env, CPXLPptr lp)
 	cableregularize(inst, x, flux );
 
 	printf("Calcolo quanto costa la solutione\n");
-	cost = objectiveFunction(inst, x);
+	cost = objectiveFunction(inst, x, flux);
 	inst->zbest = cost;
 	printf("La soluzione trovata costa : %Le\n",(long double)cost );
 
@@ -1060,20 +1091,20 @@ void execute8(instance *inst, CPXENVptr env, CPXLPptr lp)
 		cableregularize(inst, x_best, flux_best );
 
 		printf("Calcolo quanto costa la solutione\n");
-		newcost = objectiveFunction(inst, x_best);
+		newcost = objectiveFunction(inst, x_best, flux_best);
 		inst->zbest = newcost;
 		printf("La soluzione trovata costa : %Le\n",(long double)newcost );
 
 		printf("Plotto\n");
-		plotGraph(inst, x_best, flux_best, cost);
+		//plotGraph(inst, x_best, flux_best, cost);
 
-		fprintf(gp, "exit\n");
-		fclose(gp);
-		gp = popen("gnuplot -p","w");
-		wait(1);
+		//fprintf(gp, "exit\n");
+		//fclose(gp);
+		//gp = popen("gnuplot -p","w");
+		//wait(1);
 	}
 
-
+	plotGraph(inst, x_best, flux_best, cost);
 	printf("Ottimo Locale trovato, costo : %Le\n",(long double )newcost );
 	//free(suc);
 	//free(best);
@@ -1113,7 +1144,7 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 	int *tabulistout;
 	tabulistout = (int *) calloc((inst->nturbines*inst->nturbines), sizeof(int ));
 	int etabu = 0;
-	int thresh = 70;
+	int thresh = 10;
 	//int changethresh = 40;
 
 	printf("Eseguo PrimDijkstra\n");
@@ -1126,7 +1157,7 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 	cableregularize(inst, x, flux );
 
 	printf("Calcolo quanto costa la solutione\n");
-	cost = objectiveFunction(inst, x);
+	cost = objectiveFunction(inst, x,flux);
 	inst->zbest = cost;
 	printf("La soluzione trovata costa : %Le\n",(long double)cost );
 
@@ -1136,13 +1167,13 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 	inst->cablecost[inst->ncables-1] = 10e10;*/
 
 
-	printf("Plotto\n");
+	/*printf("Plotto\n");
 	plotGraph(inst, x, flux, cost);
 
 	fprintf(gp, "exit\n");
 	fclose(gp);
 		
-	gp = popen("gnuplot -p","w");
+	gp = popen("gnuplot -p","w");*/
 	free(x);
 	free(flux);
 
@@ -1150,13 +1181,16 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 	for(int h = 0; h < inst->nturbines; h++){best[h]=suc[h];}
 
 	//-------------------------------------------------------------- tabu opt --------------------
-	for( int count = 1; count < 200+1; count++){
+	for( int count = 1;(inst->tstart + inst->timelimit > second()); count++){
 		for(int i = 0; i < inst->nturbines*inst->nturbines; i++){x_best[i] = 0;flux_best[i] = 0;}
-		
+		if(count%70 && thresh >= 70)
+		{
+			thresh = 10;
+		}
 		printf("\n\n----------------------- RUN #%d ----------------------------------------\n", count );
 		if(cost == newcost)
 		{
-			//thresh = thresh*2;
+			if(count%20)thresh = thresh + 10;
 			printf("FERMO\n");
 		}
 		else if(cost < newcost)
@@ -1184,7 +1218,7 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 		cableregularize(inst, x_best, flux_best );
 
 		//printf("Calcolo quanto costa la solutione\n");
-		newcost = objectiveFunction(inst, x_best);
+		newcost = objectiveFunction(inst, x_best,flux_best);
 		//printf("La soluzione trovata costa : %Le\n",(long double)newcost );
 
 		//printf("Plotto\n");
@@ -1193,17 +1227,26 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 		//fprintf(gp, "exit\n");
 		//fclose(gp);
 		//gp = popen("gnuplot -p","w");
+
 		
 		if(newcost < best_cost)
 		{
-			best_cost = cost;
+			best_cost = newcost;
 			for(int h = 0; h < inst->nturbines; h++){best[h]=temp[h];}
 			//printf("best[%d] = %d \n", 0,best[0]);
+			printf("new cost %f\n",best_cost );
+			plotGraph(inst, x_best, flux_best, newcost);
+
+			/*fprintf(gp, "exit\n");
+			fclose(gp);
+			gp = popen("gnuplot -p","w");*/
+
 		}
 		//for(int h = 0; h < etabu; h++){printf("Tabu beetween ( %d ) - ( %d )\n",tabulistout[h], tabulistin[h]);}
 		//printf("------------------------------------- TOT tabu list : %d \n",ntabu );
 		//wait(1);
 		for(int h = 0; h < inst->nturbines; h++){suc[h]=temp[h];}
+		if(newcost < 1)return;
 	}
 
 	printf("Calcolo il flusso\n");
@@ -1213,7 +1256,7 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 	cableregularize(inst, x_best, flux_best );
 
 	printf("Calcolo quanto costa la solutione\n");
-	best_cost = objectiveFunction(inst, x_best);
+	best_cost = objectiveFunction(inst, x_best, flux_best);
 	inst->zbest = best_cost;
 	printf("La soluzione trovata costa : %Le\n",(long double)best_cost );
 
@@ -1230,7 +1273,6 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 /***************************************************************************************************************************/
 {
-	double newcost = DBL_MAX;
 
 	int *best;
 	best = (int *) calloc((inst->nturbines), sizeof(int));
@@ -1240,9 +1282,10 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 	x_best = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double ));
 	double best_cost = DBL_MAX;
 
-	for(int i = 1; i <= inst->times; i++)
+	for(int i = 1; (inst->tstart + inst->timelimit > second()); i++)
 	{
 
+		printf("------------------------------- Cerco la soluzione [ %d ] --------------------------------\n", i);
 		int *suc;
 		suc = (int *) calloc(inst->nturbines, sizeof(int));
 		double *flux;
@@ -1272,12 +1315,12 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 		cableregularize(inst, x, flux );
 
 		printf("Calcolo quanto costa la solutione\n");
-		double cost = objectiveFunction(inst, x);
+		double cost = objectiveFunction(inst, x, flux);
 		inst->zbest = cost;
 		printf("La soluzione trovata costa : %Le\n",(long double)cost );
 
 		inst->cablecost[inst->ncables-1] = 0;
-		inst->best_lb = objectiveFunction(inst, x);
+		inst->best_lb = objectiveFunction(inst, x,flux);
 		printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
 		inst->cablecost[inst->ncables-1] = 10e10;
 
@@ -1285,7 +1328,7 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 			for(int i = 0; i < inst->nturbines && count != 1; i++){suc[i] = best_temp[i];best_temp[i] = 0;}
 			for(int i = 0; i < inst->nturbines*inst->nturbines; i++){x_best_temp[i] = 0;flux_best_temp[i] = 0;}
 			
-			printf("\n\n----------------------- RUN #%d ----------------------------------------\n", count );
+			printf("\n\n----------------------- RUN 1 OPT #%d ----------------------------------------\n", count );
 			cost = (count == 1) ? cost : newcost;
 			
 			unoOpt(inst, suc, best_temp);
@@ -1297,7 +1340,7 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 			cableregularize(inst, x_best_temp, flux_best_temp );
 
 			//printf("Calcolo quanto costa la solutione\n");
-			newcost = objectiveFunction(inst, x_best_temp);
+			newcost = objectiveFunction(inst, x_best_temp, flux_best_temp);
 			//printf("La soluzione trovata costa : %Le\n",(long double)newcost );
 
 			//printf("Plotto\n");
@@ -1315,6 +1358,7 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 		gp = popen("gnuplot -p","w");
 		if(newcost < best_cost)
 		{
+			//printf("new %d\n", newcost);
 			best_cost = newcost;
 			inst->zbest = newcost;
 			for(int h = 0; h < inst->nturbines; h++){best[h] = best_temp[h];}
@@ -1323,7 +1367,6 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 		}
 		//wait(5);
 		
-		printf("------------------------------- [ %d ] --------------------------------\n", i);
 	}
 	plotGraph(inst, x_best, flux_best, best_cost);
 
@@ -1334,12 +1377,214 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 	
 
 
-	printf("Ottimo Locale trovato, costo : %Le\n",(long double )newcost );
+	printf("La soluzione migliore trovata ha costo : %Le\n",(long double )best_cost );
 	//free(suc);
 	//free(best);
 	//free(x_best);
 	//free(flux_best);
 }
+/***************************************************************************************************************************/
+int execute11(instance *inst, CPXENVptr env, CPXLPptr lp)
+/***************************************************************************************************************************/
+{
+	printf("huntscolonyOpt\n");
+	double pheromones[inst->nturbines*inst->nturbines];
+	
+	int best[inst->nturbines];
+	double best_flux[inst->nturbines*inst->nturbines];
+	double best_x[inst->nturbines*inst->nturbines];
+	double best_cost = DBL_MAX;
+
+	int tmp[inst->nturbines];
+	double tmp_flux[inst->nturbines*inst->nturbines];
+	double tmp_x[inst->nturbines*inst->nturbines];
+	double tmp_cost = 0;
+
+	for(int i = 0; i<inst->nturbines*inst->nturbines;i++)
+	{
+		pheromones[i]=1;
+		best_flux[i]=0;
+		best_x[i]=0;
+		tmp_flux[i]=0;
+		tmp_x[i]=0;
+	}
+	for(int i = 0; i<inst->nturbines;i++)
+	{
+		best[i]=0;
+		tmp[i]=0;
+	}
+	if(inst->times == -1)inst->times = INT_MAX;
+	for(int i = 0 ;  (inst->tstart + inst->timelimit > second()); i++)
+	{
+		printf("\n\n----------------------------------------Iterazione %d--------------------------------\n",i );
+		printf("----------------------------------------Tempo %.0f--------------------------------\n",(second()-inst->tstart) );
+		if(i == INT_MAX-1)i=0;
+		antFindPathKruskal(inst->mat, inst->nturbines, tmp, pheromones, inst);
+		
+		/*for(int h = 0; h < inst->nturbines; h++)
+		{
+			printf("tmp[ %d ] = %d\n",h,tmp[h] );
+		}*/
+
+		//printf("Calcolo il flusso\n");
+		fluxCalculator(tmp, tmp_flux, inst->nturbines);
+
+		//printf("Metto i cavi\n");
+		cableregularize(inst, tmp_x, tmp_flux );
+
+		//printf("Calcolo quanto costa la solutione: ");
+		tmp_cost = objectiveFunction(inst, tmp_x, tmp_flux);
+
+
+		//plotGraph(inst, tmp_x, tmp_flux, tmp_cost);
+		//plotGraph(inst, tmp_x, tmp_flux, tmp_cost);
+
+		//printf(": %f\nAggiorno i feromoni\n",tmp_cost);
+		updatepheromones(pheromones, tmp_x, tmp_flux, inst->cablecost, inst->nturbines, inst->mat, tmp_cost);
+
+		if(tmp_cost < best_cost)
+		{
+			for(int j = 0; j < inst->nturbines; j++){
+				best[j]=tmp[j];
+			}
+			fluxCalculator(best, best_flux, inst->nturbines);
+			cableregularize(inst, best_x, best_flux );
+			best_cost = objectiveFunction(inst, best_x, best_flux);
+			inst->zbest=best_cost;
+
+			plotGraph(inst, best_x, best_flux, best_cost);
+			/*
+			printf("Plotto migliore soluzione trovata\n");
+			fprintf(gp, "exit\n");
+			fclose(gp);
+			gp = popen("gnuplot -p","w");
+			*/
+		}
+		//wait(1);
+		//exit(0);
+	}
+
+	//printf("Plotto\n");
+	plotGraph(inst, best_x, best_flux, best_cost);
+	fprintf(gp, "exit\n");
+	fclose(gp);
+	gp = popen("gnuplot -p","w");
+
+	return 0;
+}
+/***************************************************************************************************************************/
+int execute12(instance *inst, CPXENVptr env, CPXLPptr lp)
+/***************************************************************************************************************************/
+{
+	printf("huntscolonyOpt\n");
+	double pheromones[inst->nturbines*inst->nturbines];
+	
+	int best[inst->nturbines];
+	double best_flux[inst->nturbines*inst->nturbines];
+	double best_x[inst->nturbines*inst->nturbines];
+	double best_cost = DBL_MAX;
+
+	int tmp[inst->nturbines];
+	double tmp_flux[inst->nturbines*inst->nturbines];
+	double tmp_x[inst->nturbines*inst->nturbines];
+	double tmp_cost = 0;
+
+	for(int i = 0; i<inst->nturbines*inst->nturbines;i++)
+	{
+		pheromones[i]=1;
+		best_flux[i]=0;
+		best_x[i]=0;
+		tmp_flux[i]=0;
+		tmp_x[i]=0;
+	}
+	for(int i = 0; i<inst->nturbines;i++)
+	{
+		best[i]=0;
+		tmp[i]=0;
+	}
+	if(inst->times == -1)inst->times = INT_MAX;
+	for(int i = 0 ;  (inst->tstart + inst->timelimit > second()); i++)
+	{
+		printf("\n\n----------------------------------------Iterazione %d--------------------------------\n",i );
+		printf("----------------------------------------Tempo %.0f--------------------------------\n",(second()-inst->tstart) );
+		if(i == INT_MAX-1)i=0;
+		antFindPathKruskal(inst->mat, inst->nturbines, tmp, pheromones, inst);
+		
+		/*for(int h = 0; h < inst->nturbines; h++)
+		{
+			printf("tmp[ %d ] = %d\n",h,tmp[h] );
+		}*/
+
+		//printf("Calcolo il flusso\n");
+		fluxCalculator(tmp, tmp_flux, inst->nturbines);
+
+		//printf("Metto i cavi\n");
+		cableregularize(inst, tmp_x, tmp_flux );
+
+		//printf("Calcolo quanto costa la solutione: ");
+		tmp_cost = objectiveFunction(inst, tmp_x, tmp_flux);
+
+
+		int best_temp[inst->nturbines];
+		double flux_best_temp[inst->nturbines*inst->nturbines];
+		double x_best_temp[inst->nturbines*inst->nturbines];
+		double newcost = 0;
+
+		for( int count = 1; tmp_cost != newcost; count++){
+			for(int i = 0; i < inst->nturbines && count != 1; i++){tmp[i] = best_temp[i];best_temp[i] = 0;}
+			for(int i = 0; i < inst->nturbines*inst->nturbines; i++){x_best_temp[i] = 0;flux_best_temp[i] = 0;}
+			
+			printf("\n\n----------------------- RUN 1 OPT #%d ----------------------------------------\n", count );
+			tmp_cost = (count == 1) ? tmp_cost : newcost;
+			
+			unoOpt(inst, tmp, best_temp);
+
+			//printf("Calcolo il flusso\n");
+			fluxCalculator(best_temp, flux_best_temp, inst->nturbines);
+
+			//printf("Metto i cavi\n");
+			cableregularize(inst, x_best_temp, flux_best_temp );
+
+			//printf("Calcolo quanto costa la solutione\n");
+			newcost = objectiveFunction(inst, x_best_temp, flux_best_temp);
+		}
+		
+		//plotGraph(inst, tmp_x, tmp_flux, tmp_cost);
+
+		//printf(": %f\nAggiorno i feromoni\n",tmp_cost);
+		updatepheromones(pheromones, tmp_x, tmp_flux, inst->cablecost, inst->nturbines, inst->mat, tmp_cost);
+
+		if(tmp_cost < best_cost)
+		{
+			for(int j = 0; j < inst->nturbines; j++){
+				best[j]=tmp[j];
+			}
+			fluxCalculator(best, best_flux, inst->nturbines);
+			cableregularize(inst, best_x, best_flux );
+			best_cost = objectiveFunction(inst, best_x, best_flux);
+			inst->zbest=best_cost;
+
+			
+			printf("Plotto migliore soluzione trovata\n");
+			plotGraph(inst, best_x, best_flux, best_cost);
+			fprintf(gp, "exit\n");
+			fclose(gp);
+			gp = popen("gnuplot -p","w");
+			
+		}
+		//wait(1);
+		//exit(0);
+	}
+
+	//printf("Plotto\n");
+	plotGraph(inst, best_x, best_flux, best_cost);
+	fprintf(gp, "exit\n");
+	fclose(gp);
+	gp = popen("gnuplot -p","w");
+
+	return 0;
+}
+
 /***************************************************************************************************************************/
 void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 /**************************************************************************************************************************/
@@ -1391,6 +1636,12 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 				break;
 			case 10:
 				execute10(inst, env, lp);	// heuristic multi start
+				break;
+			case 11:
+				execute11(inst, env, lp);	// heuristic ant colony
+				break;
+			case 12:
+				execute12(inst, env, lp);	// heuristic ant colony
 				break;
 		}
 	}
@@ -1804,7 +2055,7 @@ int unoOpt(instance *inst, int* suc, int* best)
 					//printf("Cavi\n");
 					cableregularize(inst, x, flux );
 					//printf("Costo\n");
-					double cost = objectiveFunction(inst, x);
+					double cost = objectiveFunction(inst, x, flux);
 					if(cost < minobj){
 						inst->zbest = cost;
 						inst->second_zbest = minobj;
@@ -1902,7 +2153,7 @@ int tabuOpt(instance *inst, int* suc, int* best, int* tabulistout, int* tabulist
 					//printf("Cavi\n");
 					cableregularize(inst, x, flux );
 					//printf("Costo\n");
-					double cost = objectiveFunction(inst, x);
+					double cost = objectiveFunction(inst, x, flux);
 					if(cost < minobj){
 						inst->zbest = cost;
 						inst->second_zbest = minobj;
