@@ -1,0 +1,42 @@
+% !TEX TS-program = pdflatex
+% !TEX root = ../ArsClassica.tex
+
+%************************************************
+\chapter{Methods}
+
+\label{chp:3-Methods}
+
+%************************************************
+\section{Plain Execution}
+We simply create the linear programming model and then we pass it to CPLEX for the optimization. The performances, as we will notice for all the methods, depends on the instance: we noticed the power of CPLEX that find the optimal solution in few seconds, and in the meantime we discovered that some instances takes many hours to be solved by our machines. 
+The main steps of our code in this phase are: 
+to read the input files and parse it
+...
+
+\section{Relaxed Mode}
+RELAX: this method tries to ‘relax’ some constraints in order to make faster the process of searching the first solution (so that RINS can start working). We add a slack variable >=0 in the model. Then we add this variable also in the objective function multiplied for a constant reasonably large. In this way, even if CPLEX could find a wrong initial solution, it’s probable that this solution will rapidly get better and became correct. 
+\section{CPLEX Heuristics-Params}
+We enable some CPLEX heuristic methods adapting them to our specific case and instances. We use: 
+RINS: tries to improve the incumbent; in the initial part the process don’t change, but as soon as a solution is found the RINS heuristic tryes to improve it with more frequency. It is possible to infer that the RINS method has been used in a CPLEX step when in the logs there is a ‘*’ near to the number (?)
+POLISHING: this heuristic tries to modify some variables of a (good) solution to improve the solution; it is possible to set a condition that enables this method, in order to avoid a too erply usage of this method that can lead to a waste of time an performances. 
+
+\section{No-Crossing condition}
+In order to avoid that the cables crosses each other it’s necessary to add a function that checks that no cable crosses another. This check could be done using the Cramer Method:
+
+…formule e immagine...
+So the most intuitive constraints is the following:  …
+But, using the constraints that from a vertex the outgoing edges must be <=1 , we could use this constraint: 		… formula e immagine …
+
+\section{Lazy Constraints Method}
+Adding all the “no-crossing constraints” statically to the model will probably block it for a really long time. So we add them to the CPLEX pool of constraints and it will check those constraints only when a solution is created. In the case that some constraint is violated CPLEX will add the corresponding constraint before the incumbent update. (?)
+In the end we use CPXAddLazyConstraints instead of CPXAddRows. 
+The laxy constraints decrease the power of the CPLEX pre-processing.
+
+We used a condition (?) that helps the process avoiding some duplicated constraints .. (?)
+We noticed that, even if we add the constraints using CPXAddLazyConstraints, the computation time of the solution is sometimes really high.  
+
+\section{Loop Method}
+
+\section{Callback Method}
+
+\section{...}

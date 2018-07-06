@@ -1,0 +1,72 @@
+% !TEX TS-program = pdflatex
+% !TEX root = ../ArsClassica.tex
+
+%************************************************
+\chapter{Development Environment}
+\label{chp:1-Environment}
+%************************************************
+To allow replicability of our experiments we add some informations about the system and the environment that we used for the following research. 
+We used the following development environment:
+\begin{itemize}
+\item \textsc{CPLEX} :  version 0.1-2018
+\item \textsc{Linux Ubuntu} : version 18.04 LTS (Operative System)
+\item \textsc{C} :  	(language)
+\item \textsc{Sublime text}: (IDE / text editor)
+\item \textsc{Github} : (versioning)
+\item \textsc{Gnuplot} : (library plot)
+\end{itemize}
+
+\section{Real World Info}
+As in \cite{wfcp} research, we used a library of real-life instances that are made publicly available for benchmarking.
+For benchmark purposes we collected the data of five different real wind farms in operation in United Kingdom (wf02, wf03, wf05) and Denmark (wf01, wf04). Different types of cable with different costs, capacities and electrical resistances are available on the market; we considered 5 different sets of real cables, named cb01, cb02, cb03, cb04, and cb05; the turbines in each wind park are of the same type, so we can express the cable capacities as the maximum number of turbines that it can support. Finally we estimated the maximum number of connections to the substation, namely the input parameter C. The \ref{tab:realWorld} table contains all the informations.
+\begin{table}[!htbp]\label{tab:realWorld}
+\center
+\begin{tabular}{llllll}
+\hline
+name & site         & turbine type  & no. of turbines & C  & allowed cables      \\ \hline
+wf01 & Horn Rev 1   & Vestas 80-2MW & 80              & 10 & cb01-cb02-cb05      \\
+wf02 & Kentis Flats & Vestas 90-3MW & 30              & $\infty$   & cb01-cb02-cb04-cb05 \\
+wf03 & Ormonde      & Senvion 5MW   & 30              & 4  & cb03-cb04           \\
+wf04 & DanTysk      & Simens 3.6MV  & 80              & 10 & cb01                \\
+wf05 & Thanet       & Vestas 90-3MW & 100             & 10 & cb04-cb05           \\ \hline
+\end{tabular}
+\caption{Basic information on the real-world wind farms we used for tests.}
+\end{table}
+
+\section{Instance TEST BED}
+The set of tests that we had the possibility to use are the combinations between the 5 instances of wind farms and the 5 sets of real cables. For simplicity and in order to decrease the possibility to make mistakes we adopted the same a numeration as the \cite{wfcp} article. This solution allows us to easily compare our results with the results in that research. 
+Table \ref{tab:testBed} reports the resulting numbers of the different instances. For example we renamed the 01 wind farm as data\_01.turb and the corresponding cables as data\_01.cbl. 
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[!htbp]\label{tab:testBed}
+\center
+\begin{tabular}{lcl}
+\hline
+number & \multicolumn{1}{l}{wind farm} & cable set         \\ \hline
+01     & \multirow{6}{*}{wf01}         & wf01\_cb01\_capex \\
+02     &                               & wf01\_cb01        \\
+03     &                               & wf01\_cb02\_capex \\
+04     &                               & wf01\_cb02        \\
+05     &                               & wf01\_cb05\_capex \\
+06     &                               & wf01\_cb05        \\ \hline
+07     & \multirow{8}{*}{wf02}         & wf02\_cb01\_capex \\
+08     &                               & wf02\_cb01        \\
+09     &                               & wf02\_cb02\_capex \\
+10     &                               & wf02\_cb02        \\
+12     &                               & wf02\_cb04\_capex \\
+13     &                               & wf02\_cb04        \\
+14     &                               & wf02\_cb05\_capex \\
+15     &                               & wf02\_cb05        \\ \hline
+16     & \multirow{4}{*}{wf03}         & wf03\_cb03\_capex \\
+17     &                               & wf03\_cb03        \\
+18     &                               & wf03\_cb04\_capex \\
+19     &                               & wf03\_cb04        \\ \hline
+20     & \multirow{2}{*}{wf04}         & wf04\_cb01\_capex \\
+21     &                               & wf04\_cb01        \\ \hline
+26     & \multirow{4}{*}{wf05}         & wf05\_cb04\_capex \\
+27     &                               & wf05\_cb04        \\
+28     &                               & wf05\_cb05\_capex \\
+29     &                               & wf05\_cb05        \\ \hline
+\end{tabular}
+\caption {Test Bed instance numbers.}
+\end{table}

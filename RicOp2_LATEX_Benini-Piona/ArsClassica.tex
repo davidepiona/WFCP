@@ -1,0 +1,56 @@
+% !TEX TS-program = pdflatex
+% !TEX root = RicOp2.tex
+
+\documentclass[a4paper,twoside,openright,titlepage,
+               headinclude,,footinclude,BCOR5mm,
+               numbers=noenddot,cleardoublepage=empty,
+               tablecaptionabove]{scrreprt}
+               
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{indentfirst}
+\usepackage[style=philosophy-modern,hyperref]{biblatex}
+%\usepackage{biblatex}
+\addbibresource{Bibliography.bib}
+\usepackage{chngpage}
+\usepackage{multirow}
+\usepackage{calc}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{lipsum}
+\usepackage{shapepar}
+\usepackage{pifont}
+\usepackage[eulerchapternumbers,subfig,beramono,eulermath,pdfspacing,listings]{classicthesis}
+\usepackage{arsclassica}
+\usepackage{tabto}
+%\usepackage{minitoc}
+
+\input{arsclassica-settings}
+
+\begin{document}
+%\dominitoc
+%\dominilof
+%\dominilot
+%\faketableofcontents
+%\fakelistoffigures
+%\fakelistoftables
+\pagenumbering{roman}
+\pagestyle{plain}
+\input{FrontBackMatter/Titlepage}
+%\input{FrontBackMatter/Titleback}
+\cleardoublepage
+\pagestyle{scrheadings} 
+\input{FrontBackMatter/Contents}
+\cleardoublepage
+\pagenumbering{arabic}
+%\input{Chapters/Fundamentals}
+\input{Chapters/1-Environment}
+\input{Chapters/2-Model}
+\input{Chapters/3-Methods}
+\input{Chapters/4-Heuristics}
+\clearpage
+\input{FrontBackMatter/Bibliography}
+\end{document}
