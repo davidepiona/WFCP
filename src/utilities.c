@@ -426,7 +426,7 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 	
 	flag[0] = 1;
 	pred[0] = -1;
-	P[0] = -600; // -600 dataset 7/8 -400 dataset 1
+	P[0] = -400; // -600 dataset 7/8 -400 dataset 1
 	if(r != 0)
 	{
 		srand(r);
@@ -464,7 +464,7 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 		if( r != 0 && npool > 0)
 		{
 			h = pool[rand()%npool];
-			P[h] = P[h] + 50; // +50 dataset 7/8  +10 dataset 1
+			P[h] = P[h] + 10; // +50 dataset 7/8  +10 dataset 1
 		}
 		flag[h] = 1;
 		
@@ -580,8 +580,7 @@ int fluxCalculator(int *suc, double*flux, int nodes)
 	int n = 0;
 	
 	for(int i = 0; i < nodes*nodes; i++){ flux[i] = 0;}
-	for(int i = 0; i < nodes; i++){ accumulator[i] = 0;}
-	for(int i = 0; i < nodes; i++){ start[i] = 0;}
+	for(int i = 0; i < nodes; i++){ accumulator[i] = 0;start[i] = 0;}
 
 	for( int i = 0; i < nodes; i++)
 	{
@@ -672,6 +671,324 @@ int tabucontains(int *arrayout, int* arrayin, int n, int valout, int valin)
 		}
 		if(arrayout[i] == 0 && arrayin[i] == 0){
 			break;
+		}
+	}
+	return 0;
+}
+int getminDist(double*mat, int start, int nodes, int n, int *v, int *nv, int nnv) 	// start -> elemento da cui il ramo esce
+																					// n -> numero di nodi che si vogliono
+																					// nv -> nodi che non si possono prendere
+																					// nnv -> numero dei nodi che non si possono prendere
+{
+	int count = 0;
+	for(int i = 0; i < nodes; i++)
+	{
+		if(count < n && nv[i] != 1)
+		{
+			//printf("Aggiungo %d\n",i );
+			v[count] = i;
+			count++;
+		}
+		else if(nv[i] != 1)
+		{
+			for(int j = 0; j < n ; j++)
+			{
+				if(mat[start + nodes*i] < mat[start + nodes*v[j]] )
+				{
+					v[j] = i;
+					break;
+				}
+	
+			}
+			
+		}
+	}
+
+	return count;
+}
+
+int removeloop(double*mat, int nodes, int *suc)
+{
+	int flag[nodes];
+	int t = 0;
+	for(int i = 0; i < nodes; i++)
+	{
+		for(int j = 0; j<nodes;j++)flag[j]=0;
+		
+		flag[i] = 1;
+		t = suc[i];
+		int count = 0;
+		while(t != -1)
+		{
+			if(flag[t] == 1)
+				count++;
+			if(flag[t] == 2)
+			{
+				printf("Ciclo : <-");
+				int l = t;
+				int inroot = t;
+				for(int h = 0; h < count; h++)
+				{
+					printf("- %d -",l );
+					l = suc[l];
+				}
+				printf(">\n");
+				printf("Metto nella radice il cavo uscente da %d\n",inroot );
+				suc[inroot] = 0;
+				break;
+			}
+			flag[t]++;
+			t = suc[t];
+		}
+	}
+	return 0;
+}
+int findcycle(int *prec, int *nv, int node, int nodes)
+{
+	
+	//printf("--------------------------------------------------------------------------\n");
+	//for(int i = 0; i< nodes; i++)printf("< %d >-> %d\n",i,prec[i] );
+	
+	//printf("Il nodo %d crea cicli se collegato con\n", node);
+	int candidate[nodes];
+	candidate[0] = node;
+	nv[node]=1;
+	int count = 1;
+	for( int i = 0; i < count; i++)
+	{
+		for(int j = 0;j<nodes;j++){
+			if(prec[j] == candidate[i])
+			{
+				candidate[count] = j;
+				count++;
+				nv[j]=1;
+				//printf("-%d-",j );
+			}
+		}
+	}
+
+	//printf("\n--------------------------------------------------------------------------\n");
+	return count;
+}
+int checkCross(int *prec, int *nv, int node, int nodes, instance *inst)
+{
+	int count = 0;
+	for(int i = 0; i < nodes; i++){
+		if(i == node || nv[i] == 1 )continue;
+		for(int j = 0; j < nodes; j++){
+			if(prec[j] == -10) continue;
+			if(!noCross(node,i,j,prec[j],inst)){
+				count++;
+				nv[i] = 1;
+				//printf("Arco ( %d - %d ) crossa con ( %d - %d ) \n",node,i, j, prec[j] );
+				break;
+			}
+		}
+	}
+	return count;
+}
+int antFindPathKruskal(double*mat, int nodes, int *pred, double *pheromones, instance* inst)
+{
+	int nv[nodes];
+	int v[nodes];
+	int L[nodes];
+	for(int i = 0;i<nodes;i++){L[i]=0;nv[i]=0,v[i] = 0;pred[i]=-10;}
+	pred[0]=-1;
+
+	int nnv = 0;
+	int n = 0;
+
+	srand(time(NULL));
+
+	int current_s = (int)rand()%nodes;
+	while(current_s == 0)current_s = (int)rand()%nodes;
+
+	int current_f = 0;
+
+	int tmp_current = 0;
+	nnv++;
+
+	double totph = 0.0;
+	double phr = 0;
+
+	int add = 0;
+
+	while(add < nodes-1)
+	{
+		// choose new current_s
+		/*for (int i = 0; i < nodes; ++i)
+		{
+			printf("[%d]%d\n",i,v[i] );
+		}
+		*/
+		int index = (int)rand()%(nodes-add-1);
+		//printf("Index : %d \n",index );
+		for(int i = 1; i < nodes && index != -1; i++)
+		{
+			if(v[i] == 0)
+			{
+				if(index == 0)
+				{
+					current_s = i;
+					v[current_s] = 1;
+					//printf("v[ %d ] = %d Index= %d\n",i,v[i],index );
+				}
+				index--;
+			}
+		}
+		//printf(" < %d > Arco uscente da < %d > ",add,current_s );
+
+		// L.clear && nv.clear
+		for(int i = 0;i<nodes;i++){L[i]=0;nv[i]=0;}
+
+		//find element that make cycle 
+		nnv = findcycle(pred, nv, current_s, nodes);
+
+		//check crossing
+		nnv = nnv + checkCross(pred, nv, current_s, nodes, inst);
+
+		/*for (int i = 0; i < nodes; ++i)
+		{
+			if(nv[i]==0)printf("[%d]%d\n",i,nv[i] );
+		}
+		*/
+		if(nnv == nodes)	
+		{
+			//printf("Non posso collegarlo a nessun nodo se no crea crossing\n");
+			pred[current_s] = 0;
+			add++;
+		}
+		else{		
+			// get the element that is not contains in nv and put it to L[i] = 1 then return the number of non-zero elements 
+			n = getminDist(mat, current_s, nodes, nodes, L, nv, nnv );
+			L[0] = 0;
+
+			// choose where link current_s
+			totph = 0;
+			for(int i = 0; i < n; i++)
+			{
+				totph = totph + pheromones[current_s+nodes*L[i]];
+			}
+			phr = ((double)rand() / RAND_MAX)*totph;
+			totph = 0;
+			for(int i = 0; i < n; i++)
+			{
+				totph = totph + pheromones[current_s+nodes*L[i]];
+				if(totph > phr)
+				{
+					current_f = L[i];
+					break;
+				}
+			}
+			// link current_s to current_f
+			//printf("Arco entrante in < %d > \n\n",current_f );
+			pred[current_s] = current_f;
+			add++;
+		}
+
+
+	}
+	//printf("fine\n");
+	return 0;
+}
+
+
+int antFindPath(double*mat, int nodes, int *pred, double *pheromones)
+{
+	int nv[nodes];
+	int L[nodes];
+	for(int i = 0;i<nodes;i++){L[i]=0;nv[i]=0;pred[i]=-10;}
+	pred[0]=-1;
+
+	int nnv = 0;
+
+	//srand(time(NULL));
+	int current = (int)rand()%nodes;
+	int tmp_current = 0;
+	nnv++;
+
+	int n = 0;
+	double totph = 0.0;
+	double phr = 0;
+
+	while(nnv < nodes-1)
+	{
+		//printf("Il nodo corrente è : %d \n",current );
+		for(int i = 0;i<nodes;i++){L[i]=0;nv[i]=-10;}
+		nnv = findcycle(pred, nv, current, nodes);
+
+		n = getminDist(mat, current, nodes, nodes, L, nv, nnv );
+		L[0]=0;
+
+		
+		totph = 0;
+		//printf("Ho trovato %d vicini\n",n );
+		for(int i = 0; i < n; i++)
+		{
+			//printf("L[%d] = %d\n",i,L[i]);
+			totph = totph + pheromones[current+nodes*L[i]];
+		}
+		phr = ((double)rand() / RAND_MAX)*totph;
+		//printf("Livello di feromoni scelto : %f sul totale: %f \n",phr,totph);
+		totph = 0;
+		for(int i = 0; i < n; i++)
+		{
+			totph = totph + pheromones[current+nodes*L[i]];
+			if(totph > phr)
+			{
+				tmp_current = L[i];
+				//printf("Collego il nodo al nodo : %d\n",tmp_current );
+				break;
+			}
+		}
+		if(tmp_current == 0)
+		{
+			//printf("Il nodo corrente è 0\n");
+			pred[current] = 0;
+			if(n == 1)
+			{
+				pred[0] = -1;
+			}
+		}
+		else{
+			pred[current] = tmp_current;
+			current = tmp_current;
+			// trovo i nodi che fanno ciclo con il nodo corrente
+		}
+
+		//srand(time(NULL)*nnv);
+	}
+	pred[0]=-1;
+	return 0;
+}
+
+int updatepheromones(double *pheromones, double* x, double* flux, double *cost, int nodes, double *mat, double zsol){
+	double c1 = 0;//cost[0];
+	double c2 = (cost[0]+BIG_M_CABLE)/2;
+	//printf("Contributo dato dalla soluzione : %f\n",sol );
+	double p = 0.002;
+	for(int i = 0; i < nodes; i++){
+		for(int j = 0; j < nodes; j++){
+			if(i==j)continue;
+			if(x[i+j*nodes] < -0.5 || flux[i+j*nodes] < 0.5){
+				double ph = (1-p) * pheromones[i+j*nodes]; 
+				pheromones[i+j*nodes] = ph;	
+			}
+			else{
+				//printf("costo dell'arco %d \n",(int)x[i+j*nodes]);
+				double cable = c1/(cost[((int)x[i+j*nodes])]*flux[i+j*nodes]*mat[i+j*nodes]);
+				double z = c2 / zsol;
+				//printf("Costo dell'arco: %f\n",cable );
+				double ph = (1-p) * pheromones[i+j*nodes] + cable + z;
+
+				printf("Feromoni lasciati sull'arco ( %d - %d ) -> %f\n",i,j,ph);
+				pheromones[i+j*nodes] = ph;		
+			}
+			if(pheromones[i+j*nodes] < 0.0)
+			{
+				printf("ERROR: pheromones [ %d - %d ] negative\n",i,j);
+				exit(0);
+			}
 		}
 	}
 	return 0;
