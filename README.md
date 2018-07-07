@@ -41,6 +41,8 @@
 	* **1** : Random hard fixing
 	* **2** : rins
 * **times** : times to do heuristic
+* **names**              : Option in the name of the output files
+	* **1** : more clear names
 
 ## EXAMPLE OF STRING FOR CPLEX
 ```
