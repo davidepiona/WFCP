@@ -843,48 +843,49 @@ int antFindPathKruskal(double*mat, int nodes, int *pred, double *pheromones, ins
 
 		//find element that make cycle 
 		nnv = findcycle(pred, nv, current_s, nodes);
-
 		//check crossing
-		nnv = nnv + checkCross(pred, nv, current_s, nodes, inst);
-
 		/*for (int i = 0; i < nodes; ++i)
 		{
 			if(nv[i]==0)printf("[%d]%d\n",i,nv[i] );
 		}
 		*/
+		nnv = nnv + checkCross(pred, nv, current_s, nodes, inst);
 		if(nnv == nodes)	
 		{
 			//printf("Non posso collegarlo a nessun nodo se no crea crossing\n");
-			pred[current_s] = 0;
-			add++;
+			for (int i = 0; i < nodes; ++i)
+			{
+				nv[i] = 0;
+			}
+			nnv = findcycle(pred, nv, current_s, nodes);	
 		}
-		else{		
-			// get the element that is not contains in nv and put it to L[i] = 1 then return the number of non-zero elements 
-			n = getminDist(mat, current_s, nodes, nodes, L, nv, nnv );
-			L[0] = 0;
 
-			// choose where link current_s
-			totph = 0;
-			for(int i = 0; i < n; i++)
-			{
-				totph = totph + pheromones[current_s+nodes*L[i]];
-			}
-			phr = ((double)rand() / RAND_MAX)*totph;
-			totph = 0;
-			for(int i = 0; i < n; i++)
-			{
-				totph = totph + pheromones[current_s+nodes*L[i]];
-				if(totph > phr)
-				{
-					current_f = L[i];
-					break;
-				}
-			}
-			// link current_s to current_f
-			//printf("Arco entrante in < %d > \n\n",current_f );
-			pred[current_s] = current_f;
-			add++;
+		// get the element that is not contains in nv and put it to L[i] = 1 then return the number of non-zero elements 
+		n = getminDist(mat, current_s, nodes, (int)(nodes/5), L, nv, nnv );	// prendo solo i 5 più vicini
+		L[0] = 0;
+
+		// choose where link current_s
+		totph = 0;
+		for(int i = 0; i < n; i++)
+		{
+			totph = totph + pheromones[current_s+nodes*L[i]];
 		}
+		phr = ((double)rand() / RAND_MAX)*totph;
+		totph = 0;
+		for(int i = 0; i < n; i++)
+		{
+			totph = totph + pheromones[current_s+nodes*L[i]];
+			if(totph > phr)
+			{
+				current_f = L[i];
+				break;
+			}
+		}
+		// link current_s to current_f
+		//printf("Arco entrante in < %d > \n\n",current_f );
+		pred[current_s] = current_f;
+		add++;
+
 
 
 	}
@@ -916,7 +917,7 @@ int antFindPath(double*mat, int nodes, int *pred, double *pheromones)
 		//printf("Il nodo corrente è : %d \n",current );
 		for(int i = 0;i<nodes;i++){L[i]=0;nv[i]=-10;}
 		nnv = findcycle(pred, nv, current, nodes);
-
+		nv[0]=1;
 		n = getminDist(mat, current, nodes, nodes, L, nv, nnv );
 		L[0]=0;
 
@@ -963,10 +964,10 @@ int antFindPath(double*mat, int nodes, int *pred, double *pheromones)
 }
 
 int updatepheromones(double *pheromones, double* x, double* flux, double *cost, int nodes, double *mat, double zsol){
-	double c1 = 0;//cost[0];
+	double c1 = mat[1+2*nodes];
 	double c2 = (cost[0]+BIG_M_CABLE)/2;
 	//printf("Contributo dato dalla soluzione : %f\n",sol );
-	double p = 0.002;
+	double p = 0.005;
 	for(int i = 0; i < nodes; i++){
 		for(int j = 0; j < nodes; j++){
 			if(i==j)continue;
@@ -976,7 +977,9 @@ int updatepheromones(double *pheromones, double* x, double* flux, double *cost, 
 			}
 			else{
 				//printf("costo dell'arco %d \n",(int)x[i+j*nodes]);
-				double cable = c1/(cost[((int)x[i+j*nodes])]*flux[i+j*nodes]*mat[i+j*nodes]);
+
+																		// peso dall'avvicinamento alla radice
+				double cable = (mat[j] - mat[i] > 0 && j != 0) ? c1/(mat[i+j*nodes]) : 0;
 				double z = c2 / zsol;
 				//printf("Costo dell'arco: %f\n",cable );
 				double ph = (1-p) * pheromones[i+j*nodes] + cable + z;
