@@ -1,0 +1,52 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\babel@toc {english}{}
+\defcounter {refsection}{0}\relax 
+\vspace {-\cftbeforechapskip }
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {1}{Development Environment}}{1}{chapter.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {1.1}{Real World Info}}{1}{section.1.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {1.2}{Instance TEST BED}}{1}{section.1.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}{Mathematical Model}}{3}{chapter.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.1}{Wind Farm Cable Problem Introduction}}{3}{section.2.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.2}{Crossing Cables}}{4}{section.2.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.2.1}{Crossing check}}{5}{subsection.2.2.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.2.2}{Crossing condition}}{5}{subsection.2.2.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.2.3}{Lazy Constraints}}{6}{subsection.2.2.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.3}{...}}{6}{section.2.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}{Methods}}{7}{chapter.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.1}{Plain Execution}}{7}{section.3.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.2}{Relaxed Mode}}{7}{section.3.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.3}{CPLEX Heuristics-Params}}{7}{section.3.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.4}{No-Crossing condition}}{7}{section.3.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.5}{Lazy Constraints Method}}{8}{section.3.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.6}{Loop Method}}{8}{section.3.6}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.7}{Callback Method}}{8}{section.3.7}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.8}{...}}{8}{section.3.8}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}{Heuristics}}{9}{chapter.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.1}{Math Heuristic - Hard Fixing}}{9}{section.4.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.2}{Taboo Search}}{9}{section.4.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.3}{Ant Algorithm}}{9}{section.4.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.4}{...}}{9}{section.4.4}

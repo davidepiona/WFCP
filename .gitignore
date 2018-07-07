@@ -6,3 +6,4 @@ bin
 *.dat
 *.lp
 runs
+src/plot
