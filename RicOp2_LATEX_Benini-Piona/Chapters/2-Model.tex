@@ -115,19 +115,19 @@ Then we evaluate if the determinant is equal to zero value; to do this in a calc
 [non ho ben capito qui cosa rappresentino le funzioni, intanto le ho scritte poi basta aggiungere una descrizione]\\
 1) condizione base
 \[
-y(a,b)+ y(c,d) \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] / cross / [P_c, P_d]
+y(a,b)+ y(c,d) \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] \ cross \ [P_c, P_d]
 \]
  \\
 2) 
 \[
-y(a,b)+ y(c,d) + y(b,a) + y(d,c) \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] / cross / [P_c, P_d]
+y(a,b)+ y(c,d) + y(b,a) + y(d,c) \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] \ cross \ [P_c, P_d]
 \]
 In this case the integer solution is equal to the previous one, but in case of fractional solution the performances are much better. However the number of checks is $O(n^4)$ which is still too much.\\ \\
 
 3)\\ 
 Given:
 \[
-Q(a,b,c) = \{(a,b), (b,a) \} \vee \{ (c,d) \in \delta^+ (c): [P_c, P_d] / cross / [P_a, P_b]
+Q(a,b,c) = \{(a,b), (b,a) \} \vee \{ (c,d) \in \delta^+ (c): [P_c, P_d] \ cross \ [P_a, P_b]
 \]
 \[
 \sum y_{ij} \leq 1, \quad (i,j) \in \ Q(a,b,c)

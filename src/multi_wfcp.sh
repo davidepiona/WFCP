@@ -6,13 +6,26 @@ cd ..
 dir=$(date +"%Y-%m-%d_%H-%M-%S")
 mkdir runs/${dir}
 path=$(pwd)
-settings="-C 10 -rins 5 -relax 1 -seed 9 -CC 3 -time_limit 30 -polishing_time 260 -names 1"
+settings="-rins 5 -relax 1 -seed 9 -CC 3 -time_limit 10 -names 1"
 cd ${path}'/data'
+count=0
 for c in `find . -type f -name '*.turb' | cut -c 3-9 |sort`
 do
 	echo "---"$c
+	if [ $count -le 5 ]; then
+		cSub="-C 10"
+	fi
+	if [ $count -gt 5 ] && [ $count -le 13 ]; then
+		cSub="-C 100"
+	fi
+	if [ $count -gt 13 ] && [ $count -le 17 ]; then
+		cSub="-C 4"
+	fi
+	if [ $count -gt 17 ]; then
+		cSub="-C 10"	
+	fi
 	cd ${path}'/src'
-	./wfcp -ft ${path}'/data/'${c}'.turb' -fc ${path}'/data/'${c}'.cbl' ${settings} > ../runs/${dir}/run_${c}.log
+	./wfcp -ft ${path}'/data/'${c}'.turb' -fc ${path}'/data/'${c}'.cbl' ${cSub} ${settings} > ../runs/${dir}/run_${c}.log
 done
 mv *.png '../runs/'${dir}
 mv plot '../runs/'${dir}
