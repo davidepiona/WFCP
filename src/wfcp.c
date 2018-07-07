@@ -362,8 +362,8 @@ int CableOpt(instance *inst)
 	 
 	execute(inst, env, lp );
 
-	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time\n");
-	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time);
+	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time, modello, cc,softF,hardF\n");
+	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf,%d,%d,%d,%d\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time,inst->model_type,inst->noCross,inst->softF, inst->hardF);
 	fprintf(gp, "exit\n");
 	fclose(gp);
 	CPXfreeprob(env, &lp);
@@ -705,6 +705,7 @@ void build_model(instance *inst, CPXENVptr env, CPXLPptr lp)
 void execute0(instance *inst, CPXENVptr env, CPXLPptr lp)
 /***************************************************************************************************************************/
 {
+	mip_timelimit(env, CPX_INFBOUND, inst, inst->timelimit);
 	CPXmipopt(env,lp);     
 	CPXgetbestobjval(env, lp, &inst->best_lb); 
 	mip_update_incumbent(env, lp, inst);
@@ -713,6 +714,7 @@ void execute0(instance *inst, CPXENVptr env, CPXLPptr lp)
 void execute1(instance *inst, CPXENVptr env, CPXLPptr lp)
 /***************************************************************************************************************************/
 {
+	mip_timelimit(env, CPX_INFBOUND, inst, inst->timelimit);
 	CPXmipopt(env,lp);     
 	CPXgetbestobjval(env, lp, &inst->best_lb); 
 	mip_update_incumbent(env, lp, inst);

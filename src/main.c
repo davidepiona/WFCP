@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 		printf("... WFCP problem solved in %lf sec.s\n", t2-t1);  
 	}
 	
-	free_instance(&inst);
+	//free_instance(&inst);
 	return 0; 
 }         
 

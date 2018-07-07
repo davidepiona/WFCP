@@ -10,7 +10,7 @@
 	* **0** : Cplex model
 	* **1** : Matrix model
 * **rins**                  : rins
-* **relax**                 : relax 	
+* **relax**                 : relax
 	* **1** : relax on station capacity
 	* **2** : relax on flux
 	* **3** : relax on flux + out edges
@@ -32,12 +32,12 @@
 	* **9** : Tabu Search
 	* **10** : Multi-start
 	* **else** : Normal Execution
-* **soft_fix**              : Type of soft fixing 	
+* **soft_fix**              : Type of soft fixing 
 	* **1** : Asimmetric Local Branching
 	* **2** : Simmetric Local Branching
 	* **3** : rins asimmetric 
-	* **4** : rins simmetric 													  
-* **hard_fix**              : Type of hard fixing  
+	* **4** : rins simmetric
+* **hard_fix**              : Type of hard fixing 
 	* **1** : Random hard fixing
 	* **2** : rins
 * **times** : times to do heuristic
@@ -55,3 +55,10 @@
 ## TESTING
 * **CR**					: Cable regularization 
 * **CRF**					: Cable regularization
+
+```
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 0 -time_limit 300
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 1 -time_limit 300
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 2 -time_limit 300 -time_loop 60
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 3 -time_limit 300
+```
