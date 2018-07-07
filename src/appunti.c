@@ -136,6 +136,18 @@
 					definisco un punto di taglio e creo il corredo genetico del figlio. Va bene ammazzare figli in base alla loro fitness ma in modo probabilistico.
 					Siccome potrei avere i figli "fatti male", devo fare una procedura di refinement in modo da sistemarli.
 
+
+
+
+
+
+
+	Per la tesina parlare dell'articolo sull'ant algorithm su wind farm cable problem, interessa al professore.
+	Dobbiamo parlare anche della regolarizzazione dei cavi.
+
+
+	pytorch -> libreria deep learning
+
 */
 
 

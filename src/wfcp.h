@@ -19,7 +19,7 @@
 #define EPSILON		  		  1e-9		// 1e-9		// very small numerical tolerance 
 #define XSMALL		  		  1e-8 		// 1e-4*	// tolerance used to decide ingerality of 0-1 var.s
 #define MIN_CUT_VIOL          0.1		// min cut violation
-#define BIG_M_SUBSTATION	  10e9		//big m substation
+#define BIG_M_SUBSTATION	  10e10		//big m substation
 #define BIG_M_CROSS			  10e7		// big m for crossing
 #define BIG_M_CABLE			  10e8		// big m cable
 //data structures  
