@@ -1,0 +1,59 @@
+% !TEX TS-program = pdflatex
+% !TEX root = ../ArsClassica.tex
+
+%************************************************
+\begin{appendices}
+%************************************************
+\chapter{CPLEX}
+The contents...
+
+\chapter{Shell script}
+The collection of the results is an important part of our software development. Gives us the possibility to run the same code on different instances, to collect the results in a accessible way, to compare results obtained with different CPLEX parameters and finally gives us the convenience to store all the result of a run in the same folder. 
+For those reasons when we were still at the beginning of the development we create a shell script that automates the process. It is composed by some parts:
+\begin{enumerate}
+\item Make: compiles the code at the actual state.
+\item Creates the plot folder and the results folder named with the actual timestamp.
+\item Defines the the command line parameter in the \textit{settings} variable.
+\item Starts a cycle iterating over all the .turb files in the data folder, that represent all the instances. For each iteration it executes the wfcp script and saves the logs in the right folder giving them a name that associate it to the instance. The \textit{cSub} variable is set in order to use the correct $C$ for each instance.
+\item Order some files, also the .png results if present.
+\item Creates the settings.txt file with the execution settings of that run.
+\item Creates the results.csv file that collects all the instances results coming from the logs.
+\end{enumerate}
+
+The script detects the working directory from which the script is launched so it is adaptable to different environment if the folder structure is the following:
+\begin{itemize}
+\item main directory
+\item data: contains all the .turb and .cbl file
+\item runs: contains the results 
+\item src: contains the script files and the multi\_wfcp.sh file. 
+\end{itemize}
+
+Here the code of the \textit{multi\_wfcp.sh} file:
+\newpage
+\lstinputlisting[language=bash,caption={Shell multi\_wfcp.sh script}]{/home/davide/dev/WFCP/src/multi_wfcp.sh}
+
+
+\chapter{Performance Profile}
+
+\chapter{Performance Variability and Random Seed}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%************************************************
+\end{appendices}
+
+
+
