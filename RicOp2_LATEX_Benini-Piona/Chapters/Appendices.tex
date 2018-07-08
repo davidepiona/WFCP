@@ -32,6 +32,74 @@ Here the code of the \textit{multi\_wfcp.sh} file:
 \newpage
 \lstinputlisting[language=bash,caption={Shell multi\_wfcp.sh script}]{/home/davide/dev/WFCP/src/multi_wfcp.sh}
 
+\chapter{Input string parameteres}
+In our code we tried to parameterize all the compilation options, in order to avoid to change the code for little changes or different tests. Here we describe all the parameter in a ready-to-use list of options: 
+\begin{itemize}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0.5pt plus 1pt}
+\item \textbf{fc} : input cables file
+\item \textbf{ft} : input turbines file
+\item \textbf{C} : capacity of root
+\item \textbf{time\_loop} : time for loop in loop/heuristic method
+\item \textbf{time\_limit} : total time limit
+\item \textbf{time\_start} : time start to heuristic method
+\item \textbf{model} : model type
+\begin{enumerate}\setcounter{enumi}{-1}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+	\item Cplex model
+	\item Matrix model
+\end{enumerate}
+\item \textbf{rins} : rins
+\item \textbf{relax} : relax
+\begin{enumerate}\setcounter{enumi}{0}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+	\item relax on station capacity
+	\item relax on flux
+	\item relax on flux + out edges
+	\item[] else : no relax
+\end{enumerate}
+\item \textbf{polishing\_time} : polishing time
+\item \textbf{gap} : gap to terminate
+\item \textbf{seed} : random seed
+\item \textbf{threads} : n threads
+\item \textbf{CC} : Cross Constraints
+\begin{enumerate}\setcounter{enumi}{-1}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+	\item Normal execution with no cross cable as normal constraints
+	\item Lazy constraints to the model
+	\item loop Method
+	\item Normal execution + lazy callback
+	\item Hard Fixing
+	\item Soft Fixing
+	\item Heuristic
+	\item Heuristic Loop to have multiple solution
+	\item Heuristic with 1-opt
+	\item Tabu Search
+	\item Multi-start
+	\item[] else: Normal Execution
+\end{enumerate}
+\item \textbf{soft\_fix} : Type of soft fixing
+\begin{enumerate}\setcounter{enumi}{0}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+	\item Asimmetric Local Branching
+	\item Simmetric Local Branching
+	\item Asimmetric RINS
+	\item Simmetric RINS
+\end{enumerate}
+\item \textbf{hard\_fix} : Type of hard fixing
+\begin{enumerate}\setcounter{enumi}{0}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+	\item Random hard fixing
+	\item RINS
+\end{enumerate}
+\item \textbf{times} : times to do heuristic
+\item \textbf{names} : 1 for more clear file names
+\end{itemize}
 
 \chapter{Performance Profile}
 

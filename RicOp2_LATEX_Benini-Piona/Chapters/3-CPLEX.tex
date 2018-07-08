@@ -42,13 +42,14 @@ We noticed that, even if we add the constraints using CPXAddLazyConstraints, the
 [copiatooo]
 The generated constraints are often too much and risks to block the solution for a long time. 
 Instead of add sistematically all the constraints in the model at the beginning, we generates them "on the fly" when they are violated by the Branch and Bound process, and we add the new constraints before to update the incumbent. The \textsc{CPLEX} command to add a set of constraints is CPXAddLazyConstraints. \\
-This tecnique decreases the efficiency of the \textsc{CPLEX} pre-processing, but generally gives good results. \\\\ 
+This tecnique decreases the efficiency of the \textsc{CPLEX} pre-processing, but generally gives good results.
 
 \section{Loop Method}
 In this method the \textsc{CPLEX} execution will be reiterated until the optimal solution is not found. From this feature cames his name. \\
 The model that we initially use doesn't include the no-crossing constraints and we can't set all of them in one time. So, in this method, we add time by time only the necessary constraints after each loop of the method. In particular after each loop we must verify that the cables that have been chosen do not intersect.\\
 This method is mathematically correct, but it seems really unefficient. However nowadays the power of \textsc{CPLEX} pre-processing allows the Loop Method to be considered. We have also implemented a variant of this method that can stop the execution in some cases, even if the optimality has not yet been reached. This optimization cames from the fact that often \textsc{CPLEX} spends a lot of time demonstrating the optimality of a solution but maybe this solution uses some crossing cables. The stopping conditions can be several: we can stop at the first solution (not so good in out case because often it is the "star solution"), we can stop when the gap is < than a fixed percentual or we can stop after a timelimit. We have choosen a combination of the gap condition and the timelimit, the first condition reached causes the end of the loop. (???)\\
 This technique uses \textsc{CPLEX} as a \textit{“black box”}, solving consecutively more complex models. It is important to note that \textsc{CPLEX} has a feature that allows to start from the last solution found, it no new constraint is added to the model. Limitazioni di questo metodo (???)
+
 \section{Lazy Callback Method}
 \textsc{CPLEX} supports callbacks so that it is possibile to define functions that will be called at crucial points in the application. In particular, lazy constraints are constraints that the user knows are unlikely to be violated, and in consequence, the user
 wants them applied lazily, not before needed. Lazy constraints are only (and always) checked when an integer feasible solution candidate has been identified, and any of these constraints that is violated will be applied to the full model. \\
@@ -57,4 +58,5 @@ The algorithm starts with the creation of the model, and the lazy constraint cal
 the arcs intersects. Hence, starting from this solution we have to check if there are cables crossing and, if there are any, we have to add the correspondig constraints. In this way only necessary constraints are added and \textsc{CPLEX} will make sure that these constraints will be satisfied before producing any future solution of the problem.\\
 The algorithm terminates when \textsc{CPLEX} find the optimal integer solution without crossing. \\
 Different from the loop method, \textsc{CPLEX} generate the optimal solution only for the final model, adding the constraints during the resolution of the problem: this tendentially leads to the addition of more constraints respect to the loop method, hence, in some cases, leading to a slower execution.
+
 \section{Results}

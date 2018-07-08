@@ -5,7 +5,9 @@
 \chapter{Heuristic Methods}
 \label{chp:5-Heuristic}
 %************************************************
-
+As we have said, the WFCP belongs to the class of NP-Hard problems so, many times, when the number of nodes is too high, we can’t obtain an optimal solution in a feasible time.
+For this reason we have decided to implement some algorithms that, instead of solving the mathematical model, use heuristic methods to find a solution of the problem. These methods can compute, relying on the characteristic structure of the problem, a good solution quickly but that is not guaranteed to be optimal.
+Then, in the following section, we are going to describe some heuristic methods that iteratively execute a specific procedure trying to obtain consecutively a better solution.
 
 \section{Dijkstra}
 
@@ -18,7 +20,17 @@
 \section{Taboo Search}
 
 \section{Ant Algorithm}
-
+\begin{algorithm}[H]
+\caption{: \textsc{rand\_round\_set-cover} ($\mathcal{S}$,$\mathbf{x^*}$). \label{alg:SC}}
+\begin{algorithmic} 
+\STATE{\textbf{Input:} Graph $G = (E, V )$, Pheromone Values $P_E$}
+\STATE{\textbf{Data:} Current Node $c$, Choice List $L$}
+\STATE{\textbf{Output:} $T \subseteq E$}
+\REPEAT
+\STATE {...}
+\UNTIL {$L$ \textit{is empty}}
+\end{algorithmic}
+\end{algorithm}
 \section{Results}
 
 
