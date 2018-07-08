@@ -8,26 +8,39 @@
 As we have said, the WFCP belongs to the class of NP-Hard problems so, many times, when the number of nodes is too high, we can’t obtain an optimal solution in a feasible time.
 For this reason we have decided to implement some algorithms that, instead of solving the mathematical model, use heuristic methods to find a solution of the problem. These methods can compute, relying on the characteristic structure of the problem, a good solution quickly but that is not guaranteed to be optimal.
 Then, in the following section, we are going to describe some heuristic methods that iteratively execute a specific procedure trying to obtain consecutively a better solution.
-
 \section{Dijkstra}
-
-\section{Grasp}
-
+Dijkstra's algorithm is an algorithm for finding the shortest paths between nodes in a graph, it was conceived by computer scientist Edsger W. Dijkstra in 1956 and published three years later. We use the variant that fixes a single node as the "source" node and finds the shortest path from the source node to all other nodes in the graph producing the shortest-path tree. \\
+(come funziona l'algoritmo???)
+The resulting graph did not respect the $C$ constraint and can have crossing cables. 
+\section{GRASP}
+The GRASP algorithm, that means \textit{Greedy Randomized Adaptive Search Procedures}, is a metaheuristic algorithm first introduced by Feo and Resende (1989). GRASP typically consists of iterations made up from successive constructions of a greedy randomized solution and subsequent iterative improvements of it through a local search. \\
+This algorithm, that we implemented for the Wind Farm Cable Problem, consists in looking at the best $N$ possible choices for each iteration, then flip a coin and if it comes out head choose the best one, otherwise pick one solution randomly. 
+[è giusto il funzionamento ??? spiegare altro ... anche su pdf amici] 
 \section{1-Opt}
-
+It belongs to the cathegory \textit{Refining Heuristic Algorithm}, therefore it tryes to                                                                  improve an already existing solution.                                                                   \\
+Basically it tryes to substitute an arc with another one that reduces the cost of the objective function. \\
 \section{Multistart}
 
 \section{Taboo Search}
 
 \section{Ant Algorithm}
+[??? questo algoritmo è esattamente uguale a quello nel pdf .. credo che vada cambiato un po']
+From the \cite{nedlin2017ant} research: 
 \begin{algorithm}[H]
-\caption{: \textsc{rand\_round\_set-cover} ($\mathcal{S}$,$\mathbf{x^*}$). \label{alg:SC}}
+\caption{: FindPath in Kruskal Approach} \label{alg:SC}
 \begin{algorithmic} 
 \STATE{\textbf{Input:} Graph $G = (E, V )$, Pheromone Values $P_E$}
 \STATE{\textbf{Data:} Current Node $c$, Choice List $L$}
 \STATE{\textbf{Output:} $T \subseteq E$}
 \REPEAT
-\STATE {...}
+\STATE {\textsc{L.CLEAR()}}
+\STATE {// select all valid neighbors}
+\STATE {\textbf{forall} $(c,v) \in E \smallsetminus \{ e \in E \ | \ T \bigcup \ \{ e \}$ \textit{ contains a circle} \} \textbf{do}} 
+\STATE {\quad \textbf{if} \textit{c or v are not connected to a substation in ($V,T$)} \textbf{then}}
+\STATE {\quad \quad \textsc{L.INSERT}\textit{(c, v)}}
+\STATE {\textbf{if} $L$ \textit{is not empty} \textbf{then}}
+\STATE {\quad Select a random edge e = \{ $c,v$ \} from $L$ using $P_E$ as weight}
+\STATE {\quad $T \leftarrow T \ \bigcup \ \{ e \}$}
 \UNTIL {$L$ \textit{is empty}}
 \end{algorithmic}
 \end{algorithm}
