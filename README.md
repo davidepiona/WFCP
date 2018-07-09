@@ -11,7 +11,7 @@
 	* **1** : Matrix model
 * **rins**                  : rins
 * **relax**                 : relax
-	* **1** : relax on station capacity
+	* **1** : relax on station capacity, we allows substation recives more than C cable with a cost
 	* **2** : relax on flux
 	* **3** : relax on flux + out edges
 	* **else** : no relax
@@ -56,9 +56,24 @@
 * **CR**					: Cable regularization 
 * **CRF**					: Cable regularization
 
+## TEST EXECUTION
+## Math method with ciplex
 ```
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 0 -time_limit 300
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 1 -time_limit 300
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 2 -time_limit 300 -time_loop 60
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/data_01.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/data_01.turb' -model 1 -CC 3 -time_limit 300
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 0 -time_limit 300 -relax 0
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 1 -time_limit 300 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 2 -time_limit 300 -time_loop 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 3 -time_limit 300 -relax 3
+```
+## MathHeuristic method with ciplex
+```
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 4 -hard_fix 1 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 4 -hard_fix 2 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 1 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 2 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 3 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 4 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+```
+## Heuristic method
+```
+
 ```

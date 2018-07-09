@@ -451,7 +451,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	if(inst->relax == 1)
 	{
 		sprintf(cname[0], "s");
-		double obj = 1e9;
+		double obj = BIG_M_CABLE;
 		double ub = CPX_INFBOUND;
 		if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &continuous, cname) ) 
 				print_error(" wrong CPXnewcols on s var.s");
@@ -760,7 +760,7 @@ void execute3(instance *inst, CPXENVptr env, CPXLPptr lp)
 /***************************************************************************************************************************/
 {
 	mip_timelimit(env, CPX_INFBOUND, inst, inst->timelimit);
-	CPXsetintparam(env, CPX_PARAM_MIPCBREDLP, CPX_OFF);	
+	CPXsetintparam(env, CPX_PARAM_MIPCBREDLP, CPX_OFF);		
 	installLazyCallback(env,lp,inst);
 	if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 	CPXmipopt(env,lp);     
@@ -784,7 +784,7 @@ void execute4(instance *inst, CPXENVptr env, CPXLPptr lp)
 	if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 	CPXmipopt(env,lp); 
 	CPXgetbestobjval(env, lp, &inst->best_lb);    
-	//printf("Hard Fixing start\n");
+	printf("Hard Fixing start\n");
 	int times = 1;
 	
 	while(!done)
@@ -1655,7 +1655,7 @@ static int CPXPUBLIC lazyCallback(CPXCENVptr env, void *cbdata, int wherefrom, v
 	instance *inst = (instance*)cbhandle;
 	double z = CPX_INFBOUND;
 	CPXgetcallbacknodeobjval(env, cbdata, wherefrom, &z);
-	double *xstar = (double*) malloc(inst->ncols * sizeof(double));
+	double xstar[inst->ncols];
 	if ( CPXgetcallbacknodex(env, cbdata, wherefrom, xstar, 0, inst->ncols-1) )
 		return 1;
 	

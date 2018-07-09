@@ -27,17 +27,17 @@ void free_instance(instance *inst)
 	//printf("a\n"); 
 	free(inst->power);
 	//printf("a\n"); 
-	//free(inst->xcoord);
+	free(inst->xcoord);
 	//printf("a\n"); 
 	free(inst->ycoord);
 	//printf("a\n"); 
-	//free(inst->cablecapacity);
+	free(inst->cablecapacity);
 	//printf("a\n"); 
-	//free(inst->cablecost);
+	free(inst->cablecost);
 	//printf("a\n"); 
-	//free(inst->best_sol);
+	free(inst->best_sol);
 	//printf("a\n"); 
-	//free(inst->second_best_sol);
+	free(inst->second_best_sol);
 	free(inst->mat);
 }
 
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 		printf("... WFCP problem solved in %lf sec.s\n", t2-t1);  
 	}
 	
-	//free_instance(&inst);
+	free_instance(&inst);
 	return 0; 
 }         
 

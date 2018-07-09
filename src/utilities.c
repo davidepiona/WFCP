@@ -414,7 +414,21 @@ int RinsSHamming(double *yr1, double *yr2, int s, int l, int *index)
 	}
 	return k;
 }
-
+double minDist(double*mat, int nodes)
+{
+	double n = DBL_MAX;
+	for (int i = 0; i < nodes; i++)
+	{
+		for (int j = i; j < nodes; j++)
+		{
+			if(mat[i+j*nodes] < n)
+			{
+				n = mat[i+j*nodes];
+			}
+		}	
+	}
+	return n;
+}
 int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 {
 	int flag[nodes];
@@ -423,10 +437,10 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 	//L = (double *) calloc(nodes, sizeof(double));	
 	double P[nodes];
 	//P = (double *) calloc(nodes, sizeof(double));	
-	
+	double mdist = minDist(mat,nodes);
 	flag[0] = 1;
 	pred[0] = -1;
-	P[0] = -400; // -600 dataset 7/8 -400 dataset 1
+	P[0] = -3*mdist; // -600 dataset 7/8 -400 dataset 1
 	if(r != 0)
 	{
 		srand(r);
@@ -464,7 +478,7 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 		if( r != 0 && npool > 0)
 		{
 			h = pool[rand()%npool];
-			P[h] = P[h] + 10; // +50 dataset 7/8  +10 dataset 1
+			P[h] = P[h] + mdist/10; 
 		}
 		flag[h] = 1;
 		
@@ -474,8 +488,8 @@ int PrimDijkstra(double*mat, int nodes, int *pred, int r)
 			{
 				L[j] = mat[h+j*nodes] + P[h];
 				pred[j] = h;
-				P[h] = P[h] - 10;
-				P[j] = P[j] + 10;
+				P[h] = P[h] - mdist/10;
+				P[j] = P[j] + mdist/10;
 			}
 		}
 	}
