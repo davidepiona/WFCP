@@ -41,6 +41,8 @@
 	* **1** : Random hard fixing
 	* **2** : rins
 * **times** : times to do heuristic
+* **names**              : Option in the name of the output files
+	* **1** : more clear names
 
 ## EXAMPLE OF STRING FOR CPLEX
 ```
@@ -60,20 +62,28 @@
 ## Math method with ciplex
 ```
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 0 -time_limit 300 -relax 0
+
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 1 -time_limit 300 -relax 3
+
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 2 -time_limit 300 -time_loop 60 -relax 3
+
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 3 -time_limit 300 -relax 3
 ```
 ## MathHeuristic method with ciplex
+Hard fixing
 ```
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 4 -hard_fix 1 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 4 -hard_fix 2 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 1 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 2 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 3 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 4 -time_limit 300 -time_loop 60 -time_start 60 -relax 3
+```
+Soft Fixing
+```
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 1 -time_limit 600 -time_loop 60 -time_start 300 -relax 3
+
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 3 -time_limit 3000 -time_loop 60 -time_start 300 -relax 3
 ```
 ## Heuristic method
+Tabu Search
 ```
-
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 1 -CC 9 -time_limit 300
 ```

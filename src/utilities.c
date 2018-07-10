@@ -281,7 +281,7 @@ int cableregularize(instance *inst, double *x, long double z )
 	}
 	
 	
-	z = sol;
+	inst->zbest = sol;
 
 	return count;
 }
@@ -342,7 +342,7 @@ void mip_reload_solution(CPXENVptr env, CPXLPptr lp, int ncols, instance *inst, 
 	}
 	free(ctype);
 
-	cableregularize(inst,xstar,0);
+	cableregularize(inst,xstar,inst->zbest);
 
 	int *indices = (int *) malloc(ncols*sizeof(int));
 	for ( j = 0; j < ncols; j++ ) indices[j] = j;

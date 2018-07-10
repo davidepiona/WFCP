@@ -1,0 +1,60 @@
+% !TEX TS-program = pdflatex
+% !TEX root = ../ArsClassica.tex
+
+%************************************************
+\chapter{Matheuristic Methods}
+\label{chp:4-Matheuristics}
+%************************************************
+Given that the \textsc{CPLEX} solver is really optimized, we apply the heuristic in the model writing. In this way the model that we’ll give to \textsc{CPLEX} should be theoretically easier to solve.
+
+\section{Hard Fixing}
+The first matheuristic algorithm that we have implemented relied on the hard variable fixing approach. Its main idea is to use a black-box solver to whom give the input data to generate quickly a first solution. Once the initial solution is been found some of its variables are fixed and then the method is iteratively reapplied on the restricted problem resulting from fixing: the black-box solver is called again, a new target solution is found, some of its variables are fixed, and so on. The choice of which variables have to be fixed is arbitrary, so the edges are chosen with uniform probability.\\
+Each time, before applying the \textsc{CPLEX} solver, the algorithm fixes some variables of the last solution obtained; an important parameter that influences the performances of the \textsc{CPLEX} solver is the number of edges that are been fixed in each loop: if the number of fixed edges is high \textsc{CPLEX} will find a solution more quickly, on the other hand, if the number of fixed edges decreases \textsc{CPLEX} is more free to find new improvement of a solution. \\
+(quanti vertici fissiamo? questo numero rimane fisso nel tempo??)\\
+Using the hard fixing technique, and in general fixing some variables, \textsc{CPLEX} became more faster because the number of arcs decreases. The number of arcs decreases in three ways: 
+\begin{enumerate}
+\item some of them are fixed
+\item because we "delete" all the arcs exiting from a node which has already an exiting arc
+\item because we "delete" all the arcs crossing with those already fixed 
+\end{enumerate}
+We discovered that in the first \textsc{CPLEX} solutions very often appears the "star". The "star" is a shape of routing cables in which all the turbines are directly connected to the basestation; in almost all the instances it is not a good solution because of the long cables. This fact can be a problem for the Hard Fixing tecnique because it is very likely to choose fixed cables far away from the optimal solution. To avoid this situation we .... ??? \\ 
+\subsection{Random Hard Fixing}
+
+\subsection{RINS Hard Fixing}
+
+
+
+\section{Soft Fixing}
+This method, also called \textit{local branching}, given a solution called $y^{REF}$, fixes at least a percentual of the arcs of that solution, and repeat the execution searching the best choice for the others. A critical issue of variable fixing methods is related on the choice of the variables to be fixed at each step and wrong choices are typically difficult to detect. In this sense, the purpose of the soft fixing is to fix a relevant number of variables without losing the possibility of finding good feasible solutions.\\
+A possible implementation is, give the solution $y^{REF}$ represented by an array of zeros and ones, given a generic solution $y$ and given a constant $K$:
+\[
+	y^{REF} = (0,1,0,1,1,...)
+\]
+\[
+	\sum_{(i,j):y^{REF}_{ij}=0} y_{ij} + \sum_{(i,j):y^{REF}_{ij}=1} (1-y_{ij}) \quad \leq K
+\]
+It represents the Hamming distance between $y$ and $y^{REF}$; in practice the constraints allows one to replace at most $K$ edges of $y^{REF}$. \\
+Then, in our implementation, the algorithm starts producing a heuristic solution $Y$, adds the local branching constraint to the MIP model and solves it using \textsc{CPLEX}.\\ (come abbiamo scelto k ???)\\
+Soft fixing avoids a too rigid fixing of the variables in favor of a more flexible condition; this allows the new solution to "move" from the older one fixing at each iteration some random arcs and moving the other looking quickly for a better solution. (???)\\
+This is the symmetric version of this method because it considers equally the 0-1 and the 1-0 flips. 
+[inserire immagine grafico local brancing???]
+\subsection{Asymmetric Soft Fixing}
+In this case we consider only the flips from 1 to 0:
+\[
+	\sum_{(i,j):y^{REF}_{ij}=1} (1-y_{ij}) \quad \leq K
+\]
+\[
+	\sum_{(i,j):y^{REF}_{ij}=1} y_{ij} \quad \geq \sum_{(i,j):y^{REF}_{ij}=1} 1 - K
+\]
+\[
+	\sum_{(i,j):y^{REF}_{ij}=1} y_{ij} \quad \geq n - 1 - K
+\]
+This method is more convenient from the graphical point of view. 
+[??? aggiungere .. bo qualcosa sull'integrality grip?]
+\subsection{Symmetric RINS}
+
+\subsection{Asymmetric RINS}
+
+\section{Results}
+
+

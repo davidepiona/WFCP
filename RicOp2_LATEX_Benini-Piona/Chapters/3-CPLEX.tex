@@ -1,0 +1,62 @@
+% !TEX TS-program = pdflatex
+% !TEX root = ../ArsClassica.tex
+
+%************************************************
+\chapter{CPLEX}
+
+\label{chp:3-CPLEX}
+
+%************************************************
+\section{Plain Execution}
+We simply create the linear programming model and then we pass it to CPLEX for the optimization. The performances, as we will notice for all the methods, depends on the instance: we noticed the power of CPLEX that find the optimal solution in few seconds, and in the meantime we discovered that some instances takes many hours to be solved by our machines. 
+The main steps of our code in this phase are: 
+\begin{itemize}
+\item Read the input files, the command line parameter and parse them;
+\item Memorize turbines and cables;
+\item Develop the specific linear programming model;
+\item Call CPX\_INT\_OPT that optimizes the instance;
+\item Ask to CPLEX the optimal function;
+\item Print and graph it;
+\end{itemize}
+
+\subsection{Relaxed Mode (???)}
+RELAX: this method tries to ‘relax’ some constraints in order to make faster the process of searching the first solution (so that RINS can start working). We add a slack variable >=0 in the model. Then we add this variable also in the objective function multiplied for a constant reasonably large. In this way, even if CPLEX could find a wrong initial solution, it’s probable that this solution will rapidly get better and became correct. 
+
+\subsection{CPLEX Heuristics-Params}
+The \textsc{CPLEX} code contains some heuristic procedure; being integrated into branch \& cut, they can speed the final proof of optimality, or they can provide a suboptimal but high-quality solution in a shorter amount of time than by branching alone. With default parameter settings, \textsc{CPLEX} automatically invokes the heuristics when they seem likely to be beneficial. However it is possible to adapt them to our specific case and instances, changing the frequency of activation of these procedure by setting some \textsc{CPLEX} parameter. We mainly analized two of them:
+\begin{itemize}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+\item \textbf{RINS}: tries to improve the incumbent; in the initial part the process don’t change, but as soon as a solution is found the RINS heuristic tryes to improve it with more frequency. It is possible to infer that the RINS method has been used in a \textsc{CPLEX} step when in the logs there is a ‘*’ near to the number. We set the \textit{-rins} param to 5 in all the tests. 
+\item \textbf{POLISHING}: this heuristic tries to modify some variables of a (good) solution to improve it; it is possible to set a condition that enables this method, in order to avoid a too early usage of this method that can lead to a waste of time an performances. We decided to not change this parameter in our tests.
+\end{itemize}
+
+\section{Lazy Constraints Method}
+Adding all the “no-crossing constraints” statically to the model will probably block it for a really long time. So we add them to the \textsc{CPLEX} pool of constraints and it will check those constraints only when a solution is created. In the case that some constraint is violated \textsc{CPLEX} will add the corresponding constraint before the incumbent update. (?)
+In the end we use CPXAddLazyConstraints instead of CPXAddRows. 
+The laxy constraints decrease the power of the \textsc{CPLEX} pre-processing.
+
+We used a condition (?) that helps the process avoiding some duplicated constraints .. (?)
+We noticed that, even if we add the constraints using CPXAddLazyConstraints, the computation time of the solution is sometimes really high. 
+
+[copiatooo]
+The generated constraints are often too much and risks to block the solution for a long time. 
+Instead of add sistematically all the constraints in the model at the beginning, we generates them "on the fly" when they are violated by the Branch and Bound process, and we add the new constraints before to update the incumbent. The \textsc{CPLEX} command to add a set of constraints is CPXAddLazyConstraints. \\
+This tecnique decreases the efficiency of the \textsc{CPLEX} pre-processing, but generally gives good results.
+
+\section{Loop Method}
+In this method the \textsc{CPLEX} execution will be reiterated until the optimal solution is not found. From this feature cames his name. \\
+The model that we initially use doesn't include the no-crossing constraints and we can't set all of them in one time. So, in this method, we add time by time only the necessary constraints after each loop of the method. In particular after each loop we must verify that the cables that have been chosen do not intersect.\\
+This method is mathematically correct, but it seems really unefficient. However nowadays the power of \textsc{CPLEX} pre-processing allows the Loop Method to be considered. We have also implemented a variant of this method that can stop the execution in some cases, even if the optimality has not yet been reached. This optimization cames from the fact that often \textsc{CPLEX} spends a lot of time demonstrating the optimality of a solution but maybe this solution uses some crossing cables. The stopping conditions can be several: we can stop at the first solution (not so good in out case because often it is the "star solution"), we can stop when the gap is < than a fixed percentual or we can stop after a timelimit. We have choosen a combination of the gap condition and the timelimit, the first condition reached causes the end of the loop. (???)\\
+This technique uses \textsc{CPLEX} as a \textit{“black box”}, solving consecutively more complex models. It is important to note that \textsc{CPLEX} has a feature that allows to start from the last solution found, it no new constraint is added to the model. Limitazioni di questo metodo (???)
+
+\section{Lazy Callback Method}
+\textsc{CPLEX} supports callbacks so that it is possibile to define functions that will be called at crucial points in the application. In particular, lazy constraints are constraints that the user knows are unlikely to be violated, and in consequence, the user
+wants them applied lazily, not before needed. Lazy constraints are only (and always) checked when an integer feasible solution candidate has been identified, and any of these constraints that is violated will be applied to the full model. \\
+In this method we have added the no-crossing constraint calling the \textit{lazy constraint callback} (named "LazyConstraintCallBack") each time the solver find an integer feasible solution. \\
+The algorithm starts with the creation of the model, and the lazy constraint callback is installed to make \textsc{CPLEX} call it when needed. Then, the \textsc{CPLEX} solver starts to resolve the model applying the branch-and-cut technique. When \textsc{CPLEX} finds an integer feasible solution the lazy constraint callback is called. The solution that we have now is an integer solution of the problem where, perhaps, some of
+the arcs intersects. Hence, starting from this solution we have to check if there are cables crossing and, if there are any, we have to add the correspondig constraints. In this way only necessary constraints are added and \textsc{CPLEX} will make sure that these constraints will be satisfied before producing any future solution of the problem.\\
+The algorithm terminates when \textsc{CPLEX} find the optimal integer solution without crossing. \\
+Different from the loop method, \textsc{CPLEX} generate the optimal solution only for the final model, adding the constraints during the resolution of the problem: this tendentially leads to the addition of more constraints respect to the loop method, hence, in some cases, leading to a slower execution.
+
+\section{Results}

@@ -733,6 +733,7 @@ void execute2(instance *inst, CPXENVptr env, CPXLPptr lp)
 			mip_timelimit(env, CPX_INFBOUND, inst, inst->timeloop*times);
 		CPXmipopt(env,lp);     
 		CPXgetbestobjval(env, lp, &inst->best_lb); 
+		mip_update_incumbent(env, lp, inst);
 		plotGraph(env, lp, inst);
 		done = 1;
 		if(nocross_separation(env, lp, inst))
@@ -783,7 +784,8 @@ void execute4(instance *inst, CPXENVptr env, CPXLPptr lp)
 	installLazyCallback(env,lp,inst);
 	if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 	CPXmipopt(env,lp); 
-	CPXgetbestobjval(env, lp, &inst->best_lb);    
+	CPXgetbestobjval(env, lp, &inst->best_lb);  
+	mip_update_incumbent(env, lp, inst);  
 	printf("Hard Fixing start\n");
 	int times = 1;
 	
@@ -821,7 +823,8 @@ void execute4(instance *inst, CPXENVptr env, CPXLPptr lp)
 		installLazyCallback(env,lp,inst);
 		if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 		//printf("-----------------------------------START MIP OPT----------------------------------\n");
-		CPXmipopt(env,lp); 
+		CPXmipopt(env,lp);
+		mip_update_incumbent(env, lp, inst);
 		//printf("-----------------------------------END MIP OPT------------------------------------\n");
 		
 		
@@ -847,6 +850,7 @@ void execute4(instance *inst, CPXENVptr env, CPXLPptr lp)
 		times++;
 	}
 	plotGraph( inst, inst->best_sol);
+	printf("Zbest : %lf\n",inst->zbest);
 }
 /***************************************************************************************************************************/
 void execute5(instance *inst, CPXENVptr env, CPXLPptr lp)
@@ -864,7 +868,8 @@ void execute5(instance *inst, CPXENVptr env, CPXLPptr lp)
 	installLazyCallback(env,lp,inst);
 	if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 	CPXmipopt(env,lp); 
-	CPXgetbestobjval(env, lp, &inst->best_lb);    
+	CPXgetbestobjval(env, lp, &inst->best_lb);
+	mip_update_incumbent(env, lp, inst);
 	//printf("Hard Fixing start\n");
 	int times = 1;
 	int K = 3;
@@ -896,7 +901,8 @@ void execute5(instance *inst, CPXENVptr env, CPXLPptr lp)
 		installLazyCallback(env,lp,inst);
 		if(inst->cableReg == 1) installheuristicCallback(env,lp,inst);
 		//printf("-----------------------------------START MIP OPT----------------------------------\n");
-		CPXmipopt(env,lp); 
+		CPXmipopt(env,lp);
+		mip_update_incumbent(env, lp, inst); 
 		//printf("-----------------------------------END MIP OPT------------------------------------\n");
 		
 		resetSoftFix( env,  lp);
@@ -927,6 +933,7 @@ void execute5(instance *inst, CPXENVptr env, CPXLPptr lp)
 		times++;
 	}
 	plotGraph( inst, inst->best_sol);
+	printf("Zbest : %lf\n",inst->zbest);
 }
 /***************************************************************************************************************************/
 void execute6(instance *inst, CPXENVptr env, CPXLPptr lp)
@@ -1771,16 +1778,17 @@ int setHardFixRandom(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char
 {
 	int count = 0;
 	for(int i = 0; i < inst->nturbines; i++)
-		for(int j = i + 1; j < inst->nturbines; j++)
+		for(int j = 0; j < inst->nturbines; j++)
 		{
 			if(i == j) continue;
 			
-			if((inst->best_sol[ypos(i,j,inst)] > 0.1 ) && (rand() % 100) > 50)
+			if((inst->best_sol[ypos(i,j,inst)] > 0.5 ) && (rand() % 100) > 50)
 			{
 				printf("Fixing beetween ( %d ) - ( %d )\n", i,j);
 				index[count] = ypos(i,j,inst);
 				lu[count] = 'L';
 				bd[count] = 1;
+				inst->best_sol[ypos(i,j,inst)] = 1.0;
 				count++;
 
 			}
@@ -1804,6 +1812,7 @@ int setHardRins(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu,
 				index[count] = ypos(i,j,inst);
 				lu[count] = 'U';
 				bd[count] = 1;
+				inst->best_sol[ypos(i,j,inst)] = 1.0;
 				count++;
 			}
 			else if((inst->best_sol[ypos(i,j,inst)] < 0.5 ) && (inst->second_best_sol[ypos(i,j,inst)] < 0.5 ) && (rand() % 100) > 50)
@@ -1812,6 +1821,7 @@ int setHardRins(CPXENVptr env, CPXLPptr lp, instance *inst, int *index,char *lu,
 				index[count] = ypos(i,j,inst);
 				lu[count] = 'L';
 				bd[count] = 0;
+				inst->best_sol[ypos(i,j,inst)] = 0.0;
 				count++;				
 			}
 		}
