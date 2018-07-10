@@ -17,8 +17,7 @@ Using the hard fixing technique, and in general fixing some variables, \textsc{C
 \item because we "delete" all the arcs exiting from a node which has already an exiting arc
 \item because we "delete" all the arcs crossing with those already fixed 
 \end{enumerate}
-We discovered that in the first \textsc{CPLEX} solutions very often appears the "star". The "star" is a shape of routing cables in which all the turbines are directly connected to the basestation; in almost all the instances it is not a good solution because of the long cables. This fact can be a problem for the Hard Fixing tecnique because it is very likely to choose fixed cables far away from the optimal solution. To avoid this situation we .... ??? \\ 
-\subsection{Random Hard Fixing}
+We discovered that in the first \textsc{CPLEX} solutions very often appears the "star". The "star" is a shape of routing cables in which all the turbines are directly connected to the substation; in almost all the instances it is not a good solution because of the long cables. This fact can be a problem for the Hard Fixing technique because it is very likely to choose fixed cables far away from the optimal solution. To avoid this situation ww have defined a \textit{timestart}: when the algorithm starts \textsc{CPLEX} runs for \textit{timestart} seconds searching a good starting solution, then it starts the real Hard Fixing method until the \textit{timelimit} expires. 
 
 \subsection{RINS Hard Fixing}
 hard fix normale e dove c'è la condizione della scelta di un ramo, c'è anche la condizione che quel ramo sia presente in entrambe le soluzioni. Abbiamo fatto così perchè altrimenti con due soluzioni simili andava subito a terminare. 
@@ -35,8 +34,9 @@ A possible implementation is, give the solution $y^{REF}$ represented by an arra
 	\sum_{(i,j):y^{REF}_{ij}=0} y_{ij} + \sum_{(i,j):y^{REF}_{ij}=1} (1-y_{ij}) \quad \leq K
 \]
 It represents the Hamming distance between $y$ and $y^{REF}$; in practice the constraints allows one to replace at most $K$ edges of $y^{REF}$. \\
-Then, in our implementation, the algorithm starts producing a heuristic solution $Y$, adds the local branching constraint to the MIP model and solves it using \textsc{CPLEX}.\\ (come abbiamo scelto k ???)\\
-Soft fixing avoids a too rigid fixing of the variables in favor of a more flexible condition; this allows the new solution to "move" from the older one fixing at each iteration some random arcs and moving the other looking quickly for a better solution. (???)\\
+Then, in our implementation, the algorithm starts producing a heuristic solution $Y$, adds the local branching constraint to the MIP model and solves it using \textsc{CPLEX}.\\
+In our solution we decided to start with $K=3$; each time the increment is by two units until it reaches the maximum of 20: then it restarts from 3. It is important that the number $K$ changes during the different execution to allow the \textit{local branching} exploring different solutions type. We decided the specific numbers after some simple test on some instances.\\
+Soft fixing avoids a too rigid fixing of the variables in favor of a more flexible condition; this allows the new solution to "move" from the older one fixing at each iteration some random arcs and moving the other looking quickly for a better solution.\\
 This is the symmetric version of this method because it considers equally the 0-1 and the 1-0 flips. 
 [inserire immagine grafico local brancing???]
 \subsection{Asymmetric Soft Fixing}
@@ -53,8 +53,8 @@ In this case we consider only the flips from 1 to 0:
 This method is more convenient from the graphical point of view. 
 [??? aggiungere .. bo qualcosa sull'integrality grip?]
 \subsection{Asymmetric RINS}
-
-\subsection{Symmetric RINS}
+This method is a variant of the Soft Fixing. RINS algorithm is an heuristic that explores a neighborhood of the current incumbent solution to try to find a new, improved incumbent; in practice it compares the variable values of the good solutions and when the (??? spiegare come funziona). In the asymmetric case it looks only for the 1 values. \\
+It is possible to realize also the Symmetric RINS that consider also the 0 values. Anyway we have discarded this option from the tests because for our specific practice case is more important which are the selected arcs than which are not selected.
 \section{Results}
 
 
