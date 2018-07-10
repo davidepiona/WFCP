@@ -1,0 +1,76 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\babel@toc {english}{}
+\defcounter {refsection}{0}\relax 
+\vspace {-\cftbeforechapskip }
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {1}{Development Environment}}{1}{chapter.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {1.1}{Real World Info}}{1}{section.1.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {1.2}{Instance TEST BED}}{1}{section.1.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}{Mathematical Model}}{3}{chapter.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.1}{Wind Farm Cable Problem Introduction}}{3}{section.2.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.2}{Crossing Cables}}{5}{section.2.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}{CPLEX}}{7}{chapter.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.1}{Plain Execution}}{7}{section.3.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.1.1}{Relaxed Mode (???)}}{7}{subsection.3.1.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.1.2}{CPLEX Heuristics-Params}}{7}{subsection.3.1.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.2}{Lazy Constraints Method}}{8}{section.3.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.3}{Loop Method}}{8}{section.3.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.4}{Lazy Callback Method}}{9}{section.3.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.5}{Results}}{9}{section.3.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}{Matheuristic Methods}}{11}{chapter.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.1}{Hard Fixing}}{11}{section.4.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.1.1}{Random Hard Fixing}}{12}{subsection.4.1.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.1.2}{RINS Hard Fixing}}{12}{subsection.4.1.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.2}{Soft Fixing}}{12}{section.4.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.2.1}{Asymmetric Soft Fixing}}{12}{subsection.4.2.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.2.2}{Asymmetric RINS}}{13}{subsection.4.2.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.2.3}{Symmetric RINS}}{13}{subsection.4.2.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.3}{Results}}{13}{section.4.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}{Heuristic Methods}}{15}{chapter.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.1}{Dijkstra}}{15}{section.5.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.2}{GRASP}}{15}{section.5.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {5.2.1}{1-Opt}}{16}{subsection.5.2.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.3}{Taboo Search}}{16}{section.5.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.4}{Ant Algorithm}}{17}{section.5.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.5}{Results}}{17}{section.5.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Appendices}{19}{section*.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {A}{CPLEX}}{21}{Appendix.a.A}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {B}{Shell script}}{23}{Appendix.a.B}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {C}{Input string parameteres}}{25}{Appendix.a.C}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {D}{Performance Profile}}{27}{Appendix.a.D}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {E}{Performance Variability and Random Seed}}{29}{Appendix.a.E}

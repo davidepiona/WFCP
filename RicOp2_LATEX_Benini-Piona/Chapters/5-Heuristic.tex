@@ -10,19 +10,32 @@ For this reason we have decided to implement some algorithms that, instead of so
 Then, in the following section, we are going to describe some heuristic methods that iteratively execute a specific procedure trying to obtain consecutively a better solution.
 \section{Dijkstra}
 Dijkstra's algorithm is an algorithm for finding the shortest paths between nodes in a graph, it was conceived by computer scientist Edsger W. Dijkstra in 1956 and published three years later. We use the variant that fixes a single node as the "source" node and finds the shortest path from the source node to all other nodes in the graph producing the shortest-path tree. \\
+Per evitare che attacchi un solo ramo alla substation si è dato alla substation una distanza (fittizia) minore dalle turbine così che le turbine siano invogliate a creare archi con la substation.  
 (come funziona l'algoritmo???)
-The resulting graph did not respect the $C$ constraint and can have crossing cables. 
+Fa schifo
+The resulting graph could not respect the $C$ constraint and can have crossing cables. 
+
 \section{GRASP}
-The GRASP algorithm, that means \textit{Greedy Randomized Adaptive Search Procedures}, is a metaheuristic algorithm first introduced by Feo and Resende (1989). GRASP typically consists of iterations made up from successive constructions of a greedy randomized solution and subsequent iterative improvements of it through a local search. \\
-This algorithm, that we implemented for the Wind Farm Cable Problem, consists in looking at the best $N$ possible choices for each iteration, then flip a coin and if it comes out head choose the best one, otherwise pick one solution randomly. 
-[è giusto il funzionamento ??? spiegare altro ... anche su pdf amici] 
-\section{1-Opt}
-It belongs to the cathegory \textit{Refining Heuristic Algorithm}, therefore it tryes to                                                                  improve an already existing solution.                                                                   \\
-Basically it tryes to substitute an arc with another one that reduces the cost of the objective function. \\
-\section{Multistart}
+The GRASP algorithm, that means \textit{Greedy Randomized Adaptive Search Procedures}, is a metaheuristic algorithm first introduced by Feo and Resende (1989). GRASP typically consists of iterations made up from successive constructions of a greedy randomized solution and subsequent iterative improvements of it through a local search. GRASP is a multi-start metaheuristic. \\
+It consists of two phases: greedy randomized adaptive phase (generating some solutions) and local search (finding a local minimum).\\
+The first phase is further composed by two parts, a greedy algorithm and a probabilistic selection.\\
+The \textit{greedy algorithm} always makes the choice that looks the best at the moment, that in our case is to find the best $N = 10$ possible edge choices, so the $N$ closer turbines. The \textit{probabilistic part} consists in flipping a coin and if it comes out head choose the best of the $10$ edge choices, otherwise picks randomly one another solution. This probabilistic part has the objective to diversify the solutions of the greedy algorithm, adding randomness to an algorithm: this can lead to some good solutions that a deterministic procedure could not obtain. Note that if all the coins come out head this algorithm will take exactly the same decisions of the Dijkstra algorithm.\\
+Once we have found a solution using the first phase we have to reach the local optimum. For this process we use the \textit{1-Opt} technique, described in the next subsection (\ref{subsec:1opt}), which finds the local optimum from an existing solution.\\
+Our algorithm execute iteratively all of these steps, at the end of the time this algorithm will return the best solution found. \\
+This intuitive algorithm can mitigate the threat to finish always in a local minimum (\textit{1-Opt}) with the randomness added by the greedy randomized phase.\\ 
+With this algorithm there isn't the mathematical proof that the optimum will be reached, but the probability of \textit{"to not reach the optimum"} is infinitely close to 1 (obviously considering an infinite number of executions). 
+\subsection{1-Opt} \label{subsec:1opt}
+It belongs to the category \textit{Refining Heuristic Algorithm}, therefore it tries to                                                                  improve an already existing solution.\\                                                         
+Basically it tries to substitute an arc with another one that reduces the cost of the objective function. \\
+Obviously the end of this algorithm will be inside a local minimum; therefore the results of this procedure will be a local optimum. 
 
 \section{Taboo Search}
-
+Tabu search, proposed by Fred Glover in 1986 and formalized in 1989, is a metaheuristic search method that guides a local search procedure to explore the solution space beyond local optimality. Tabu search is based on the premise that problem solving, in order to qualify as intelligent, must incorporate adaptive memory and responsive exploration. Since local choices are guided by information collected during the search, Tabu search contrasts with memoryless procedures that heavily rely on semi-random processes that implement a form of sampling. The emphasis on responsive exploration in Tabu search, whether in a deterministic or probabilistic implementation, derives from the supposition that a bad strategic choice can often yield more information than a good random choice, and therefore provides a basis for progressively improved strategies that take advantage of search history.\\
+In our algorithm Tabu search means to make a move and consider the opposite move \textit{"Tabu"}. In this way the algorithm tries to avoid the local optimum\\
+In our solution the algorithm start from (???) and applies a \textit{1-OPT} local search until a local optimum is reached. Then, to try to "escape" from the local optimum, the algorithm makes a sequence of moves that deteriorate the current objective function. (quali mosse ???). At each move, whether it is improving or worsening the previous solution, the algorithm stores the edges that are involved in the exchange in a data structure, marking them as \textit{tabu}, that means that they can not be involved again in the future moves. This type of memorization, in general, is called \textit{recency-based memory} that means that it keeps track of solutions attributes that have changed during the recent past.\\
+The capacity of the algorithm to go away from the local optimum is determined by the number of moves that the memory structure can stores, and it directly influences the diversification stage. This parameter is called \texit{tabu tenure} and it is really difficult to decide a-priori its size for two reasons: if the \texit{tabu tenure} is too high the risk is to "freeze" the algorithm, in the sense that only few moves are allowed, and, conversely, if it is too low is not assure that the algorithm could escape from all
+the local optimums. So, the choice of \textit{tabu tenure} has to be tested in some runs of the algorithm depending on the instance that has to be solved.(cosa abbiamo scelto noi??)\\
+(c'è da spiegare qualcosa per quanto riguarda il fatto che quando ci sono le mosse peggiorative la nostra soluzione ritorna infeasible a causa dei crossing e delle perdite di flusso???)
 \section{Ant Algorithm}
 [??? questo algoritmo è esattamente uguale a quello nel pdf .. credo che vada cambiato un po']
 From the \cite{nedlin2017ant} research: 

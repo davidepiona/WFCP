@@ -10,7 +10,7 @@ Given that the \textsc{CPLEX} solver is really optimized, we apply the heuristic
 \section{Hard Fixing}
 The first matheuristic algorithm that we have implemented relied on the hard variable fixing approach. Its main idea is to use a black-box solver to whom give the input data to generate quickly a first solution. Once the initial solution is been found some of its variables are fixed and then the method is iteratively reapplied on the restricted problem resulting from fixing: the black-box solver is called again, a new target solution is found, some of its variables are fixed, and so on. The choice of which variables have to be fixed is arbitrary, so the edges are chosen with uniform probability.\\
 Each time, before applying the \textsc{CPLEX} solver, the algorithm fixes some variables of the last solution obtained; an important parameter that influences the performances of the \textsc{CPLEX} solver is the number of edges that are been fixed in each loop: if the number of fixed edges is high \textsc{CPLEX} will find a solution more quickly, on the other hand, if the number of fixed edges decreases \textsc{CPLEX} is more free to find new improvement of a solution. \\
-(quanti vertici fissiamo? questo numero rimane fisso nel tempo??)\\
+We choose to fix all the arcs with probability 0.5 
 Using the hard fixing technique, and in general fixing some variables, \textsc{CPLEX} became more faster because the number of arcs decreases. The number of arcs decreases in three ways: 
 \begin{enumerate}
 \item some of them are fixed
@@ -21,7 +21,8 @@ We discovered that in the first \textsc{CPLEX} solutions very often appears the 
 \subsection{Random Hard Fixing}
 
 \subsection{RINS Hard Fixing}
-
+hard fix normale e dove c'è la condizione della scelta di un ramo, c'è anche la condizione che quel ramo sia presente in entrambe le soluzioni. Abbiamo fatto così perchè altrimenti con due soluzioni simili andava subito a terminare. 
+"fare hard fix sotto le condizioni del RINS" 
 
 
 \section{Soft Fixing}
@@ -51,10 +52,9 @@ In this case we consider only the flips from 1 to 0:
 \]
 This method is more convenient from the graphical point of view. 
 [??? aggiungere .. bo qualcosa sull'integrality grip?]
-\subsection{Symmetric RINS}
-
 \subsection{Asymmetric RINS}
 
+\subsection{Symmetric RINS}
 \section{Results}
 
 
