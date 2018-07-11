@@ -80,10 +80,18 @@ Soft Fixing
 ```
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 1 -time_limit 600 -time_loop 60 -time_start 300 -relax 3
 
-./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 3 -time_limit 3000 -time_loop 60 -time_start 300 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 5 -soft_fix 3 -time_limit 300 -time_loop 60 -time_start 300 -relax 3
 ```
 ## Heuristic method
 Tabu Search
 ```
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 1 -CC 9 -time_limit 300
+```
+Ant algorithm
+```
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 1 -CC 11 -time_limit 300
+```
+Multi start
+```
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 1 -CC 10 -time_limit 300
 ```

@@ -1283,34 +1283,25 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 /***************************************************************************************************************************/
 {
 
-	int *best;
-	best = (int *) calloc((inst->nturbines), sizeof(int));
-	double *flux_best;
-	flux_best = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double ));
-	double *x_best;
-	x_best = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double ));
+	int best[inst->nturbines];
+	double flux_best[inst->nturbines*inst->nturbines];
+	double x_best[inst->nturbines*inst->nturbines];
 	double best_cost = DBL_MAX;
 
 	for(int i = 1; (inst->tstart + inst->timelimit > second()); i++)
 	{
 
 		printf("------------------------------- Cerco la soluzione [ %d ] --------------------------------\n", i);
-		int *suc;
-		suc = (int *) calloc(inst->nturbines, sizeof(int));
-		double *flux;
-		flux = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
-		double *x;
-		x = (double *) calloc(inst->nturbines*inst->nturbines, sizeof(double ));
+		int suc[inst->nturbines];
+		double flux[inst->nturbines*inst->nturbines];
+		double x[inst->nturbines*inst->nturbines];
 
 
 		double newcost = DBL_MAX;
 
-		int *best_temp;
-		best_temp = (int *) calloc((inst->nturbines+1), sizeof(int));
-		double *flux_best_temp;
-		flux_best_temp = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double ));
-		double *x_best_temp;
-		x_best_temp = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double ));
+		int best_temp[inst->nturbines+1];
+		double flux_best_temp[inst->nturbines*inst->nturbines];
+		double x_best_temp[inst->nturbines*inst->nturbines];
 	
 
 		printf("Eseguo PrimDijkstra\n");
@@ -1327,11 +1318,6 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 		double cost = objectiveFunction(inst, x, flux);
 		inst->zbest = cost;
 		printf("La soluzione trovata costa : %Le\n",(long double)cost );
-
-		inst->cablecost[inst->ncables-1] = 0;
-		inst->best_lb = objectiveFunction(inst, x,flux);
-		printf("La soluzione, senza considerare i cavi inventati costa : %Le\n",(long double)inst->best_lb );
-		inst->cablecost[inst->ncables-1] = 10e10;
 
 		for( int count = 1; cost != newcost; count++){
 			for(int i = 0; i < inst->nturbines && count != 1; i++){suc[i] = best_temp[i];best_temp[i] = 0;}
@@ -1360,24 +1346,29 @@ void execute10(instance *inst, CPXENVptr env, CPXLPptr lp)
 			//gp = popen("gnuplot -p","w");
 			//wait(1);
 		}
-		plotGraph(inst, x_best_temp, flux_best_temp, newcost);
+		//plotGraph(inst, x_best_temp, flux_best_temp, newcost);
 
 		fprintf(gp, "exit\n");
 		fclose(gp);
 		gp = popen("gnuplot -p","w");
 		if(newcost < best_cost)
 		{
-			//printf("new %d\n", newcost);
+			printf("new %lf\n", newcost);
+			
 			best_cost = newcost;
 			inst->zbest = newcost;
+			plotGraph(inst, x_best, flux_best, best_cost);
 			for(int h = 0; h < inst->nturbines; h++){best[h] = best_temp[h];}
-			for(int h = 0; h < inst->nturbines*inst->nturbines; h++){flux_best[h] = flux_best_temp[h];x_best[h] = x_best_temp[h];}
+			for(int h = 0; h < inst->nturbines*inst->nturbines; h++){
+				flux_best[h] = flux_best_temp[h];
+				x_best[h] = x_best_temp[h];
+			}
 
 		}
 		//wait(5);
 		
 	}
-	plotGraph(inst, x_best, flux_best, best_cost);
+	//plotGraph(inst, x_best, flux_best, best_cost);
 
 	fprintf(gp, "exit\n");
 	fclose(gp);
@@ -2005,17 +1996,13 @@ int PrimDijkstraMat(instance *inst)
 int unoOpt(instance *inst, int* suc, int* best)
 {
 	//printf("unoOpt\n");
-	int *predec;
-	predec = (int *) calloc(inst->nturbines, sizeof(int));
+	int predec[inst->nturbines];
 
-	int *newsuc;
-	newsuc = (int *) calloc(inst->nturbines, sizeof(int));
+	int newsuc[inst->nturbines];
 
-	double *flux;
-	flux = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double));
+	double flux[inst->nturbines*inst->nturbines];
 	
-	double *x; 
-	x = (double *) calloc((inst->nturbines*inst->nturbines), sizeof(double));
+	double x[inst->nturbines*inst->nturbines];
 	
 	double minobj = inst->zbest;
 	
@@ -2087,10 +2074,7 @@ int unoOpt(instance *inst, int* suc, int* best)
 			
 		}
 	}
-	free(newsuc);
-	free(predec);
-	free(flux);
-	free(x);
+
 	return 0;
 }
 
