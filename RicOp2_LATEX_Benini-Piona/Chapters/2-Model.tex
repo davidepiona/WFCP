@@ -6,8 +6,7 @@
 \label{chp:2-Model}
 %************************************************
 
-\section{Wind Farm Cable Problem Introduction}
-We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production of needs to be routed by some cables to the substation and then directed to the coast.
+\section{Wind Farm Cable Problem Introduction}We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production needs to be routed by some cables to the substation and then directed to the coast.
 To do that, each turbine must be connected through a cable to another turbine, and eventually to a substation.
 
 This problem complexity if the cable routing problem is strongly NP-hard according to [cite pdf].They have proved that the problem is NP-hard in two formulation. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
@@ -16,7 +15,7 @@ When designing a feasible cable routing it's necessarly to take in account a num
 
 \begin{itemize}
 \item since the energy flow is unsplittable, the energy flow leaving a turbine must be supported by a single cable; 
-\item power losses should be avoided beacuse it will cause revenue losses in the future; [?]
+\item power losses should be avoided beacuse it will cause revenue losses in the future;
 \item different cables, with different capacities and costs, are available; this means that it is important to choose the right cable to minimize the costs without affecting the revenues 
 \item the energy flow on each connection cannot exceed the capacity of the installed cable;
 \item due to the substation physical layout, a given maximum number of cables, say $C$, can be connected to each substation; 
@@ -58,12 +57,12 @@ Definition of $f_{i,j}$ :
 %\]
 Objective function: 
 \begin{equation}\label{eq:obj}
-	\min{\sum^n_{i=1} \sum^n_{j=1} \sum^K_{k} cost(k) \cdot dist(i,j) \cdot x^k_{i,j}}
+	\min{\sum^n_{i=1} \sum^n_{j=1} \sum^K_{k} cost(k) \cdot dist(i,j) \cdot x^k_{ij}}
 \end{equation}
 
 Constraints: 
 \begin{equation}\label{eq:numberCable}
-	\sum^n_{j = 1} y_{h,j} = 
+	\sum^n_{j = 1} y_{hj} = 
 	\begin{cases}
    1 \quad \mbox{if } P_h \geq 0, \quad \forall h=1,...,n \\
    0 \quad \mbox{if } P_h = -1
@@ -71,7 +70,7 @@ Constraints:
 \end{equation}
 
 \begin{equation}\label{eq:basestation}
-	\sum^n_{i =1} y_{i,h} \leq C, \quad \forall h \ | \ P_h = -1
+	\sum^n_{i =1} y_{ih} \leq C, \quad \forall h \ | \ P_h = -1
 \end{equation}
 
 \begin{equation}\label{eq:flux}
@@ -79,7 +78,7 @@ Constraints:
 \end{equation}
 
 \begin{equation}\label{eq:oneCable}
-	y_{i,j} = \sum^K_{k=1} x^k_{i,j}, \quad i,j = 1,...,n
+	y_{i,j} = \sum^K_{k=1} x^k_{ij}, \quad i,j = 1,...,n
 \end{equation}
 
 \begin{equation}\label{eq:capacity}
