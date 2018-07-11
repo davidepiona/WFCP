@@ -9,7 +9,7 @@
 \section{Wind Farm Cable Problem Introduction}We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production needs to be routed by some cables to the substation and then directed to the coast.
 To do that, each turbine must be connected through a cable to another turbine, and eventually to a substation.
 
-This problem complexity if the cable routing problem is strongly NP-hard according to [cite pdf].They have proved that the problem is NP-hard in two formulation. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
+This problem complexity if the cable routing problem is strongly NP-hard according to \cite{wfcp}. They have proved that the problem is NP-hard in two formulation. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
 
 When designing a feasible cable routing it's necessarly to take in account a number of constraints. Here we list some of them and then we'll describe the mathematical model that realizes those constraints. Our model is based on the following requirements:
 
@@ -21,14 +21,11 @@ When designing a feasible cable routing it's necessarly to take in account a num
 \item due to the substation physical layout, a given maximum number of cables, say $C$, can be connected to each substation; 
 \item cable crossing should be avoided. (we will discuss this problem in the next subsection)
 \end{itemize}
-
-[è corretta questa introduzione di K e n?]\\
-
 Let $K$ denote the number of different types of cables that can be used and let $n$ be the number turbines. 
 
-Definition of $y_{i,j}$ :
+Definition of $y_{ij}$ :
 \[
-	y_{i,j} =
+	y_{ij} =
    \begin{cases}
    1 \quad \mbox{if arc } (i,j) \mbox{ is constructed} \\
    0 \quad \mbox{otherwise.} 
@@ -36,20 +33,20 @@ Definition of $y_{i,j}$ :
    \forall \,i,j = 1, ..., n 
 \]
 \[
-	y_{i,i} = 0, \quad \forall i,i= 1, ... n 
+	y_{ii} = 0, \quad \forall i= 1, ... n 
 \]
-Definition of $x^k_{i,j}$ :
+Definition of $x^k_{ij}$ :
 \[
-	x^k_{i,j} =
+	x^k_{ij} =
    \begin{cases}
    1 \quad \mbox{if arc } (i,j) \mbox{ is constructed with cable type k} \\
    0 \quad \mbox{otherwise.} 
    \end{cases}
    \forall \,i,j = 1, ..., n \ \forall \ k = 1,... K
 \]
-Definition of $f_{i,j}$ :
+Definition of $f_{ij}$ :
 \[
-	f_{i,j} \geq 0, \quad \forall i,j= 1, ... n
+	f_{ij} \geq 0, \quad \forall i,j= 1, ... n
 \]
 
 %\[
@@ -78,7 +75,7 @@ Constraints:
 \end{equation}
 
 \begin{equation}\label{eq:oneCable}
-	y_{i,j} = \sum^K_{k=1} x^k_{ij}, \quad i,j = 1,...,n
+	y_{ij} = \sum^K_{k=1} x^k_{ij}, \quad i,j = 1,...,n
 \end{equation}
 
 \begin{equation}\label{eq:capacity}
@@ -91,7 +88,7 @@ Constraints \ref{eq:oneCable} impose that only one type of cable can be selected
 Constraints \ref{eq:flux} are flow conservation constraints: the energy exiting each node $h$ is equal to the energy entering $h$ plus the power production of the node. 
 Constraints \ref{eq:capacity} ensure that the flow does not exceed the capacity of the installed cable.
 Constraints \ref{eq:numberCable} impose that only one cable can exit a turbine and that no one cable can exit from the substation. 
-Constraint \ref{eq:basestation} imposes the maximum number of cables ($C$) that can enter in a substation, depending on the data of the instance. The \ref{img:wfcp} image shows an example of a graphical solution to the cable routing problem.
+Constraint \ref{eq:basestation} imposes the maximum number of cables ($C$) that can enter in a substation, depending on the data of the instance. The image \ref{img:wfcp} shows an example of a graphical solution to the cable routing problem.
 
 \begin{center}
 	\includegraphics[scale=0.4]{Graphics/wfcp.png}
@@ -100,7 +97,7 @@ Constraint \ref{eq:basestation} imposes the maximum number of cables ($C$) that 
 \end{center}
 	
 \section{Crossing Cables}
-According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged in practice as building one cable on top of another is more expensive and increases the risk of cable damages.\\
+According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged in practice as building one cable on top of another is more expensive and increase the risks of cable damages.\\
 
 In order to evaluate if two arches cross we used the Cramer Method: given the arc $a$ between $P_1$ and $P_2$ and the arc $b$ between $P_3$ and $P_4$. We define the coordinates of a general point as: $P_j = (X_i, y_i)$. \\
 Using the Cramer method we have:

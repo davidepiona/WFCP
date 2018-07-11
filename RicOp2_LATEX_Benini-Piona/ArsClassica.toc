@@ -70,3 +70,5 @@
 \contentsline {chapter}{\numberline {D}{Performance Profile}}{31}{Appendix.a.D}
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {E}{Performance Variability and Random Seed}}{33}{Appendix.a.E}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {}{Bibliography}}{35}{section*.8}

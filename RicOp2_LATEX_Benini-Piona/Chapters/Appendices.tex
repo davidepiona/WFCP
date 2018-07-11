@@ -103,10 +103,14 @@ Here we describe all the parameter in a ready-to-use list of options:
 \end{itemize}
 
 \chapter{Performance Profile}
-
-\chapter{Performance Variability and Random Seed}
 un'altra appendice che potremmo mettere è quella su gnuplot .. noi l'abbiamo utilizzato in qualche modo particolare rispetto ad altri gruppi o abbiamo fatto come tutti? 
 
+\chapter{Performance Variability and Random Seed}
+The performance of MIP solvers is subject to some variability that appears when changing from different computing platforms.The literature case \cite{danna2008performance}, shows us that it could happen that the same instance, with the same code is solved at the root node in one platform, and requires 1426 nodes in another. It is even possible to have different results even if we’re comparing two runs in different partition of the same machine. According to \cite{lodi2013performance} also the permutation of rows and/or columns of a model could lead to different performance. The performance variability is common for all the different MIP solvers. 
+The reason of that, in a simplified view, is that the small differences of precision between different environment can lead to different branching variables. Infact the Branch and Bound approach is defined “chaotic” because little variations lead to big changes. \\
+In literature there are some approaches to this problem and also exploiting this situation for better overall solver performance: developing pseudo-cost formulas that selects the branching variables in a more robust way or to try some different basis and evaluate which is the best alternative (this solution adds a computational overhead). \\
+Also CPLEX offers a possible solution giving the random seed parameter that can be used to change the initialization of the random number generator that is used in some internal operations, with the purpose also to speed up the computation. The random seed  enforces the random variability giving the possibility to collect statistics of N different runs for more comparable results. \\
+For the purpose of our research the performance variability is not a central question, however it is important for two reasons. First, to understand that the same code applied to the same instance can lead to different solution paths depending on the environments. Second, because a variability means that it is possible to take different choices, that means there’s a way to choose better and improve again the performances. 
 
 
 

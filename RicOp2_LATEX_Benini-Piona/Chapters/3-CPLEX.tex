@@ -11,7 +11,7 @@
 We simply create the linear programming model and then we pass it to CPLEX for the optimization. The performances, as we will notice for all the methods, depends on the instance: we noticed the power of CPLEX that find the optimal solution in few seconds, and in the meantime we discovered that some instances takes many hours to be solved by our machines. 
 The main steps of our code in this phase are: 
 \begin{itemize}
-\item Read the input files, the command line parameter and parse them;
+\item Read the input files and the command line parameter and parse them;
 \item Memorize turbines and cables;
 \item Develop the specific linear programming model;
 \item Call CPX\_INT\_OPT that optimizes the instance;
@@ -21,7 +21,7 @@ The main steps of our code in this phase are:
 
 \subsection{Relaxed Mode}
 Sometimes there are constraints that risk to block the improving of the solution or to make \textsc{CPLEX} take long time before to find a feasible solution. \\
-To avoid those situation it is possible to \textit{"relax"} some constraints in order to make faster the process of searching the first solution. The main steps are to add a slack variable $\geq 0$ in the model and then add this variable also in the objective function multiplied for a constant reasonably large. In this way, even if \textsc{CPLEX} could find a wrong initial solution, it’s probable that this solution will rapidly get better and became correct. Anyway the choice to relax some constraint should not impact on the optimal solution because of the very high objective function. \\
+To avoid those situation it is possible to \textit{"relax"} some constraints in order to make faster the process of searching the first solution. The main steps are to add a slack variable $\geq 0$ in the model and then add this variable also in the objective function multiplied for a constant reasonably large. In this way, even if \textsc{CPLEX} could find a wrong initial solution, it’s probable that this solution will rapidly get better and became correct. Anyway the choice to relax some constraint should not affect the optimal solution because of the very high impact on the objective function. \\
 In our case we found three constraints that could be relaxed: the maximum number $C$ of edges entering in a substation, the flux losses and (for some heuristic algorithm) the need to have one big connected component that connects all the arcs. \\
 The first constraint can be relaxed in this way:
 \[
@@ -41,7 +41,7 @@ And finally it is possible to add to the relaxed constraint $f^{R_2}_{obj} (x,y,
 \[
 \sum^n_{j=1} y_{ij} < 1 \quad \forall i = 1, ... n
 \]
-
+Those are only three different possibility that we can activate in our algorithms; the second and the third options comes out thinking about heuristics algorithm, while the first option can be applied in all the algorithms. 
 \subsection{CPLEX Heuristics-Params}
 The \textsc{CPLEX} code contains some heuristic procedure; being integrated into branch \& cut, they can speed the final proof of optimality, or they can provide a suboptimal but high-quality solution in a shorter amount of time than by branching alone. With default parameter settings, \textsc{CPLEX} automatically invokes the heuristics when they seem likely to be beneficial. However it is possible to adapt them to our specific case and instances, changing the frequency of activation of these procedure by setting some \textsc{CPLEX} parameter. We mainly analized two of them:
 \begin{itemize}
@@ -69,7 +69,7 @@ wants them applied lazily, not before needed. Lazy constraints are only (and alw
 In this method we have added the no-crossing constraint calling the \textit{lazy constraint callback} (named "LazyConstraintCallBack") each time the solver find an integer feasible solution. \\
 The algorithm starts with the creation of the model, and the lazy constraint callback is installed to make \textsc{CPLEX} call it when needed. Then, the \textsc{CPLEX} solver starts to resolve the model applying the branch-and-cut technique. When \textsc{CPLEX} finds an integer feasible solution the lazy constraint callback is called. The solution that we have now is an integer solution of the problem where, perhaps, some of
 the arcs intersects. Hence, starting from this solution we have to check if there are cables crossing and, if there are any, we have to add the corresponding constraints. In this way only necessary constraints are added and \textsc{CPLEX} will make sure that these constraints will be satisfied before producing any future solution of the problem.\\
-The algorithm terminates when \textsc{CPLEX} find the optimal integer solution without crossing. \\
+The algorithm terminates when \textsc{CPLEX} find the optimal integer solution without crossing, or when the \textit{timelimit} is reached. \\
 Different from the loop method, \textsc{CPLEX} generate the optimal solution only for the final model, adding the constraints during the resolution of the problem: this tendentially leads to the addition of more constraints respect to the loop method, hence, in some cases, leading to a slower execution.
 
 \section{Results}
