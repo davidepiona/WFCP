@@ -1970,7 +1970,10 @@
     <bcf:citekey order="1">wfcp</bcf:citekey>
     <bcf:citekey order="2">wfcp</bcf:citekey>
     <bcf:citekey order="3">wfcp</bcf:citekey>
-    <bcf:citekey order="4">nedlin2017ant</bcf:citekey>
+    <bcf:citekey order="4">wfcp</bcf:citekey>
+    <bcf:citekey order="5">nedlin2017ant</bcf:citekey>
+    <bcf:citekey order="6">danna2008performance</bcf:citekey>
+    <bcf:citekey order="7">lodi2013performance</bcf:citekey>
     <bcf:citekey order="0">*</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->

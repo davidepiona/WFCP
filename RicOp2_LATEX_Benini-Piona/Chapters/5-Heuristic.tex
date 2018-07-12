@@ -10,10 +10,9 @@ For this reason we have decided to implement some algorithms that, instead of so
 Then, in the following section, we are going to describe some heuristic methods that iteratively execute a specific procedure trying to obtain consecutively a better solution.
 \section{Dijkstra}
 Dijkstra's algorithm is an algorithm for finding the shortest paths between nodes in a graph, it was conceived by computer scientist Edsger W. Dijkstra in 1956 and published three years later. We use the variant that fixes a single node as the "source" node and finds the shortest path from the source node to all other nodes in the graph producing the shortest-path tree. \\
-Per evitare che attacchi un solo ramo alla substation si è dato alla substation una distanza (fittizia) minore dalle turbine così che le turbine siano invogliate a creare archi con la substation.  
-(come funziona l'algoritmo???)
-Fa schifo
-The resulting graph could not respect the $C$ constraint and can have crossing cables. 
+In the Dijkstra algorithm initially all the nodes are marked with distance infinite; then step by step we explore all the neighbor and (in lower than the actual) we update the distance. At the end we use the shortest edges to connect all the nodes. \\
+In our solution we personalized a little bit the algorithm. In order to avoid that only one edge is connected with the substation, we have decided a fake distance between turbines and the substation so that there are more connection between the turbines and the substation.\\
+It is important to note that the resulting graph could not respect the $C$ constraint and can have crossing cables. 
 
 \section{GRASP}
 The GRASP algorithm, that means \textit{Greedy Randomized Adaptive Search Procedures}, is a metaheuristic algorithm first introduced by Feo and Resende (1989). GRASP typically consists of iterations made up from successive constructions of a greedy randomized solution and subsequent iterative improvements of it through a local search. GRASP is a multi-start metaheuristic. \\
@@ -25,7 +24,7 @@ Our algorithm execute iteratively all of these steps, at the end of the time thi
 This intuitive algorithm can mitigate the threat to finish always in a local minimum (\textit{1-Opt}) with the randomness added by the greedy randomized phase.\\ 
 With this algorithm there isn't the mathematical proof that the optimum will be reached, but the probability of \textit{"to not reach the optimum"} is infinitely close to 1 (obviously considering an infinite number of executions). 
 \subsection{1-Opt} \label{subsec:1opt}
-It belongs to the category \textit{Refining Heuristic Algorithm}, therefore it tries to                                                                  improve an already existing solution.\\                                                         
+It belongs to the category \textit{Refining Heuristic Algorithm}, therefore it tries to improve an already existing solution.\\                                                         
 Basically it tries to substitute an arc with another one that reduces the cost of the objective function. \\
 Obviously the end of this algorithm will be inside a local minimum; therefore the results of this procedure will be a local optimum. 
 
@@ -36,9 +35,38 @@ In our solution the algorithm start from (???) and applies a \textit{1-OPT} loca
 The capacity of the algorithm to go away from the local optimum is determined by the number of moves that the memory structure can stores, and it directly influences the diversification stage. This parameter is called \textit{tabu tenure} and it is really difficult to decide a-priori its size for two reasons: if the \textit{tabu tenure} is too high the risk is to "freeze" the algorithm, in the sense that only few moves are allowed, and, conversely, if it is too low is not assure that the algorithm could escape from all
 the local optimums. So, the choice of \textit{tabu tenure} has to be tested in some runs of the algorithm depending on the instance that has to be solved.(cosa abbiamo scelto noi??)\\
 (c'è da spiegare qualcosa per quanto riguarda il fatto che quando ci sono le mosse peggiorative la nostra soluzione ritorna infeasible a causa dei crossing e delle perdite di flusso???)
-\section{Ant Algorithm}
-[??? questo algoritmo è esattamente uguale a quello nel pdf .. credo che vada cambiato un po']
-From the \cite{nedlin2017ant} research: 
+\section{Ant Colony Algorithm}
+Ant Colony Optimization (ACO) is a heuristic optimization algorithm. The main idea is follow what the ants do when them find food. An ant moves randomly in the world leaving pheromones, if it does not find anything continue on its path and the pheromone decay over time. When it finds food, take it and return to its anthill. It retrace the path that has done to arrive at the food doubling the normal quantity of pheromones. The more pheromones on the path make higher the chance that a new ant follows this path. When another ant follows this path reinforced the line of pheromones.\\
+With the same logic we can create algorithm \ref{alg:Ant} for our problem. Initially every edges of the solution is chosen with the same probability, starting from this solution the algorithm simulates the leaving of pheromones, incrementing the probability of the edges chosen in base on the quality of solution and decreasing the other edges of a fixed percentage to simulate the decay over time of pheromones. Then the algorithm repeat the choice of solution basing of the new probability. Doing so, after some repetition of the loop the probability to choice an edges of the optimal solution should be greater than the other edges.\\
+
+\begin{algorithm}
+\caption{: Ant Colony Optimization} \label{alg:Ant}
+\begin{algorithmic} 
+\STATE{\textbf{Input:} Graph $G = (E, V )$, function cost: $P(E) \rightarrow {\rm I\!R}$}
+\STATE{\textbf{Data:} Pheromone Values $P_E : E \rightarrow {\rm I\!R}$, Current solution $C \subseteq $}
+\STATE{\textbf{Output:} $S \subseteq E$}
+\STATE {Initialize pheromone values}
+\REPEAT
+\STATE {\quad $C \leftarrow$ \textsc{findPath}$(G, P_E)$}
+\STATE {\quad $P_E \leftarrow$ \textsc{updatePheromones}$(C, P_E)$}
+\STATE {\quad \textbf{if} cost($C$) < cost($S$) \textbf{then}}
+\STATE {\quad \quad $S \leftarrow C$}
+\UNTIL {\textit{time limit reached}}
+\STATE {return $S$}
+\end{algorithmic}
+\end{algorithm}
+
+There are a lot of way to implements the logic of the algorithm as we have find in \cite{nedlin2017ant}, every method for our problem is based on how is implemented findPath function. We chosen to implement the ant colony algorithm based on the Kruscal’s algorithm. \\
+The Kruscal algorithm (bibliografia???) is meant to find the minimum coating tree, the tree that link all nodes and that has the sum of the weight of its edges as minimum. The main idea is order the edges with increasing weight and choice the new edge to add at the tree that one that has the minimum cost and does not make cycle with the edges already selected.\\
+We realized the Ant algorithm in Kruscal approach: as a basis we use again the common ACO algorithm before presented but with a modified FindPath function. In this approach we selected the new edge to add at the tree choosing randomly a node and get with the probability given by the pheromones an out edge from the node chosen. The out edge must satisfy some conditions:
+\begin{enumerate}
+\setlength{\parskip}{0pt}
+\setlength{\itemsep}{0pt plus 1pt}
+\item Do not crossing, this condition can be forced if there aren’t others choice
+\item Do not cycles
+\end{enumerate}
+This operation repeats until all nodes are linked.
+
 \begin{algorithm}[H]
 \caption{: FindPath in Kruskal Approach} \label{alg:SC}
 \begin{algorithmic} 
@@ -57,7 +85,37 @@ From the \cite{nedlin2017ant} research:
 \UNTIL {$L$ \textit{is empty}}
 \end{algorithmic}
 \end{algorithm}
+
 \section{Results}
 
-
-
+\begin{table}[]
+\begin{tabular}{lllllll}
+\hline
+Instance & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Tabu Search \\ ( TL 10m)\end{tabular}} & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}GRASP \\ ( TL 10m)\end{tabular}} & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Ant Algorithm\\ ( TL 10m)\end{tabular}} \\ \hline
+         & time                                    & solution                                   & time                                 & solution                                & time                                    & solution                                    \\ \hline
+data\_01 & 600                                     & 2.22E+07                                   & 600                                  & 2.24E+08                                & 600                                     & 2.24E+08                                    \\
+data\_02 & 600                                     & 2.42E+07                                   & 600                                  & 2.62E+07                                & 600                                     & 2.62E+07                                    \\
+data\_03 & 600                                     & 2.65E+07                                   & 600                                  & 2.85E+07                                & 600                                     & 2.85E+07                                    \\
+data\_04 & 600                                     & 2.96E+07                                   & 600                                  & 3.20E+07                                & 600                                     & 3.20E+07                                    \\
+data\_05 & 600                                     & 2.73E+07                                   & 600                                  & 2.30E+08                                & 600                                     & 2.30E+08                                    \\
+data\_06 & 600                                     & 2.71E+07                                   & 600                                  & 2.97E+07                                & 600                                     & 2.97E+07                                    \\
+data\_07 & 600                                     & 9.53E+06                                   &                                      &                                         & 600                                     &                                             \\
+data\_08 & 600                                     & 9.31E+06                                   &                                      &                                         & 600                                     &                                             \\
+data\_09 & 600                                     & 1.10E+07                                   & 600                                  & 2.13E+08                                & 600                                     & 2.13E+08                                    \\
+data\_10 &                                         &                                            & 600                                  & 1.22E+07                                & 600                                     & 1.22E+07                                    \\
+data\_12 & 600                                     & 8.93E+06                                   & 600                                  & 1.00E+07                                & 600                                     & 1.00E+07                                    \\
+data\_13 & 600                                     & 9.65E+06                                   &                                      &                                         & 600                                     &                                             \\
+data\_14 & 600                                     & 1.07E+07                                   &                                      &                                         & time                                    &                                             \\
+data\_15 & 600                                     & 1.08E+07                                   & 600                                  & 1.22E+07                                & 600                                     & 1.22E+07                                    \\
+data\_16 & 600                                     & 8.55E+06                                   & 600                                  & 9.07E+06                                & 600                                     & 9.07E+06                                    \\
+data\_17 & 600                                     & 9.15E+06                                   & 600                                  & 9.59E+06                                & 600                                     & 9.59E+06                                    \\
+data\_18 & 600                                     & 9.27E+06                                   & 600                                  & 9.68E+06                                & 600                                     & 9.68E+06                                    \\
+data\_19 &                                         &                                            & 600                                  & 1.11E+07                                & 600                                     & 1.11E+07                                    \\
+data\_20 & 600                                     & 2.03E+11                                   & 600                                  & 2.02E+11                                & 600                                     & 2.02E+11                                    \\
+data\_21 & 600                                     & 2.03E+11                                   & 600                                  & 2.01E+11                                & 600                                     & 2.01E+11                                    \\
+data\_26 & 600                                     & 2.43E+07                                   & 600                                  & 2.48E+07                                &                                         & 2.48E+07                                    \\
+data\_27 & 600                                     & 2.55E+07                                   & 600                                  & 2.57E+07                                & 600                                     & 2.57E+07                                    \\
+data\_28 & 600                                     & 2.01E+11                                   & 600                                  & 2.01E+11                                & 600                                     & 2.01E+11                                    \\
+data\_29 & 600                                     & 2.01E+11                                   & 600                                  & 2.01E+11                                & 600                                     & 2.01E+11                                    \\ \hline
+\end{tabular}
+\end{table}

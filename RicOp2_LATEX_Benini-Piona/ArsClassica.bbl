@@ -19,6 +19,33 @@
 
 \refsection{0}
   \datalist[entry]{nyt/global//global/global}
+    \entry{danna2008performance}{inproceedings}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=2673530b98b52377b98330170f098dc9}{%
+           family={Danna},
+           familyi={D\bibinitperiod},
+           given={Emilie},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{2673530b98b52377b98330170f098dc9}
+      \strng{fullhash}{2673530b98b52377b98330170f098dc9}
+      \strng{bibnamehash}{2673530b98b52377b98330170f098dc9}
+      \strng{authorbibnamehash}{2673530b98b52377b98330170f098dc9}
+      \strng{authornamehash}{2673530b98b52377b98330170f098dc9}
+      \strng{authorfullhash}{2673530b98b52377b98330170f098dc9}
+      \field{sortinit}{D}
+      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Workshop on Mixed Integer Programming, Columbia University, New York}
+      \field{number}{08}
+      \field{title}{Performance variability in mixed integer programming}
+      \field{volume}{20}
+      \field{year}{2008}
+    \endentry
     \entry{wfcp}{article}{}
       \name{author}{2}{}{%
         {{uniquename=2,uniquepart=given,hash=d908556c6bc84f003b0a7c10e91d82b8}{%
@@ -98,6 +125,52 @@
       \field{labeltitlesource}{title}
       \field{title}{Lezioni di ricerca operativa.}
       \field{year}{1995}
+    \endentry
+    \entry{lodi2013performance}{incollection}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=8f06c522270f9d0be3d58eef6505039b}{%
+           family={Lodi},
+           familyi={L\bibinitperiod},
+           given={Andrea},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=efcd61f1539308e084f0de25c351f29d}{%
+           family={Tramontani},
+           familyi={T\bibinitperiod},
+           given={Andrea},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {INFORMS}%
+      }
+      \strng{namehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{fullhash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{bibnamehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{authorbibnamehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{authornamehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{authorfullhash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \field{sortinit}{L}
+      \field{sortinithash}{2c7981aaabc885868aba60f0c09ee20f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Theory Driven by Influential Applications}
+      \field{title}{Performance variability in mixed-integer programming}
+      \field{urlday}{9}
+      \field{urlmonth}{7}
+      \field{urlyear}{2018}
+      \field{year}{2013}
+      \field{urldateera}{ce}
+      \field{pages}{1\bibrangedash 12}
+      \range{pages}{12}
+      \verb{urlraw}
+      \verb https://pubsonline.informs.org/doi/pdf/10.1287/educ.2013.0112
+      \endverb
+      \verb{url}
+      \verb https://pubsonline.informs.org/doi/pdf/10.1287/educ.2013.0112
+      \endverb
     \endentry
     \entry{nedlin2017ant}{thesis}{}
       \name{author}{1}{}{%
