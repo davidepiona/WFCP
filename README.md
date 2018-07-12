@@ -64,10 +64,13 @@
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 0 -time_limit 300 -relax 0
 
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 1 -time_limit 300 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 1 -time_limit 600 -relax 3
 
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 2 -time_limit 300 -time_loop 60 -relax 3
+./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 2 -time_limit 600 -time_loop 120 -relax 3
 
 ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 3 -time_limit 300 -relax 3
+----> ./wfcp -fc '/home/michele/Scrivania/RO2/WFCP/data/xxxx.cbl' -ft '/home/michele/Scrivania/RO2/WFCP/data/xxxx.turb' -model 0 -CC 3 -time_limit 600 -relax 3
 ```
 ## MathHeuristic method with ciplex
 Hard fixing

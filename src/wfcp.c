@@ -138,9 +138,10 @@ int makeScript(instance *inst)
 
 int plotGraph(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
-	double *x;
-	x = (double *) calloc(CPXgetnumcols(env, lp), sizeof(double)); 
-	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
+	int ncols = CPXgetnumcols(env, lp);
+	double x[ncols]; 
+
+	CPXgetx(env, lp, x, 0, ncols -1);
 	FILE *f;
 	char filename[30];
 	char p[8];
@@ -258,16 +259,6 @@ double objectiveFunction(instance *inst, double*x, double*flux)
 		}
 	}
 	//printf("\n\n\nLa soluzione trovata costa di lunghezza dei cavi: %Le\n", cost);
-	if(cost < 1)
-	{
-		for(int i = 0; i < inst->nturbines; i++){
-			for(int j = 0; j < inst->nturbines; j++)
-			{
-				//if(x[i+j*inst->nturbines] < 0.5)continue;
-				//printf("x [ %d, %d ] = %f  dist : %f\n",i,j,x[i+j*inst->nturbines],dist(i,j,inst));
-			}
-		}
-	}
 	int n = 0;
 	for(int i = 0; i < inst->nturbines; i++){
 		for(int j = 0; j < inst->nturbines; j++){
@@ -465,7 +456,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 		for(int i = 0; i < inst->nturbines ; i++)
 		{
 			sprintf(cname[0], "s ( %d)", i);
-			double obj = 1e9;
+			double obj = BIG_M_CABLE;
 			double ub = CPX_INFBOUND;
 			if ( CPXnewcols(env, lp, 1, &obj, &zero, &ub, &continuous, cname) ) 
 				print_error(" wrong CPXnewcols on s var.s");
@@ -729,31 +720,25 @@ void execute2(instance *inst, CPXENVptr env, CPXLPptr lp)
 	while(!done && solved)
 	{
 		if(inst->cableReg == 1) {CPXsetintparam(env, CPX_PARAM_MIPCBREDLP, CPX_OFF);	installheuristicCallback(env,lp,inst);}
-		if(inst->timeloop > 0)
-			mip_timelimit(env, CPX_INFBOUND, inst, inst->timeloop*times);
+		if(inst->timeloop > 0 && inst->timeloop*times < inst->timelimit)
+			mip_timelimit(env, CPX_INFBOUND, inst, inst->timeloop*times );
+		else{
+			printf("time limit\n");
+			mip_timelimit(env, CPX_INFBOUND, inst, inst->timelimit - inst->timeloop*(times-1));
+		}
+		
 		CPXmipopt(env,lp);     
 		CPXgetbestobjval(env, lp, &inst->best_lb); 
 		mip_update_incumbent(env, lp, inst);
 		plotGraph(env, lp, inst);
-		done = 1;
-		if(nocross_separation(env, lp, inst))
-		{
-			done = 0;
-		}
-		else
+		
+		if(!nocross_separation(env, lp, inst))
 		{
 			printf("NO CROSS CONSTRAINTS TO ADD\n");
-			mip_update_incumbent(env, lp, inst);
-			double t = inst->timelimit - second() + inst->tstart;
-			printf("\n\n time %lf \n\n",t);
-			mip_timelimit(env, CPX_INFBOUND, inst, t);
-			if(CPXsetdblparam(env,CPX_PARAM_EPGAP,0.0))
-				print_error("Error set of minimum gap");
-			 done = 0;
-			 solved --;
 		}
 		if(time_limit_expired(inst, inst->timelimit))
 			solved = 0;
+		times ++;
 	}
 }
 /***************************************************************************************************************************/
@@ -808,13 +793,19 @@ void execute4(instance *inst, CPXENVptr env, CPXLPptr lp)
 			done = 1;
 		}
 		
-		int *index;
-		char *lu;
-		double *bd;
+		int index[inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines ];
+		char lu[inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines ];
+		double bd[inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines ];
+		for (int i = 0; i < inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines ; i++)
+		{
+			index[i] = 0;
+			lu[i] = 0;
+			bd[i] = 0;
+		}
 
-		index = (int *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(int ));
-		lu = (char *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(char ));
-		bd = (double *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(double ));
+		//index = (int *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(int ));
+		//lu = (char *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(char ));
+		//bd = (double *) calloc(inst->nturbines * inst->nturbines * inst->nturbines * inst->nturbines , sizeof(double ));
 		
 		mip_reload_solution(env, lp, inst->ncols,inst, inst->best_sol);
 		int nzcnt = setHardFix( env,  lp, inst, index, lu, bd);
@@ -830,9 +821,6 @@ void execute4(instance *inst, CPXENVptr env, CPXLPptr lp)
 		
 		resetHardFix( env,  lp, inst, index, lu, bd, nzcnt );
 		
-		free(index);
-		free(lu);
-		free(bd);
 		
 		
 		if(time_limit_expired(inst, inst->timelimit) || times > 1000)
@@ -1718,8 +1706,7 @@ int installheuristicCallback( CPXENVptr env, CPXLPptr lp, instance *inst)
 int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 {
 	int count = 0;
-	double *x;
-	x = (double *) calloc(CPXgetnumcols(env, lp), sizeof(double)); 
+	double x[CPXgetnumcols(env, lp)]; 
 	CPXgetx(env, lp, x, 0, CPXgetnumcols(env, lp) -1);
 	//printf("\n\nCONSTRAINT ADD :\n");
 	for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
@@ -1761,7 +1748,7 @@ int nocross_separation(CPXENVptr env, CPXLPptr lp, instance *inst)
 			}
 		}
 	}
-
+	printf("count %d\n",count );
 	return count;
 }
 

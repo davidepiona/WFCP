@@ -6,7 +6,7 @@ cd ..
 dir=$(date +"%Y-%m-%d_%H-%M-%S")
 mkdir runs/${dir}
 path=$(pwd)
-settings="-model 1 -CC 10 -time_limit 600 -names 1"
+settings="-model 0 -CC 2 -time_limit 600 -time_loop 120 -relax 3 -names 1"
 cd ${path}'/data'
 count=0
 for c in `find . -type f -name '*.turb' | cut -c 3-9 |sort`
