@@ -123,7 +123,11 @@ int mip_update_incumbent(CPXENVptr env, CPXLPptr lp, instance *inst)
 			inst->second_zbest = mip_value(env, lp);
 			CPXgetx(env, lp, inst->second_best_sol, 0, inst->ncols-1);	
 		}
-
+		if(inst->second_zbest == CPX_INFBOUND)
+		{
+			inst->second_zbest = inst->zbest;
+			for(int i =0; i< inst->ncols; i++){ inst->second_best_sol[i] = inst->best_sol[i]; }
+		}
 		if ( VERBOSE >= 40 ) 
 			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf , the second best solution is %lf <<<<<<<<\n", inst->zbest, inst->tbest, inst->second_zbest);
 		newsol = 1;
@@ -162,7 +166,11 @@ int mip_update_incumbent(instance *inst, double *x, double z)
 			inst->second_zbest = z;
 			inst->second_best_sol = x; 	
 		}
-
+		if(inst->second_zbest == CPX_INFBOUND)
+		{
+			inst->second_zbest = inst->zbest;
+			for(int i =0; i< inst->ncols; i++){ inst->second_best_sol[i] = inst->best_sol[i]; }
+		}
 		if ( VERBOSE >= 40 ) 
 			printf("\n >>>>>>>>>> incumbent update of value %lf at time %7.2lf , the second best solution is %lf <<<<<<<<\n", inst->zbest, inst->tbest, inst->second_zbest);
 		newsol = 1;
@@ -998,7 +1006,7 @@ int updatepheromones(double *pheromones, double* x, double* flux, double *cost, 
 				//printf("Costo dell'arco: %f\n",cable );
 				double ph = (1-p) * pheromones[i+j*nodes] + cable + z;
 
-				printf("Feromoni lasciati sull'arco ( %d - %d ) -> %f\n",i,j,ph);
+				//printf("Feromoni lasciati sull'arco ( %d - %d ) -> %f\n",i,j,ph);
 				pheromones[i+j*nodes] = ph;		
 			}
 			if(pheromones[i+j*nodes] < 0.0)

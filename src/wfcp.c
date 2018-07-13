@@ -1440,7 +1440,8 @@ int execute11(instance *inst, CPXENVptr env, CPXLPptr lp)
 			best_cost = objectiveFunction(inst, best_x, best_flux);
 			inst->zbest=best_cost;
 
-			plotGraph(inst, best_x, best_flux, best_cost);
+			printf("NEW BEST SOLUTION : %lf\n",best_cost );
+			//plotGraph(inst, best_x, best_flux, best_cost);
 			/*
 			printf("Plotto migliore soluzione trovata\n");
 			fprintf(gp, "exit\n");
