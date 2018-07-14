@@ -1144,19 +1144,19 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 	int thresh = 10;
 	//int changethresh = 40;
 
-	printf("Eseguo PrimDijkstra\n");
+	//printf("Eseguo PrimDijkstra\n");
 	PrimDijkstra(inst->mat, inst->nturbines, suc, 0);
 
-	printf("Calcolo il flusso\n");
+	//printf("Calcolo il flusso\n");
 	fluxCalculator(suc, flux, inst->nturbines);
 	
-	printf("Metto i cavi\n");
+	//printf("Metto i cavi\n");
 	cableregularize(inst, x, flux );
 
-	printf("Calcolo quanto costa la solutione\n");
+	//printf("Calcolo quanto costa la solutione\n");
 	cost = objectiveFunction(inst, x,flux);
 	inst->zbest = cost;
-	printf("La soluzione trovata costa : %Le\n",(long double)cost );
+	//printf("La soluzione trovata costa : %Le\n",(long double)cost );
 
 	/*inst->cablecost[inst->ncables-1] = 0;
 	inst->best_lb = objectiveFunction(inst, x);
@@ -1184,23 +1184,23 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 		{
 			thresh = 10;
 		}
-		printf("\n\n----------------------- RUN #%d ----------------------------------------\n", count );
+		//printf("\n\n----------------------- RUN #%d ----------------------------------------\n", count );
 		if(cost == newcost)
 		{
 			if(count%20)thresh = thresh + 10;
-			printf("FERMO\n");
+			//printf("FERMO\n");
 		}
 		else if(cost < newcost)
 		{
-			printf("RISALGO\n");
+			//printf("RISALGO\n");
 
 		}
 		else if(newcost < cost)
 		{
-			printf("SCENDO\n");
+			//printf("SCENDO\n");
 		}
 		else {
-			printf("-----------------------------------------------------------------------------------------------------------------------cost : %f  new : %f\n", cost,newcost);
+			//printf("-----------------------------------------------------------------------------------------------------------------------cost : %f  new : %f\n", cost,newcost);
 		}
 		//printf("------------------------------------------------ suc[%d] = %d \n", 0,suc[0]);
 		cost = (count == 1) ? cost : newcost;
@@ -1216,7 +1216,7 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 		//printf("Calcolo quanto costa la solutione\n");
 		newcost = objectiveFunction(inst, x_best,flux_best);
-		//printf("La soluzione trovata costa : %Le\n",(long double)newcost );
+		printf("%Le\n",(long double)newcost );
 
 		//printf("Plotto\n");
 		//plotGraph(inst, x_best, flux_best, newcost);
@@ -1231,8 +1231,8 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 			best_cost = newcost;
 			for(int h = 0; h < inst->nturbines; h++){best[h]=temp[h];}
 			//printf("best[%d] = %d \n", 0,best[0]);
-			printf("new cost %f\n",best_cost );
-			plotGraph(inst, x_best, flux_best, newcost);
+			//printf("new cost %f\n",best_cost );
+			//plotGraph(inst, x_best, flux_best, newcost);
 
 			/*fprintf(gp, "exit\n");
 			fclose(gp);
@@ -1246,20 +1246,20 @@ void execute9(instance *inst, CPXENVptr env, CPXLPptr lp)
 		if(newcost < 1)return;
 	}
 
-	printf("Calcolo il flusso\n");
+	//printf("Calcolo il flusso\n");
 	fluxCalculator(best, flux_best, inst->nturbines);
 
-	printf("Metto i cavi\n");
+	//printf("Metto i cavi\n");
 	cableregularize(inst, x_best, flux_best );
 
-	printf("Calcolo quanto costa la solutione\n");
+	//printf("Calcolo quanto costa la solutione\n");
 	best_cost = objectiveFunction(inst, x_best, flux_best);
 	inst->zbest = best_cost;
 	printf("La soluzione trovata costa : %Le\n",(long double)best_cost );
 
-	printf("Plotto\n");
+	//printf("Plotto\n");
 
-	plotGraph(inst, x_best, flux_best, best_cost);
+//	plotGraph(inst, x_best, flux_best, best_cost);
 	
 	//free(suc);
 	//free(best);
@@ -2068,7 +2068,7 @@ int unoOpt(instance *inst, int* suc, int* best)
 
 int tabuOpt(instance *inst, int* suc, int* best, int* tabulistout, int* tabulistin, int &etabu, int tabuthresh)
 {
-	printf("tabuopt\n");
+	//printf("tabuopt\n");
 	//printf("------------------------------------------------ suc[%d] = %d \n", 0,suc[0]);
 	int *predec;//[inst->nturbines];
 	predec = (int *) calloc(inst->nturbines, sizeof(int));
