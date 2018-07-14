@@ -1,4 +1,6 @@
 # WFCP
+You can find a simple documentation folder that contains the description of our project and how we implemented it. A folder data that contains the instancesthat we used. A folder runs that contains some test runs of our problem.
+Before the use, you must compile with the make file in the /src folder, then complete the string with this conditions and execute it from the folder bin.
 ## INPUT STRING CONDITION
 * **fc**                    : input cables file
 * **ft**                    : input turbines file
