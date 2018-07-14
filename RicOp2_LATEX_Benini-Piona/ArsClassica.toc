@@ -31,50 +31,52 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.5}{Results}}{11}{section.3.5}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}{Matheuristic Methods}}{13}{chapter.4}
+\contentsline {chapter}{\numberline {4}{Matheuristic Methods}}{15}{chapter.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}{Hard Fixing}}{13}{section.4.1}
+\contentsline {section}{\numberline {4.1}{Hard Fixing}}{15}{section.4.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.1}{RINS Hard Fixing}}{14}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.1}{RINS Hard Fixing}}{16}{subsection.4.1.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.2}{Soft Fixing}}{14}{section.4.2}
+\contentsline {section}{\numberline {4.2}{Soft Fixing}}{16}{section.4.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.2.1}{Asymmetric Soft Fixing}}{14}{subsection.4.2.1}
+\contentsline {subsection}{\numberline {4.2.1}{Asymmetric Soft Fixing}}{16}{subsection.4.2.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.2.2}{Soft Fixing RINS (asymmetric)}}{15}{subsection.4.2.2}
+\contentsline {subsection}{\numberline {4.2.2}{Soft Fixing RINS (asymmetric)}}{17}{subsection.4.2.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.3}{Results}}{15}{section.4.3}
+\contentsline {section}{\numberline {4.3}{Results}}{17}{section.4.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}{Heuristic Methods}}{17}{chapter.5}
+\contentsline {chapter}{\numberline {5}{Heuristic Methods}}{19}{chapter.5}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.1}{Prim-Dijkstra}}{17}{section.5.1}
+\contentsline {section}{\numberline {5.1}{Prim-Dijkstra}}{19}{section.5.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.2}{GRASP}}{17}{section.5.2}
+\contentsline {section}{\numberline {5.2}{GRASP}}{19}{section.5.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.2.1}{1-Opt}}{18}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.1}{1-Opt}}{20}{subsection.5.2.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.3}{Taboo Search}}{18}{section.5.3}
+\contentsline {section}{\numberline {5.3}{Tabu Search}}{21}{section.5.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.4}{Ant Colony Algorithm}}{19}{section.5.4}
+\contentsline {section}{\numberline {5.4}{Ant Colony Algorithm}}{21}{section.5.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.5}{Results}}{21}{section.5.5}
+\contentsline {section}{\numberline {5.5}{Results}}{23}{section.5.5}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Appendices}{23}{section*.7}
+\contentsline {chapter}{Appendices}{25}{section*.8}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {A}{CPLEX}}{25}{Appendix.a.A}
+\contentsline {chapter}{\numberline {A}{CPLEX}}{27}{Appendix.a.A}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {A.1}{Initialization of \textsc {CPLEX} Environment}}{25}{section.a.A.1}
+\contentsline {section}{\numberline {A.1}{Initialization of \textsc {CPLEX} Environment}}{27}{section.a.A.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {A.2}{Population of a problem}}{26}{section.a.A.2}
+\contentsline {section}{\numberline {A.2}{Population of a problem}}{28}{section.a.A.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {A.3}{\textsc {CPLEX} execution and setting \textsc {CPLEX} parameters}}{26}{section.a.A.3}
+\contentsline {section}{\numberline {A.3}{\textsc {CPLEX} execution and setting \textsc {CPLEX} parameters}}{28}{section.a.A.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {B}{Shell script}}{27}{Appendix.a.B}
+\contentsline {chapter}{\numberline {B}{Shell script}}{29}{Appendix.a.B}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {C}{Input string parameteres}}{29}{Appendix.a.C}
+\contentsline {chapter}{\numberline {C}{Input string parameteres}}{31}{Appendix.a.C}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {D}{GNU PLOT}}{31}{Appendix.a.D}
+\contentsline {chapter}{\numberline {D}{GNU PLOT}}{33}{Appendix.a.D}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {E}{Performance Profile}}{33}{Appendix.a.E}
+\contentsline {chapter}{\numberline {E}{Performance Profile}}{35}{Appendix.a.E}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {F}{Performance Variability and Random Seed}}{35}{Appendix.a.F}
+\contentsline {chapter}{\numberline {F}{Performance Variability and Random Seed}}{37}{Appendix.a.F}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {}{Bibliography}}{39}{section*.9}
