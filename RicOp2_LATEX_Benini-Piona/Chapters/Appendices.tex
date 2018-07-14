@@ -5,7 +5,86 @@
 \begin{appendices}
 %************************************************
 \chapter{CPLEX}
-Questo l'ho messo solo perchè nella tesina dei tuoi amici c'è un'appendice su CPLEX .. dacci un occhio e decidiamo se vogliamo qualcosa di simile o no.
+ILOG CPLEX is a tool for solving linear optimization problems, commonly referred to as Linear Programming (LP) problems, of the form:
+\[
+Maximize \ (or \ minimize): \quad \quad c_1 x_1 + c_2 x_2 + c_n x_n 
+\]
+\[
+Subject \ to: \quad \quad a_{11} x_1 + a_{12} x_2 + ... + a_{1n} x_n \sim b_1 
+\]
+\[
+\qquad \qquad \qquad \quad \ a_{21} x_1 + a_{22} x_2 + ... + a_{2n} x_n \sim b_2
+\]
+\[
+\qquad \qquad \qquad \quad \ ...
+\]
+\[
+\qquad \qquad \qquad \quad \ a_{m1} x_1 + a_{m2} x_2 + ... + a_{mn} x_n \sim b_m
+\]
+\[
+With \ these \ bounds: \qquad \qquad l_1 \leq x_1 \leq u_1
+\]
+\[
+\qquad \qquad \qquad \qquad \ \ \  ...
+\]
+\[
+\qquad \qquad \qquad \qquad \qquad \qquad \qquad l_n \leq x_n \leq u_n
+\]
+Where $\sim$ can be $\leq$, $\geq$ or $=$, and the upper bounds $u_i$ and lower bounds $l_i$ may be positive infinity, negative infinity, or any real number.\\
+In particular, we have used the \textsc{CPLEX} Callable Library, which is a C library, that allows the programmer to embed \textsc{CPLEX} optimizers in application written in C. Thus, we have used \textsc{CPLEX} as a tool for solving Mixed Integer Programming problems since our Wind Farm Cable Problem instances.\\
+In this appendix we want describe the main method that we use to create the \textsc{CPLEX} environment, to instantiate a LP problem and populate a problem object.
+
+\section{Initialization of \textsc{CPLEX} Environment}
+The first thing to do in an application that uses \textsc{CPLEX} is create a \textsc{CPLEX} environment:
+\begin{itemize}
+\item \textit{CPXENVptr env = CPXopenCPLEX(\&error)}: initializes a \textsc{CPLEX} environment and returns a pointer to it; the parameter is a pointer to an integer where an error code is placed by the routine.
+\end{itemize}
+
+Then a \textsc{CPLEX} problem object must be created:
+\begin{itemize}
+\item \textit{CPXLPptr lp = CPXcreateprob(env, \&error, "Name of problem")}: this method returns a pointer to the \textsc{CPLEX} problem object. The problem that is created is an LP minimization problem with zero constraints, zero variables and an empty constraint matrix.
+\end{itemize}
+
+\section{Population of a problem}
+Now we have initialize the environment and we must set the objective function and the constraints of our model.
+To add a variable in the our objective function we must use:
+\begin{itemize}
+\item \textit{CPXnewcols(env, lp, ccnt, \&obj, \&zero, \&ub, \&type, cname)}: adds ccnt empty columns to the specified \textsc{CPLEX} problem object lp. For each column, we must specify the objective coefficient, the lower and upper bounds, the variable type and the name of the variable.
+\end{itemize}
+
+Then we have to add the constraints:
+\begin{itemize}
+\item \textit{CPXnewrows(env, lp, rcnt, \&rhs, \&sense, NULL, cname)}: adds rcnt empty constraints to a specified \textsc{CPLEX} problem object lp; for each row, we specify the right hand side value, sense, range value (NULL), and name of the constraint; the constraint coefficients in the new rows are zero.
+\end{itemize}
+
+To set the coefficients of the constraints in a row we use:
+\begin{itemize}
+\item \textit{CPXchgcoef (env, lp, row, column, coeff)}: changes a single coefficient in the constraint matrix in the position specified by (row, column).
+\end{itemize}
+
+\section{\textsc{CPLEX} execution and setting \textsc{CPLEX} parameters}
+Now we must to start the execution of \textsc{CPLEX} and get the result.\\
+Before the \textsc{CPLEX} starts we can set some parameters relative to its execution:
+\begin{itemize}
+\item \textit{CPXsetTYPEparam(env, CPX\_PARAM\_XXX, value)}: this function depends by the type of parameter, its type must substitute TYPE in the invoketion; the parameter that will be setted  is the second parameters of the function and the last is the value at it will be setted.
+\end{itemize}
+
+Now we can execute the \textsc{CPLEX} to solve our problem:
+\begin{itemize}
+\item \textit{CPXmipopt(env,lp)}: finds a solution to the problem lp.
+\end{itemize}
+Then get the informations about the solution with:
+\begin{itemize}
+\item \textit{CPXgetobjval(env, lp, \&sol\_value)}: writes in sol\_value the solution objective value.
+\item \textit{CPXgetx(env, lp, sol , 0, ncols-1)}: writes in sol the solution variables values.
+\end{itemize}
+
+Before the end of execution we must free the space occupied by the problem with:
+\begin{itemize}
+\item \textit{CPXfreeprob(env, \&lp)}: that free the space occupied by the lp.
+\item \textit{CPXcloseCPLEX(\&env)}: that release the pointer relative to the \textsc{CPLEX} environment.
+\end{itemize}
+
 
 \chapter{Shell script}
 The collection of the results is an important part of our software development. Gives us the possibility to run the same code on different instances, to collect the results in a accessible way, to compare results obtained with different CPLEX parameters and finally gives us the convenience to store all the result of a run in the same folder. 
@@ -65,7 +144,7 @@ Here we describe all the parameter in a ready-to-use list of options:
 \item \textbf{gap} : gap to terminate
 \item \textbf{seed} : random seed
 \item \textbf{threads} : n threads
-\item \textbf{CC} : Cross Constraints
+\item \textbf{CC} : Computational Context
 \begin{enumerate}\setcounter{enumi}{-1}
 \setlength{\parskip}{0pt}
 \setlength{\itemsep}{0pt plus 1pt}
@@ -102,8 +181,57 @@ Here we describe all the parameter in a ready-to-use list of options:
 \item \textbf{names} : 1 for more clear file names
 \end{itemize}
 
+\chapter{GNU PLOT}
+Gnuplot is the command-line program, which can generate two and three dimensional plots of functions, data and data fits, that we have used to plot the solutions of the Wind Cable Farm problem instances.
+To plot a solution obtained it, we create the script that will be used to gnuplot to plot the data.\\
+The script is create in base of the cables used, we obtain a simple script as the following:
+\begin{lstlisting}[language=bash,caption={Gnuplot script}]
+set autoscale
+set term wxt title 'cost of solution'
+plot \
+	'plot/plot_datastd_#cable1.dat' using 1:2 with lines lc rgb "#color1" lw 2 title "Cable 1",\
+	'plot/plot_datastd_#cable1.dat' using 1:2:(0.6) with circles fill solid lc rgb "black" notitle,\
+	'plot/plot_datastd_#cable1.dat' using 1:2:3     with labels tc rgb "black" offset (0,0) font 'Arial Bold' notitle
+replot \
+	'plot/plot_datastd_#cable2.dat' using 1:2 with lines lc rgb "#color2" lw 2 title "Cable 2",\
+	'plot/plot_datastd_#cable2.dat' using 1:2:(0.6) with circles fill solid lc rgb "black" notitle,\
+	'plot/plot_datastd_#cable2.dat' using 1:2:3     with labels tc rgb "black" offset (0,0) font 'Arial Bold' notitle
+.
+.
+.
+replot \
+	'plot/plot_datastd_#cable3.dat' using 1:2 with lines lc rgb "#color3" lw 2 title "Cable 3",\
+	'plot/plot_datastd_#cable3.dat' using 1:2:(0.6) with circles fill solid lc rgb "black" notitle,\
+	'plot/plot_datastd_#cable3.dat' using 1:2:3     with labels tc rgb "black" offset (0,0) font 'Arial Bold' notitle
+
+\end{lstlisting}
+With \textit{\#cableX} that depends by the solution and the \textit{\#colorX } is obtained from an array that contains twenty colors, this is made to have different color for different cables.\\
+The data file \#cableX.dat contains pair of nodes that will be linked with the cable X, also this file is created at run time. This files, for any cables, are like:
+\newpage
+\begin{lstlisting}[language=bash,caption={Data file containing cables}]
+node1.x	node1.y
+node2.x	node2.y
+
+node3.x	node3.y
+node4.x	node4.y
+.
+.
+.
+node(n-1).x	node(n-1).y
+node(n).x		node(n).y
+EOF
+\end{lstlisting}
+Once that the files are created (1 for the script and K for the cables, with K equals to the number of cables used in the solution), we manage the execution of the script by the pipe with three command:
+\begin{lstlisting}[language=bash,caption={Script execution}]
+FILE *gp = popen("gnuplot -p", "w");  // that open gnu plot on the pipe 
+fprintf(gp, "load 'plot/script_plot.p'\n"); // that run the script and show the plot
+fclose(gp); // that close the plot
+\end{lstlisting}
+
+
+
 \chapter{Performance Profile}
-un'altra appendice che potremmo mettere è quella su gnuplot .. noi l'abbiamo utilizzato in qualche modo particolare rispetto ad altri gruppi o abbiamo fatto come tutti? 
+???
 
 \chapter{Performance Variability and Random Seed}
 The performance of MIP solvers is subject to some variability that appears when changing from different computing platforms.The literature case \cite{danna2008performance}, shows us that it could happen that the same instance, with the same code is solved at the root node in one platform, and requires 1426 nodes in another. It is even possible to have different results even if we’re comparing two runs in different partition of the same machine. According to \cite{lodi2013performance} also the permutation of rows and/or columns of a model could lead to different performance. The performance variability is common for all the different MIP solvers. 

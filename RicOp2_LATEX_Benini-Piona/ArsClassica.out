@@ -22,7 +22,7 @@
 \BOOKMARK [2][-]{subsection.4.2.2}{4.2.2 Soft Fixing RINS \(asymmetric\)}{section.4.2}% 22
 \BOOKMARK [1][-]{section.4.3}{4.3 Results}{chapter.4}% 23
 \BOOKMARK [0][]{chapter.5}{5 Heuristic Methods}{}% 24
-\BOOKMARK [1][-]{section.5.1}{5.1 Dijkstra}{chapter.5}% 25
+\BOOKMARK [1][-]{section.5.1}{5.1 Prim-Dijkstra}{chapter.5}% 25
 \BOOKMARK [1][-]{section.5.2}{5.2 GRASP}{chapter.5}% 26
 \BOOKMARK [2][-]{subsection.5.2.1}{5.2.1 1-Opt}{section.5.2}% 27
 \BOOKMARK [1][-]{section.5.3}{5.3 Taboo Search}{chapter.5}% 28
@@ -30,8 +30,11 @@
 \BOOKMARK [1][-]{section.5.5}{5.5 Results}{chapter.5}% 30
 \BOOKMARK [0][]{section*.7}{Appendices}{}% 31
 \BOOKMARK [0][]{Appendix.a.A}{A CPLEX}{}% 32
-\BOOKMARK [0][]{Appendix.a.B}{B Shell script}{}% 33
-\BOOKMARK [0][]{Appendix.a.C}{C Input string parameteres}{}% 34
-\BOOKMARK [0][]{Appendix.a.D}{D Performance Profile}{}% 35
-\BOOKMARK [0][]{Appendix.a.E}{E Performance Variability and Random Seed}{}% 36
-\BOOKMARK [0][]{section*.8}{ Bibliography}{}% 37
+\BOOKMARK [1][-]{section.a.A.1}{A.1 Initialization of CPLEX Environment}{Appendix.a.A}% 33
+\BOOKMARK [1][-]{section.a.A.2}{A.2 Population of a problem}{Appendix.a.A}% 34
+\BOOKMARK [1][-]{section.a.A.3}{A.3 CPLEX execution and setting CPLEX parameters}{Appendix.a.A}% 35
+\BOOKMARK [0][]{Appendix.a.B}{B Shell script}{}% 36
+\BOOKMARK [0][]{Appendix.a.C}{C Input string parameteres}{}% 37
+\BOOKMARK [0][]{Appendix.a.D}{D GNU PLOT}{}% 38
+\BOOKMARK [0][]{Appendix.a.E}{E Performance Profile}{}% 39
+\BOOKMARK [0][]{Appendix.a.F}{F Performance Variability and Random Seed}{}% 40

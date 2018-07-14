@@ -5,7 +5,7 @@
 \chapter{Development Environment}
 \label{chp:1-Environment}
 %************************************************
-To allow replicability of our experiments we add some informations about the system and the environment that we used for the following research. 
+To allow replicability of our experiments, we have added some information about the system and the environment that we used for the following research. 
 We used the following development environment:
 \begin{itemize}
 \item \textsc{CPLEX} :  version 0.1-2018
@@ -17,8 +17,8 @@ We used the following development environment:
 \end{itemize}
 
 \section{Real World Info}
-As in \cite{wfcp} research, we used a library of real-life instances that are made publicly available for benchmarking.
-For benchmark purposes we collected the data of five real wind farms in operation in United Kingdom (wf02, wf03, wf05) and Denmark (wf01, wf04). Different types of cable with different costs, capacities and electrical resistances are available on the market; we considered 5 sets of real cables, named cb01, cb02, cb03, cb04, and cb05; the turbines in each wind park are of the same type, so we can express the cable capacities as the maximum number of turbines that it can support. Finally we list the maximum number of connections to the substation, namely the input parameter C. The \ref{tab:realWorld} table contains all the information.
+As in \cite{wfcp} research, we used a library of real-life instances that are publicly available for benchmarking.
+For benchmark purposes, we collected the data of five real wind farms in operation in United Kingdom (wf02, wf03, wf05) and Denmark (wf01, wf04). Different types of cable with different costs, capacities and electrical resistances are available on the market; we considered 5 sets of real cables, named cb01, cb02, cb03, cb04, and cb05. The turbines in each wind park are of the same type, so we can express the cable capacities as the maximum number of turbines that it can support. Finally, we list the maximum number of connections to the substation, or to be specific, the input parameter C. The \ref{tab:realWorld} table contains all the information.
 \begin{table}[!htbp]\label{tab:realWorld}
 \center
 \begin{tabular}{llllll}
@@ -30,11 +30,11 @@ wf03 & Ormonde      & Senvion 5MW   & 30              & 4  & cb03-cb04          
 wf04 & DanTysk      & Simens 3.6MV  & 80              & 10 & cb01                \\
 wf05 & Thanet       & Vestas 90-3MW & 100             & 10 & cb04-cb05           \\ \hline
 \end{tabular}
-\caption{Basic information on the real-world wind farms we used for tests.}
+\caption{Basic information on the real-world wind farms that were used for testing.}
 \end{table}
 
 \section{Instance TEST BED}
-The set of tests that we had the possibility to use are the combinations between the 5 instances of wind farms and the 5 sets of real cables. For simplicity and in order to decrease the possibility to make mistakes we adopted the same a numeration as the \cite{wfcp} article. This solution allows us to easily compare our results with the results in that research. 
+The test that we were able to use are the combinations between the 5 instances of wind farms and the 5 sets of real cables. For simplicity reasons and in order to eliminate mistakes, we adopted the same a numeration as the \cite{wfcp} article. This solution allows us to easily compare our results with the results in that research. 
 Table \ref{tab:testBed} reports the resulting numbers of the different instances. For example we renamed the 01 wind farm as data\_01.turb and the corresponding cables as data\_01.cbl. 
 
 \begin{table}[!htbp]\label{tab:testBed}

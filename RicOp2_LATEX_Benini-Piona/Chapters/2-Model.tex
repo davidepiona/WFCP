@@ -6,19 +6,20 @@
 \label{chp:2-Model}
 %************************************************
 
-\section{Wind Farm Cable Problem Introduction}We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production needs to be routed by some cables to the substation and then directed to the coast.
-To do that, each turbine must be connected through a cable to another turbine, and eventually to a substation.
+\section{Wind Farm Cable Problem Introduction}
+We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production needs to be routed by some cables to the substation and then directed to the coast.
+To do that, each turbine must be connected through a cable to another turbine, and eventually to a substation.\\
 
-This problem complexity if the cable routing problem is strongly NP-hard according to \cite{wfcp}. They have proved that the problem is NP-hard in two formulation. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
+The problem complexity of the cable routing problem is strongly NP-hard according to \cite{wfcp}. They have proved that the problem is NP-hard in two formulations. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
 
-When designing a feasible cable routing it's necessarly to take in account a number of constraints. Here we list some of them and then we'll describe the mathematical model that realizes those constraints. Our model is based on the following requirements:
+When designing a feasible cable routing, it's necessary to take in account a number of constraints. Here we list some of them and then we'll describe the mathematical model that realizes those constraints. Our model is based on the following requirements:
 
 \begin{itemize}
-\item since the energy flow is unsplittable, the energy flow leaving a turbine must be supported by a single cable; 
-\item power losses should be avoided beacuse it will cause revenue losses in the future;
-\item different cables, with different capacities and costs, are available; this means that it is important to choose the right cable to minimize the costs without affecting the revenues 
-\item the energy flow on each connection cannot exceed the capacity of the installed cable;
-\item due to the substation physical layout, a given maximum number of cables, say $C$, can be connected to each substation; 
+\item since the energy flow is unsplittable, the energy flow leaving a turbine must be supported by a single cable.
+\item power losses should be avoided because it will cause revenue losses in the future.
+\item different cables, with different capacities and costs are available. This means that it is important to choose the right cable to minimize the costs without affecting the revenues. 
+\item the energy flow on each connection cannot exceed the capacity of the installed cable.
+\item due to the substation physical layout, a given maximum number of cables, say $C$, can be connected to each substation.
 \item cable crossing should be avoided. (we will discuss this problem in the next subsection)
 \end{itemize}
 Let $K$ denote the number of different types of cables that can be used and let $n$ be the number turbines. 
@@ -97,9 +98,9 @@ Constraint \ref{eq:basestation} imposes the maximum number of cables ($C$) that 
 \end{center}
 	
 \section{Crossing Cables}
-According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged in practice as building one cable on top of another is more expensive and increase the risks of cable damages.\\
+According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged, in practice as building one cable on top of another is more expensive and increases the risks of cable damages.\\
 
-In order to evaluate if two arches cross we used the Cramer Method: given the arc $a$ between $P_1$ and $P_2$ and the arc $b$ between $P_3$ and $P_4$. We define the coordinates of a general point as: $P_j = (X_i, y_i)$. \\
+In order to evaluate if two arches cross, we used the Cramer Method: given the arc $a$ between $P_1$ and $P_2$ and the arc $b$ between $P_3$ and $P_4$. We define the coordinates of a general point as: $P_j = (X_i, y_i)$. \\
 Using the Cramer method we have:
 \[
 {x \choose y} = {x_1 \choose y_1}+ \lambda {x_2 - x_1 \choose y_2 - y_1} \quad \lambda \in \ ]0, 1[
@@ -107,7 +108,7 @@ Using the Cramer method we have:
 \[
 {x \choose y} = {x_3 \choose y_3}+ \mu {x_4 - x_3 \choose y_4 - y_3} \quad \mu \in \ ]0, 1[
 \]    
-Then we evaluate if the determinant is equal to zero value; to do this in a calculator environment avoiding mistakes we will check if the determinant is smaller than a constant epsilon with value $\simeq 10^{-9}$. We can have two situations:
+Then we evaluate if the determinant is equal to zero value. By using a calculator we will check if the determinant is smaller than a constant epsilon with value $\simeq 10^{-9}$. We can have two situations:
 \begin{enumerate}
 \item if $det=0 \quad \Rightarrow$ no crossing 
 \item if $det \neq 0 \quad \Rightarrow (\lambda, \mu) \ if \ (\lambda \in \ ]0, 1[) \ \&\& \ (\mu \in \ ]0, 1[) \Rightarrow $ crossing

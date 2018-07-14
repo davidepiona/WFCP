@@ -8,23 +8,23 @@
 Given that the \textsc{CPLEX} solver is really optimized, we apply the heuristic in the model writing. In this way the model that we’ll give to \textsc{CPLEX} should be theoretically easier to solve.
 
 \section{Hard Fixing}
-The first matheuristic algorithm that we have implemented relied on the hard variable fixing approach. Its main idea is to use a black-box solver to whom give the input data to generate quickly a first solution. Once the initial solution is been found some of its variables are fixed and then the method is iteratively reapplied on the restricted problem resulting from fixing: the black-box solver is called again, a new target solution is found, some of its variables are fixed, and so on. The choice of which variables have to be fixed is arbitrary, so the edges are chosen with uniform probability.\\
-Each time, before applying the \textsc{CPLEX} solver, the algorithm fixes some variables of the last solution obtained; an important parameter that influences the performances of the \textsc{CPLEX} solver is the number of edges that are been fixed in each loop: if the number of fixed edges is high \textsc{CPLEX} will find a solution more quickly, on the other hand, if the number of fixed edges decreases \textsc{CPLEX} is more free to find new improvement of a solution. \\
-We choose to fix all the arcs with probability 0.5 for each one. 
-Using the hard fixing technique, and in general fixing some variables, \textsc{CPLEX} became more faster because the number of arcs decreases. The number of arcs decreases in three ways: 
+The first matheuristic algorithm that we have implemented relied on the hard variable fixing approach. The main idea is to use a \textit{black-box} solver which receives the input data and quickly generates a first solution. Once the initial solution has been found, some of its variables are fixed and then the method is iteratively reapplied on the restricted problem resulting from fixing: the \textit{black-box} solver is called again, a new target solution is found, some of its variables are fixed, and so on. The choice of which variables have to be fixed is arbitrary, so the edges are chosen with uniform probability.\\
+Each time, before applying the \textsc{CPLEX} solver, the algorithm fixes some variables of the last solution obtained; an important parameter that influences the performances of the \textsc{CPLEX} solver is the number of edges that have been fixed in each loop. If the number of fixed edges is high, \textsc{CPLEX} will find a solution more quickly. On the other hand, if the number of fixed edges decreases, \textsc{CPLEX} is more free to find new improvements. \\
+We chose to fix all the arcs with probability 0.5 for each one. 
+Using the hard fixing technique, and in general fixing some variables, \textsc{CPLEX} becomes faster because the number of arcs decreases. The number of arcs decreases in three ways: 
 \begin{enumerate}
 \item some of them are fixed
-\item because we "delete" all the arcs exiting from a node which has already an exiting arc
+\item because we "delete" all the arcs exiting from a node which already has an exiting arc
 \item because we "delete" all the arcs crossing with those already fixed 
 \end{enumerate}
-We discovered that in the first \textsc{CPLEX} solutions very often appears the "star". The "star" is a shape of routing cables in which all the turbines are directly connected to the substation; in almost all the instances it is not a good solution because of the long cables. This fact can be a problem for the Hard Fixing technique because it is very likely to choose fixed cables far away from the optimal solution. To avoid this situation we have defined a \textit{timestart}: when the algorithm starts \textsc{CPLEX} runs for \textit{timestart} seconds searching a good starting solution, then it starts the real Hard Fixing method until the \textit{timelimit} expires. 
+We discovered that in the first \textsc{CPLEX} solutions very often appears the "star" solution, see image \ref{img:relax1}. The "star" is a shape of routing cables in which all the turbines are directly connected to the substation; in almost all the instances it is not a good solution because of the long cables. This fact can be a problem for the Hard Fixing technique because it is most likely to choose fixed cables far away from the optimal solution. To avoid this situation we have defined a \textit{timestart}: when the algorithm starts \textsc{CPLEX} runs for \textit{timestart} seconds searching a good starting solution, then it starts the real Hard Fixing method until the \textit{timelimit} expires. 
 
 \subsection{RINS Hard Fixing}
-This solution is like the classic Hard Fixing solution with the added condition that when we have to choose a fixed edge, that edge must be present in the actual best solution. Then all the probabilistic mechanism do not changes. This is something like "doing hard fixing over the RINS condition". 
+This solution is like the classic Hard Fixing solution with the added condition that when we have to choose a fixed edge, that edge must be present in the actual best solution. Then all the probabilistic mechanisms do not change. This is something like "doing hard fixing over the RINS condition". 
 
 
 \section{Soft Fixing}
-This method, also called \textit{local branching}, given a solution called $y^{REF}$, fixes at least a percentual of the arcs of that solution, and repeat the execution searching the best choice for the others. A critical issue of variable fixing methods is related on the choice of the variables to be fixed at each step and wrong choices are typically difficult to detect. In this sense, the purpose of the soft fixing is to fix a relevant number of variables without losing the possibility of finding good feasible solutions.\\
+This method, also called \textit{local branching}, given a solution called $y^{REF}$, fixes at least a percentage of the arcs of that solution, and repeats the execution searching the best choice for the others. A critical issue of variable fixing methods is related to the choice of the variables to be fixed at each step and wrong choices are typically difficult to detect. In this sense, the purpose of the soft fixing is to fix a relevant number of variables without losing the possibility of finding feasible solutions.\\
 A possible implementation is, given the solution $y^{REF}$ represented by an array of zeros and ones, given a generic solution $y$ and given a constant $K$:
 \[
 	y^{REF} = (0,1,0,1,1,...)
@@ -34,8 +34,8 @@ A possible implementation is, given the solution $y^{REF}$ represented by an arr
 \]
 It represents the Hamming distance between $y$ and $y^{REF}$; in practice the constraints allows one to replace at most $K$ edges of $y^{REF}$. \\
 Then, in our implementation, the algorithm starts producing a heuristic solution $Y$, adds the local branching constraint to the MIP model and solves it using \textsc{CPLEX}.\\
-In our solution we decided to start with $K=3$; each time the increment is by two units until it reaches the maximum of 20: then it restarts from 3. It is important that the number $K$ changes during the different execution to allow the \textit{local branching} exploring different solutions type. We decided those specific numbers after some simple test on some instances.\\
-Soft fixing avoids a too rigid fixing of the variables in favor of a more flexible condition; this allows the new solution to "move" from the older one fixing at each iteration some random arcs and moving the other looking quickly for a better solution.\\
+In our solution we decided to start with $K=3$; each time in increments of two units until it reaches the maximum of 20: then it restarts from 3. It is important that the number $K$ changes during the different execution to allow the \textit{local branching} to explore different solution types. We decided those specific numbers after simple test on some instances.\\
+Soft fixing avoids a rigid fixing of the variables in favor of a more flexible condition. This allows the new solution to "move" from the older one fixing at each iteration some random arcs and moving the other looking quickly for a better solution.\\
 This is the symmetric version of this method because it considers equally the 0-1 and the 1-0 flips. 
 [inserire immagine grafico local brancing???]
 \subsection{Asymmetric Soft Fixing}
@@ -50,14 +50,16 @@ In this case we consider only the flips from 1 to 0:
 	\sum_{(i,j):y^{REF}_{ij}=1} y_{ij} \quad \geq n - 1 - K
 \]
 This method is more convenient from the graphical point of view. 
-[??? aggiungere .. bo qualcosa sull'integrality grip?]
 \subsection{Soft Fixing RINS (asymmetric)}
-This method is a variant of the Soft Fixing. RINS algorithm is an heuristic that explores a neighborhood of the current incumbent solution to try to find a new, improved incumbent; in practice it compares the variable values of the good solutions and when the (??? spiegare come funziona). In the asymmetric case it looks only for the 1 values. \\
-It is possible to realize also the Symmetric RINS that consider also the $0$ values. Anyway we have discarded this option from the tests because for our specific practice case are more important the selected arcs than the not selected ones.
+This method is a variant of the Soft Fixing. RINS algorithm is an heuristic that explores a neighborhood of the current incumbent solution to try to find a new and improved incumbent. In practice it compares to the variable values of the good solutions and when the (??? spiegare come funziona). In the asymmetric case it looks only for the 1 values. \\
+It is possible to realize also the Symmetric RINS that consider also the $0$ values. Anyway, we have discarded this option from the tests because for this specific practice case the selected arcs are more important than the ones not selected.
 \section{Results}
+The MathEuristic method was born to have a better solution with less time, unless certificate the optimality of the solution. The purpose is use the \textsc{CPLEX} normal execution inserting and removing some conditions. In the table we can see a Hard and Soft Fixing method with and without using the RINS strategy.\\
+The best result that we have obtained is with the Hard Fixing with the RINS strategy but also here the result obtained is similar. While if we compare this results with the precedent we see that the MathEuristic method return the best results.\\
 
 
 \begin{table}[]
+\caption{Matheuristic methods results}
 \begin{tabular}{lllllllll}
 \hline
 Instance & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Hard Fixing \\ (TL 10m)\end{tabular}} & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Hard Fixing RINS\\ (TL 10m)\end{tabular}} & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Soft Asym. Fixing \\ (TL 10m)\end{tabular}} & \multicolumn{2}{l}{Soft Fixing RINS} \\ \hline

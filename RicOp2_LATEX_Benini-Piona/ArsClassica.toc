@@ -21,15 +21,15 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.1.1}{Relaxed Mode}}{7}{subsection.3.1.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.1.2}{CPLEX Heuristics-Params}}{8}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.2}{CPLEX Heuristics-Params}}{9}{subsection.3.1.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.2}{Lazy Constraints Method}}{8}{section.3.2}
+\contentsline {section}{\numberline {3.2}{Lazy Constraints Method}}{9}{section.3.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}{Loop Method}}{9}{section.3.3}
+\contentsline {section}{\numberline {3.3}{Loop Method}}{10}{section.3.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.4}{Lazy Callback Method}}{9}{section.3.4}
+\contentsline {section}{\numberline {3.4}{Lazy Callback Method}}{10}{section.3.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.5}{Results}}{10}{section.3.5}
+\contentsline {section}{\numberline {3.5}{Results}}{11}{section.3.5}
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {4}{Matheuristic Methods}}{13}{chapter.4}
 \defcounter {refsection}{0}\relax 
@@ -47,7 +47,7 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {5}{Heuristic Methods}}{17}{chapter.5}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.1}{Dijkstra}}{17}{section.5.1}
+\contentsline {section}{\numberline {5.1}{Prim-Dijkstra}}{17}{section.5.1}
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {5.2}{GRASP}}{17}{section.5.2}
 \defcounter {refsection}{0}\relax 
@@ -57,18 +57,24 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {5.4}{Ant Colony Algorithm}}{19}{section.5.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.5}{Results}}{20}{section.5.5}
+\contentsline {section}{\numberline {5.5}{Results}}{21}{section.5.5}
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{Appendices}{23}{section*.7}
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {A}{CPLEX}}{25}{Appendix.a.A}
 \defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {A.1}{Initialization of \textsc {CPLEX} Environment}}{25}{section.a.A.1}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {A.2}{Population of a problem}}{26}{section.a.A.2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {A.3}{\textsc {CPLEX} execution and setting \textsc {CPLEX} parameters}}{26}{section.a.A.3}
+\defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {B}{Shell script}}{27}{Appendix.a.B}
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {C}{Input string parameteres}}{29}{Appendix.a.C}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {D}{Performance Profile}}{31}{Appendix.a.D}
+\contentsline {chapter}{\numberline {D}{GNU PLOT}}{31}{Appendix.a.D}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {E}{Performance Variability and Random Seed}}{33}{Appendix.a.E}
+\contentsline {chapter}{\numberline {E}{Performance Profile}}{33}{Appendix.a.E}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {}{Bibliography}}{35}{section*.8}
+\contentsline {chapter}{\numberline {F}{Performance Variability and Random Seed}}{35}{Appendix.a.F}
