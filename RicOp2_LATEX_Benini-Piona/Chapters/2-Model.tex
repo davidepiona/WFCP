@@ -83,7 +83,6 @@ Constraints:
 	\sum^K_{k=1} cap(k)x^k_{ij} \geq f_{ij}, \quad \forall i,j = 1,...,n
 \end{equation}
 
-[magari cambiare ordine qui sotto]\\
 The objective function \ref{eq:obj} minimizes the total cable layout cost, where $dist(i, j)$ is the Euclidean distance between nodes $i$ and $j$ and $cost(k)$ is the unit cost for the cable $k$. 
 Constraints \ref{eq:oneCable} impose that only one type of cable can be selected for each build arc.
 Constraints \ref{eq:flux} are flow conservation constraints: the energy exiting each node $h$ is equal to the energy entering $h$ plus the power production of the node. 
@@ -113,8 +112,6 @@ Then we evaluate if the determinant is equal to zero value. By using a calculato
 \item if $det=0 \quad \Rightarrow$ no crossing 
 \item if $det \neq 0 \quad \Rightarrow (\lambda, \mu) \ if \ (\lambda \in \ ]0, 1[) \ \&\& \ (\mu \in \ ]0, 1[) \Rightarrow $ crossing
 \end{enumerate}                                                   
-
-[spiegareeee]!!!
 
 \[
 y(a,b)+ y(c,d) \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] \ cross \ [P_c, P_d]

@@ -231,7 +231,10 @@ fclose(gp); // that close the plot
 
 
 \chapter{Performance Profile}
-???
+The performance profile,proposed by Elizabeth D. Dolan and Jorge J. Moré in 2002 \cite{dolan2002benchmarking}, is a tool to evaluate and compare the performance of the set of solvers S on a test set P. This tool, given a set of benchmarks, returns, as seen, a plot with an evaluation function for each method used.\\
+The benchmarks are represented as a table, where each row represents the results obtained from each methods for the same instance.
+The X axis measures the percentage of victory with respect to the other methods on the base of what we choose as victory (objective function, execution time). The Y axis represents the time ratio and for each different value of it the tool measures the new percentage of victory if the best result obtained in each instance were multiplied for that time ratio.\\
+In practice, this tool allow us to evaluate the methods depending on how many times they win and, when that does not happen, in base on how far they are from the best one. In this way we can choose the methods that on average get better results.
 
 \chapter{Performance Variability and Random Seed}
 The performance of MIP solvers is subject to some variability that appears when changing from different computing platforms.The literature case \cite{danna2008performance}, shows us that it could happen that the same instance, with the same code is solved at the root node in one platform, and requires 1426 nodes in another. It is even possible to have different results even if we’re comparing two runs in different partition of the same machine. According to \cite{lodi2013performance} also the permutation of rows and/or columns of a model could lead to different performance. The performance variability is common for all the different MIP solvers. 
