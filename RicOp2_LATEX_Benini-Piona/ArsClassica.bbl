@@ -1,0 +1,286 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.9 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global}
+    \entry{cheriton1976finding}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=9a579b972275fb550109fb14a61757e1}{%
+           family={Cheriton},
+           familyi={C\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=a482470d86672bc70875624a04734732}{%
+           family={Tarjan},
+           familyi={T\bibinitperiod},
+           given={Robert\bibnamedelima Endre},
+           giveni={R\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {SIAM}%
+      }
+      \strng{namehash}{51a61339c11247156dd68a0227aa1865}
+      \strng{fullhash}{51a61339c11247156dd68a0227aa1865}
+      \strng{bibnamehash}{51a61339c11247156dd68a0227aa1865}
+      \strng{authorbibnamehash}{51a61339c11247156dd68a0227aa1865}
+      \strng{authornamehash}{51a61339c11247156dd68a0227aa1865}
+      \strng{authorfullhash}{51a61339c11247156dd68a0227aa1865}
+      \field{sortinit}{C}
+      \field{sortinithash}{963e9d84a3da2344e8833203de5aed05}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{SIAM Journal on Computing}
+      \field{number}{4}
+      \field{title}{Finding minimum spanning trees}
+      \field{volume}{5}
+      \field{year}{1976}
+      \field{pages}{724\bibrangedash 742}
+      \range{pages}{19}
+    \endentry
+    \entry{danna2008performance}{inproceedings}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=2673530b98b52377b98330170f098dc9}{%
+           family={Danna},
+           familyi={D\bibinitperiod},
+           given={Emilie},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{2673530b98b52377b98330170f098dc9}
+      \strng{fullhash}{2673530b98b52377b98330170f098dc9}
+      \strng{bibnamehash}{2673530b98b52377b98330170f098dc9}
+      \strng{authorbibnamehash}{2673530b98b52377b98330170f098dc9}
+      \strng{authornamehash}{2673530b98b52377b98330170f098dc9}
+      \strng{authorfullhash}{2673530b98b52377b98330170f098dc9}
+      \field{sortinit}{D}
+      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Workshop on Mixed Integer Programming, Columbia University, New York}
+      \field{number}{08}
+      \field{title}{Performance variability in mixed integer programming}
+      \field{volume}{20}
+      \field{year}{2008}
+    \endentry
+    \entry{wfcp}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=2,uniquepart=given,hash=d908556c6bc84f003b0a7c10e91d82b8}{%
+           family={Fischetti},
+           familyi={F\bibinitperiod},
+           given={Martina},
+           giveni={M\bibinitperiod},
+           givenun=2}}%
+        {{uniquename=0,uniquepart=base,hash=27c28bde78e62d4964a22364b7887154}{%
+           family={Pisinger},
+           familyi={P\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier BV}%
+      }
+      \strng{namehash}{09fa7a00d1ac7de6e54e56313587c44f}
+      \strng{fullhash}{09fa7a00d1ac7de6e54e56313587c44f}
+      \strng{bibnamehash}{09fa7a00d1ac7de6e54e56313587c44f}
+      \strng{authorbibnamehash}{09fa7a00d1ac7de6e54e56313587c44f}
+      \strng{authornamehash}{09fa7a00d1ac7de6e54e56313587c44f}
+      \strng{authorfullhash}{09fa7a00d1ac7de6e54e56313587c44f}
+      \field{sortinit}{F}
+      \field{sortinithash}{669c706c6f1fbf3b5a83d26f1d9e9e72}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0377-2217}
+      \field{journaltitle}{European Journal of Operational Research}
+      \field{number}{3}
+      \field{title}{Optimizing wind farm cable routing considering power losses}
+      \field{urlday}{7}
+      \field{urlmonth}{7}
+      \field{urlyear}{2018}
+      \field{volume}{270}
+      \field{year}{2018}
+      \field{urldateera}{ce}
+      \field{pages}{917\bibrangedash 930}
+      \range{pages}{14}
+      \verb{doi}
+      \verb 10.1016/j.ejor.2017.07.061
+      \endverb
+      \verb{urlraw}
+      \verb http://orbit.dtu.dk/files/126231483/TechRep_FischettiPisinger.pdf
+      \endverb
+      \verb{url}
+      \verb http://orbit.dtu.dk/files/126231483/TechRep_FischettiPisinger.pdf
+      \endverb
+      \keyw{Metaheuristics,Mixed-Integer Linear Programming,Matheuristics,Wind farm optimization,Benchmark instances}
+    \endentry
+    \entry{ricop}{book}{}
+      \name{author}{1}{}{%
+        {{uniquename=2,uniquepart=given,hash=bb435e1802203c028732fd11795a75a1}{%
+           family={Fischetti},
+           familyi={F\bibinitperiod},
+           given={Matteo},
+           giveni={M\bibinitperiod},
+           givenun=2}}%
+      }
+      \list{publisher}{1}{%
+        {Edizioni Libreria Progetto Padova}%
+      }
+      \strng{namehash}{bb435e1802203c028732fd11795a75a1}
+      \strng{fullhash}{bb435e1802203c028732fd11795a75a1}
+      \strng{bibnamehash}{bb435e1802203c028732fd11795a75a1}
+      \strng{authorbibnamehash}{bb435e1802203c028732fd11795a75a1}
+      \strng{authornamehash}{bb435e1802203c028732fd11795a75a1}
+      \strng{authorfullhash}{bb435e1802203c028732fd11795a75a1}
+      \field{sortinit}{F}
+      \field{sortinithash}{669c706c6f1fbf3b5a83d26f1d9e9e72}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Lezioni di ricerca operativa.}
+      \field{year}{1995}
+    \endentry
+    \entry{kruskal1956shortest}{article}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=ca798a47653271e78f52db3371414b6c}{%
+           family={Kruskal},
+           familyi={K\bibinitperiod},
+           given={Joseph\bibnamedelima B},
+           giveni={J\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {JSTOR}%
+      }
+      \strng{namehash}{ca798a47653271e78f52db3371414b6c}
+      \strng{fullhash}{ca798a47653271e78f52db3371414b6c}
+      \strng{bibnamehash}{ca798a47653271e78f52db3371414b6c}
+      \strng{authorbibnamehash}{ca798a47653271e78f52db3371414b6c}
+      \strng{authornamehash}{ca798a47653271e78f52db3371414b6c}
+      \strng{authorfullhash}{ca798a47653271e78f52db3371414b6c}
+      \field{sortinit}{K}
+      \field{sortinithash}{9fd838a31ba64d981e8f44562bd33f89}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the American Mathematical society}
+      \field{number}{1}
+      \field{title}{On the shortest spanning subtree of a graph and the traveling salesman problem}
+      \field{volume}{7}
+      \field{year}{1956}
+      \field{pages}{48\bibrangedash 50}
+      \range{pages}{3}
+    \endentry
+    \entry{lodi2013performance}{incollection}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=8f06c522270f9d0be3d58eef6505039b}{%
+           family={Lodi},
+           familyi={L\bibinitperiod},
+           given={Andrea},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=efcd61f1539308e084f0de25c351f29d}{%
+           family={Tramontani},
+           familyi={T\bibinitperiod},
+           given={Andrea},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {INFORMS}%
+      }
+      \strng{namehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{fullhash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{bibnamehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{authorbibnamehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{authornamehash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \strng{authorfullhash}{e7d3cfaa0726ae126d776f209e8e4e72}
+      \field{sortinit}{L}
+      \field{sortinithash}{2c7981aaabc885868aba60f0c09ee20f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Theory Driven by Influential Applications}
+      \field{title}{Performance variability in mixed-integer programming}
+      \field{urlday}{9}
+      \field{urlmonth}{7}
+      \field{urlyear}{2018}
+      \field{year}{2013}
+      \field{urldateera}{ce}
+      \field{pages}{1\bibrangedash 12}
+      \range{pages}{12}
+      \verb{urlraw}
+      \verb https://pubsonline.informs.org/doi/pdf/10.1287/educ.2013.0112
+      \endverb
+      \verb{url}
+      \verb https://pubsonline.informs.org/doi/pdf/10.1287/educ.2013.0112
+      \endverb
+    \endentry
+    \entry{nedlin2017ant}{thesis}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=e91f18b1103fcd239222df62302883c3}{%
+           family={Nedlin},
+           familyi={N\bibinitperiod},
+           given={Jakob},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{institution}{1}{%
+        {Informatics Institute}%
+      }
+      \strng{namehash}{e91f18b1103fcd239222df62302883c3}
+      \strng{fullhash}{e91f18b1103fcd239222df62302883c3}
+      \strng{bibnamehash}{e91f18b1103fcd239222df62302883c3}
+      \strng{authorbibnamehash}{e91f18b1103fcd239222df62302883c3}
+      \strng{authornamehash}{e91f18b1103fcd239222df62302883c3}
+      \strng{authorfullhash}{e91f18b1103fcd239222df62302883c3}
+      \field{sortinit}{N}
+      \field{sortinithash}{f7242c3ed3dc50029fca1be76c497c7c}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Ant-based Algorithms for the Wind Farm Cable Layout Problem}
+      \field{type}{phdthesis}
+      \field{urlday}{7}
+      \field{urlmonth}{7}
+      \field{urlyear}{2018}
+      \field{year}{2017}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://i11www.iti.kit.edu/_media/teaching/theses/ba-nedlin-17.pdf
+      \endverb
+      \verb{url}
+      \verb https://i11www.iti.kit.edu/_media/teaching/theses/ba-nedlin-17.pdf
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
