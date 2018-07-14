@@ -1,7 +1,0 @@
-Loop method :
-La black box è nei metaeuristici, secondo me è nel posto sbagliato
-
-Local branching non so se sono anche gli hard fix, non ricordo bene
-
-Dijkstra mi sa che è l'algoritmo sbagliato, dovrebbe essere Prim-Djikstra:
-Cheriton, David; Tarjan, Robert Endre (1976), "Finding minimum spanning trees", SIAM Journal on Computing, 5 (4): 724–742, doi:10.1137/0205051, MR 0446458.

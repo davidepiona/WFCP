@@ -2,7 +2,6 @@
 #include "limits.h"
 
 double second();
-void print_error(const char *err);  
 void check_dblsort();       
 double random01();     
 void read_input(instance *inst);
@@ -24,21 +23,17 @@ void print_error(const char *err)
 
 void free_instance(instance *inst)
 {    
-	//printf("a\n"); 
-	free(inst->power);
-	//printf("a\n"); 
-	free(inst->xcoord);
-	//printf("a\n"); 
-	free(inst->ycoord);
-	//printf("a\n"); 
-	free(inst->cablecapacity);
-	//printf("a\n"); 
-	free(inst->cablecost);
-	//printf("a\n"); 
-	free(inst->best_sol);
-	//printf("a\n"); 
-	free(inst->second_best_sol);
-	free(inst->mat);
+	free(inst->power); 
+	free(inst->xcoord); 
+	free(inst->ycoord); 
+	free(inst->cablecapacity); 
+	free(inst->cablecost); 
+	if(inst->model_type == 0){
+		free(inst->best_sol); 
+		free(inst->second_best_sol);
+	}
+	if(inst->model_type == 1)
+		free(inst->mat);
 }
 
 int CableOpt(instance *inst);    
@@ -214,7 +209,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-gap") == 0 ) { inst->gap = atof(argv[++i]); continue; }							// gap to terminate
 		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 				// random seed
 		if ( strcmp(argv[i],"-threads") == 0 ) { inst->num_threads = atoi(argv[++i]); continue; } 				// n. threads
-		if ( strcmp(argv[i],"-Cross_Constraints") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}		// Cross Constraints
+		if ( strcmp(argv[i],"-Computing_Context") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}		// Cross Constraints
 		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}					// Cross Constraints
 		if ( strcmp(argv[i],"-Cable_Regularization") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}	// Cable regularization
 		if ( strcmp(argv[i],"-CR") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}					// Cable regularization
@@ -241,7 +236,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-gap %lf\n", inst->gap);
 		printf("-seed %d\n", inst->randomseed);
 		printf("-threads %d\n", inst->num_threads); 
-		printf("-Cross_Constraints %d\n", inst->noCross);
+		printf("-Computing_Context %d\n", inst->noCross);
 		printf("-Cable_Regularization %d\n", inst->cableReg); 
 		printf("-CRF %d\n", inst->cableRegF); 
 		printf("-soft_fix %d\n", inst->softF); 

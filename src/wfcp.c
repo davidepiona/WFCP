@@ -1094,7 +1094,7 @@ void execute8(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 		printf("Plotto\n");
 		//plotGraph(inst, x_best, flux_best, cost);
-
+		//wait(30);
 		//fprintf(gp, "exit\n");
 		//fclose(gp);
 		//gp = popen("gnuplot -p","w");
