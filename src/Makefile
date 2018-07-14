@@ -1,6 +1,6 @@
 OBJS = main.o wfcp.o chrono.o  utilities.o
 HEADERS = wfcp.h 
-EXE = wfcp
+EXE = ../bin/wfcp
 all: $(EXE) 
 setting = -1   
 OS := $(shell uname)

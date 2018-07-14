@@ -178,7 +178,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 	inst->polishing_time = -1.0;
 	inst->randomseed = 0; 
 	inst->num_threads = 0;
-	inst->noCross = 1;
+	inst->exe = 1;
 	inst->cableReg = 0;
 	inst->cableRegF = 10;
 	inst->cableRegFA = 0;
@@ -209,8 +209,8 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		if( strcmp(argv[i],"-gap") == 0 ) { inst->gap = atof(argv[++i]); continue; }							// gap to terminate
 		if ( strcmp(argv[i],"-seed") == 0 ) { inst->randomseed = abs(atoi(argv[++i])); continue; } 				// random seed
 		if ( strcmp(argv[i],"-threads") == 0 ) { inst->num_threads = atoi(argv[++i]); continue; } 				// n. threads
-		if ( strcmp(argv[i],"-Computing_Context") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}		// Cross Constraints
-		if ( strcmp(argv[i],"-CC") == 0 ) { inst->noCross = abs(atoi(argv[++i])); continue;}					// Cross Constraints
+		if ( strcmp(argv[i],"-Computational_Context") == 0 ) { inst->exe = abs(atoi(argv[++i])); continue;}		// Cross Constraints
+		if ( strcmp(argv[i],"-CC") == 0 ) { inst->exe = abs(atoi(argv[++i])); continue;}					// Cross Constraints
 		if ( strcmp(argv[i],"-Cable_Regularization") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}	// Cable regularization
 		if ( strcmp(argv[i],"-CR") == 0 ) { inst->cableReg = abs(atoi(argv[++i])); continue;}					// Cable regularization
 		if ( strcmp(argv[i],"-CRF") == 0 ) { inst->cableRegF = abs(atoi(argv[++i])); continue;}					// Cable regularization
@@ -236,7 +236,7 @@ void parse_command_line(int argc, char** argv, instance *inst)
 		printf("-gap %lf\n", inst->gap);
 		printf("-seed %d\n", inst->randomseed);
 		printf("-threads %d\n", inst->num_threads); 
-		printf("-Computing_Context %d\n", inst->noCross);
+		printf("-Computational_Context %d\n", inst->exe);
 		printf("-Cable_Regularization %d\n", inst->cableReg); 
 		printf("-CRF %d\n", inst->cableRegF); 
 		printf("-soft_fix %d\n", inst->softF); 

@@ -306,7 +306,7 @@ int CableOpt(instance *inst)
 		if(CPXsetintparam(env,CPXPARAM_MIP_Strategy_RINSHeur,inst->rins))
 			print_error("Error set of rins");
 	if(inst->polishing_time > 0.0 )
-		if(inst->noCross != 4)
+		if(inst->exe != 4)
 		{
 			if(CPXsetdblparam(env,CPXPARAM_MIP_PolishAfter_Time,inst->polishing_time))
 				print_error("Error set of polishing time");
@@ -354,7 +354,7 @@ int CableOpt(instance *inst)
 	execute(inst, env, lp );
 
 	printf("\n     Time,Solution,Lower B,GAP%%,Seed,Rins,Relax,Polishing Time, modello, cc,softF,hardF\n");
-	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf,%d,%d,%d,%d\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time,inst->model_type,inst->noCross,inst->softF, inst->hardF);
+	printf("STAT,%.0lf,%.0lf,%.0lf,%.2lf%%,%d,%d,%d,%.0lf,%d,%d,%d,%d\n\n",inst->tbest,inst->zbest,inst->best_lb,((inst->zbest-inst->best_lb)*100/inst->zbest),inst->randomseed,inst->rins,inst->relax,inst->polishing_time,inst->model_type,inst->exe,inst->softF, inst->hardF);
 	fprintf(gp, "exit\n");
 	fclose(gp);
 	CPXfreeprob(env, &lp);
@@ -572,7 +572,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(inst->noCross == 0)
+	if(inst->exe == 0)
 	{
 		for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition
 		{
@@ -603,7 +603,7 @@ void build_model0(instance *inst, CPXENVptr env, CPXLPptr lp)
 			}
 		}
 	}
-	else if(inst->noCross == 1)
+	else if(inst->exe == 1)
 	{
 		for ( int i = 0; i < inst->nturbines; i++ )  // no Cross condition add to pool of lazy constraints
 		{
@@ -1582,7 +1582,7 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 	if(inst->model_type == 0)
 	{
 		printf("Execution with Cplex\n");
-		switch (inst->noCross) 	
+		switch (inst->exe) 	
 		{
 			case 0 : 								
 				execute0(inst, env,lp); // normal execution
@@ -1609,7 +1609,7 @@ void execute(instance *inst, CPXENVptr env, CPXLPptr lp)
 	} 
 	else if(inst->model_type == 1)
 	{
-		switch (inst->noCross) 	
+		switch (inst->exe) 	
 		{
 			case 6:
 				execute6(inst, env, lp);	// heuristic

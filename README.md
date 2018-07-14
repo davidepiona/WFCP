@@ -19,7 +19,7 @@
 * **gap**                   : gap to terminate
 * **seed**                  : random seed
 * **threads**               : n threads
-* **CC**                    : Cross Constraints	
+* **CC**                    : Computational Context
 	* **0** : Normal execution with no cross cable as normal constraints
 	* **1** : Lazy constraints to the model
 	* **2** : loop Method

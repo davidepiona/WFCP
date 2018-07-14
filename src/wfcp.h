@@ -47,7 +47,7 @@ typedef struct {
 	int rins;								// rins
 	int relax;								// relax on nturbines in root
 	double polishing_time;					// polishing time
-	int noCross;							// no cross constraints: 0 add to costraints. 1 add to lazy constraints. 2 callback 
+	int exe;							// execution mode
 	int cableReg;							// cables assignement heuristic callback : 0 no 1 yes
 	int cableRegF;							// cables assignement frequency
 	int cableRegFA;							// cables assignement frequency
