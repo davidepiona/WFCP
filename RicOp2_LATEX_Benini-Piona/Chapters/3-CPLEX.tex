@@ -41,7 +41,7 @@ And finally it is possible to add to the relaxed constraint $f^{R_2}_{obj} (x,y,
 \[
 \sum^n_{j=1} y_{ij} < 1 \quad \forall i = 1, ... n
 \]
-We listed the three different possibility that we can activate in our algorithms. The second and the third options come out of thinking about heuristic algorithm, while the first option can be applied in all the algorithms. 
+We have listed the three different possibility that we can activate in our algorithms. The second and the third options come out of thinking about heuristic algorithm, while the first option can be applied in all the algorithms. 
 \begin{center}
 	\includegraphics[scale=0.4]{Graphics/data02-relax1.png}
 	\captionof{figure}{Example relax 1}
@@ -65,11 +65,11 @@ The \textsc{CPLEX} code contains some heuristic procedures. Being integrated int
 \setlength{\parskip}{0pt}
 \setlength{\itemsep}{0pt plus 1pt}
 \item \textbf{RINS}: it means \textit{Relaxation induced neighborhood search} and it is a heuristic that explores a neighborhood of the current incumbent solution to try to find a new, improved incumbent. In the initial part the process does not change, but as soon as a solution is found the RINS heuristic tries to improve it with more frequency. It is possible to infer that the RINS method has been used in a \textsc{CPLEX} step when in the logs there is a ‘*’ near to the number. We set the \textit{-rins} param to 5 in all the tests. 
-\item \textbf{POLISHING}: this heuristic tries to modify some variables of a (good) solution to improve it. It is possible to set a condition that enables this method, in order to avoid premature usage of this method, which that can lead to wasted time and performances. We decided not to change this parameter in our tests.
+\item \textbf{POLISHING}: this heuristic tries to modify some variables of a (good) solution to improve it. It is possible to set a condition that enables this method, in order to avoid premature usage of this method, which can lead to wasted time and performances. We decided not to change this parameter in our tests.
 \end{itemize}
 
 \section{Lazy Constraints Method}
-The generated constraints are often too much and risk to block the solution for a long time if we added to the model statically.  
+The generated constraints are often too much and risk to block the solution for a long time if we add to the model statically.  
 Instead of adding systematically all the constraints in the model at the beginning, we generate them "on the fly" when they are violated by the Branch and Bound process. In this way \textsc{CPLEX} will check those constraints only when a solution is created. In the case that some constraint is violated, \textsc{CPLEX} will add the corresponding constraint before the incumbent update. \\
 The \textsc{CPLEX} command to add a set of constraints is \textit{CPXAddLazyConstraints}. \\
 This technique decreases the efficiency of the \textsc{CPLEX} pre-processing and sometimes the computation time of the solution is really high, but generally gives good results.
@@ -77,8 +77,8 @@ This technique decreases the efficiency of the \textsc{CPLEX} pre-processing and
 \section{Loop Method}
 In this method the \textsc{CPLEX} execution will be reiterated until the optimal solution is not found. From this feature comes his name. \\
 The model that we initially use do not include the no-crossing constraints and it is not possible to set all of them at one time. So in this method, we add time by time only the necessary constraints after each loop of the method. In particular after each loop we must verify that the chosen cables do not intersect.\\
-This method is mathematically correct, but seems inefficient. However, nowadays the power of \textsc{CPLEX} pre-processing allows the Loop Method to be considered. We have also implemented a variant of this method that can stop the execution in some cases, even if the optimality has not yet been reached. This optimization comes from the fact that often \textsc{CPLEX} spends a lot of time demonstrating the optimality of a solution. However, maybe this solution uses some crossing cables. The stopping conditions can be several: stop at the first solution (not so good in our case because often it is the "star solution"), stop when the gap is less than a fixed percentual or stop after a timelimit. \\
-In our solution we chose a variant of the timelimit condition. We have defined \textit{timestart} and \textit{timeloop} parameters: when the algorithm starts \textsc{CPLEX} runs for \textit{timestart} seconds searching for a good starting solution, then the loops will last \textit{timeloop} seconds, until the real \textit{timelimit} expires. The main reason of this choice is to seek for a good solution before the starting of the real Loop method. \\ 
+This method is mathematically correct, but seems inefficient. However, nowadays the power of \textsc{CPLEX} pre-processing allows the Loop method to be considered. We have also implemented a variant of this method that can stop the execution in some cases, even if the optimality has not yet been reached. This optimization comes from the fact that often \textsc{CPLEX} spends a lot of time demonstrating the optimality of a solution. However, maybe this solution uses some crossing cables. The stopping conditions can be several: stop at the first solution (not so good in our case because often it is the "star solution"), stop when the gap is less than a fixed percentual or stop after a timelimit. \\
+In our implementation we chose a variant of the timelimit condition. We have defined \textit{timestart} and \textit{timeloop} parameters: when the algorithm starts \textsc{CPLEX} runs for \textit{timestart} seconds searching for a good starting solution, then the loops will last \textit{timeloop} seconds, until the real \textit{timelimit} expires. The main reason of this choice is to seek for a good solution before the starting of the real Loop method. \\ 
 This technique solves consecutively more complex models. It is important to note that, if no new constraint is added to the model, \textsc{CPLEX} can restart from the last solution found saving a lot of time. One limitation of this method is that at the end it is possible (especially in the case of few loops iterations) to have crossing edges because initially the \textsc{CPLEX} solver is launched without constraints. 
 \section{Lazy Callback Method}
 \textsc{CPLEX} supports callbacks so that it is possible to define functions that will be called at crucial points in the application. In particular, lazy constraints are constraints that the user knows are unlikely to be violated, and in consequence, the user
@@ -91,9 +91,11 @@ Different from the loop method, \textsc{CPLEX} generates the optimal solution on
 
 \section{Results}
 With the objective to compare our algorithms we have executed various instances
-of the Wind Farm Cable Problem analyzing their solution after five and ten minutes for each method. All the instances have 30, 80 or 100 turbines with the number of cables that varying by 3 to 13 types. In this table we can see the result of this execution. As we can see the first method, the basic method with \textsc{CPLEX} that contains also all the cross constraints does not work bad but it initially has a lot of problem to compute the model because sometimes we have too many constraints, in some case our computers are blocked ( in the table: nan). To escape from this problem we set the no cross constraints as lazy constraint using the pool of lazy constraints of \textsc{CPLEX}, the lazy callback and the loop method. As we can see there are not more differences between the first two method, nothing that can be attributed to one method considering the performance variability. Also if we consider the mean of gaps between the solution with the \textsc{CPLEX} pool and the lazy callbacks, the method with \textsc{CPLEX} pool has the best results in ten minutes while in five minutes win the method with lazy callbacks. The method to compute the gap that we used is:
-\[gap = \frac{(solution 1 - solution 2)}{(solution 1 + solution 2)}\] with solution 1 and 2 relative to the same instance.The sign of the gap tell us which the method wins.\\
-While the loop method seems to be the worst method and have a problem, the loop method must be start from a good solution before than it iterate and removes the cross, so we have, as first, compute a solution with half of time of the total execution of method. \\ 
+of the Wind Farm Cable Problem analyzing their solution after five and ten minutes for each method. All the instances have 30, 80 or 100 turbines with the number of cables that varying by 3 to 13 types. In this table we can see the result of this execution. As we can see the first method, the basic method with \textsc{CPLEX} that contains also all the cross constraints does not work bad but it initially has a lot of problem to compute the model because sometimes we have too many constraints. In some cases our computers have been blocked ( in the table: nan). To escape from this problem we set the no cross constraints as lazy constraint using the pool of lazy constraints of \textsc{CPLEX}, the lazy callback and the loop method. As we can see there are not more differences between the first two method, nothing that can be attributed to one method considering the performance variability. Also if we consider the mean of gaps between the solution with the \textsc{CPLEX} pool and the lazy callbacks, the method with \textsc{CPLEX} pool has the best results in ten minutes while in five minutes win the method with lazy callbacks. The method to compute the gap that we used is:
+$gap = \frac{(solution 1 - solution 2)}{(solution 1 + solution 2)}$ \\
+with solution 1 and 2 relative to the same instance.The sign of the gap tell us which the method wins.\\
+The loop method seems to be the worst method. This happens because the loop method must be start from a good solution before than it iterate and removes the cross, so we have, as first, compute a solution with half of time of the total execution of method. \\ 
+For what concerns the performance profile \ref{img:mathperfprof}, \ref{img:mathperfprof2}, we can see that the loop method often solves the problem in less time than the others. It seem to be more effective with the easiest instances. 
 
 \begin{table}[!h]
 \caption{\textsc{CPLEX} based methods results with \textit{timelimit} 5 minutes}
@@ -171,5 +173,5 @@ data\_29 & 600                & 3.09E+07               & 600                 & 3
 \begin{center}
 	\includegraphics[scale=0.7]{Graphics/cplex.pdf}
 	\captionof{figure}{Performance profile for CPLEX methods with \textit{timelimit} 10 minutes}
-	\label{img:mathperfprof}
+	\label{img:mathperfprof2}
 \end{center}

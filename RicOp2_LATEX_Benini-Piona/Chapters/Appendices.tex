@@ -66,17 +66,17 @@ To set the coefficients of the constraints in a row we use:
 Now we must to start the execution of \textsc{CPLEX} and get the result.\\
 Before the \textsc{CPLEX} starts we can set some parameters relative to its execution:
 \begin{itemize}
-\item \textit{CPXsetTYPEparam(env, CPX\_PARAM\_XXX, value)}: this function depends by the type of parameter, its type must substitute TYPE in the invoketion; the parameter that will be setted  is the second parameters of the function and the last is the value at it will be setted.
+\item \textit{CPXsetTYPEparam(env, CPX\_PARAM\_XXX, value)}: this function depends by the type of parameter, its type must substitute TYPE in the invoketion; the parameter that will be setted  is the second parameters of the function. The last is the starting value.
 \end{itemize}
 
-Now we can execute the \textsc{CPLEX} to solve our problem:
+Now we can execute the \textsc{CPLEX} solver to solve our problem:
 \begin{itemize}
 \item \textit{CPXmipopt(env,lp)}: finds a solution to the problem lp.
 \end{itemize}
 Then get the informations about the solution with:
 \begin{itemize}
-\item \textit{CPXgetobjval(env, lp, \&sol\_value)}: writes in sol\_value the solution objective value.
-\item \textit{CPXgetx(env, lp, sol , 0, ncols-1)}: writes in sol the solution variables values.
+\item \textit{CPXgetobjval(env, lp, \&sol\_value)}: writes in \textit{sol\_value} the solution objective value.
+\item \textit{CPXgetx(env, lp, sol , 0, ncols-1)}: writes in \textit{sol} the solution variables values.
 \end{itemize}
 
 Before the end of execution we must free the space occupied by the problem with:
@@ -88,7 +88,7 @@ Before the end of execution we must free the space occupied by the problem with:
 
 \chapter{Shell script}
 The collection of the results is an important part of our software development. Gives us the possibility to run the same code on different instances, to collect the results in a accessible way, to compare results obtained with different CPLEX parameters and finally gives us the convenience to store all the result of a run in the same folder. 
-For those reasons when we were still at the beginning of the development we create a shell script that automates the process. It is composed by some parts:
+For those reasons when we were still at the beginning of the development we create a \textit{shell script} that automates the process. It is composed by some parts:
 \begin{enumerate}
 \item Make: compiles the code at the actual state.
 \item Creates the plot folder and the results folder named with the actual timestamp.
@@ -150,7 +150,7 @@ Here we describe all the parameter in a ready-to-use list of options:
 \setlength{\itemsep}{0pt plus 1pt}
 	\item Normal execution with no cross cable as normal constraints
 	\item Lazy constraints to the model
-	\item loop Method
+	\item Loop Method
 	\item Normal execution + lazy callback
 	\item Hard Fixing
 	\item Soft Fixing
@@ -183,8 +183,8 @@ Here we describe all the parameter in a ready-to-use list of options:
 
 \chapter{GNU PLOT}
 Gnuplot is the command-line program, which can generate two and three dimensional plots of functions, data and data fits, that we have used to plot the solutions of the Wind Cable Farm problem instances.
-To plot a solution obtained it, we create the script that will be used to gnuplot to plot the data.\\
-The script is create in base of the cables used, we obtain a simple script as the following:
+To plot a solution obtained it, we create the script that will be used by gnuplot to plot the data.\\
+The script is create in base of the cables used. We obtain a simple script as the following:
 \begin{lstlisting}[language=bash,caption={Gnuplot script}]
 set autoscale
 set term wxt title 'cost of solution'
@@ -237,22 +237,11 @@ The X axis measures the percentage of victory with respect to the other methods 
 In practice, this tool allow us to evaluate the methods depending on how many times they win and, when that does not happen, in base on how far they are from the best one. In this way we can choose the methods that on average get better results.
 
 \chapter{Performance Variability and Random Seed}
-The performance of MIP solvers is subject to some variability that appears when changing from different computing platforms.The literature case \cite{danna2008performance}, shows us that it could happen that the same instance, with the same code is solved at the root node in one platform, and requires 1426 nodes in another. It is even possible to have different results even if we’re comparing two runs in different partition of the same machine. According to \cite{lodi2013performance} also the permutation of rows and/or columns of a model could lead to different performance. The performance variability is common for all the different MIP solvers. 
+The performance of MIP solvers is subject to some variability that appears when changing from different computing platforms. The literature case \cite{danna2008performance}, shows us that it could happen that the same instance, with the same code is solved at the root node in one platform, and requires 1426 nodes in another. It is even possible to have different results even if we’re comparing two runs in different partition of the same machine. According to \cite{lodi2013performance} also the permutation of rows and/or columns of a model could lead to different performance. The performance variability is common for all the different MIP solvers. 
 The reason of that, in a simplified view, is that the small differences of precision between different environment can lead to different branching variables. Infact the Branch and Bound approach is defined “chaotic” because little variations lead to big changes. \\
 In literature there are some approaches to this problem and also exploiting this situation for better overall solver performance: developing pseudo-cost formulas that selects the branching variables in a more robust way or to try some different basis and evaluate which is the best alternative (this solution adds a computational overhead). \\
 Also CPLEX offers a possible solution giving the random seed parameter that can be used to change the initialization of the random number generator that is used in some internal operations, with the purpose also to speed up the computation. The random seed  enforces the random variability giving the possibility to collect statistics of N different runs for more comparable results. \\
 For the purpose of our research the performance variability is not a central question, however it is important for two reasons. First, to understand that the same code applied to the same instance can lead to different solution paths depending on the environments. Second, because a variability means that it is possible to take different choices, that means there’s a way to choose better and improve again the performances. 
-
-
-
-
-
-
-
-
-
-
-
 
 
 

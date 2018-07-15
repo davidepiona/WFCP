@@ -34,7 +34,7 @@ A possible implementation is, given the solution $y^{REF}$ represented by an arr
 \]
 It represents the Hamming distance between $y$ and $y^{REF}$; in practice the constraints allows one to replace at most $K$ edges of $y^{REF}$. \\
 Then, in our implementation, the algorithm starts producing a heuristic solution $Y$, adds the local branching constraint to the MIP model and solves it using \textsc{CPLEX}.\\
-In our solution we decided to start with $K=3$; each time in increments of two units until it reaches the maximum of 20: then it restarts from 3. It is important that the number $K$ changes during the different execution to allow the \textit{local branching} to explore different solution types. We decided those specific numbers after simple test on some instances.\\
+In our solution we decided to start with $K=3$; each time it increments of two units until it reaches the maximum of 20: then it restarts from 3. It is important that the number $K$ changes during the different execution to allow the \textit{local branching} to explore different solution types. We decided those specific numbers after simple test on some instances.\\
 Soft fixing avoids a rigid fixing of the variables in favor of a more flexible condition. This allows the new solution to "move" from the older one fixing at each iteration some random arcs and moving the other looking quickly for a better solution.\\
 This is the symmetric version of this method because it considers equally the 0-1 and the 1-0 flips. 
 \newpage
@@ -49,15 +49,16 @@ In this case we consider only the flips from 1 to 0:
 \[
 	\sum_{(i,j):y^{REF}_{ij}=1} y_{ij} \quad \geq n - 1 - K
 \]
-This method is more convenient from the graphical point of view. 
+This method is more convenient from the graphical point of view, so we decided to use this version for testing. 
 \subsection{Soft Fixing RINS (asymmetric)}
 This method is a variant of the Soft Fixing. RINS algorithm is an heuristic that explores a neighborhood of the current incumbent solution to try to find a new and improved incumbent.\\
-This method use an algorithm called relaxation induced neighborhoods search (RINS), proposed by E. Denna, E. Rothberg, C. Le Pape in 2003 \cite{danna2005exploring}. The algorithm is based on the fact that, during the exploration of the branch-and-cut tree, two solutions are typically at our disposal. We try to get information about the optimal solution using both the solutions that we have already obtained. Therefore, after a bit amount of time that we use to find almost two feasible solution, we check the edges that are selected or not in both the solution and we add a constraints to the MIP model with the soft fixing strategy a little modified.\\
+This method use an algorithm called relaxation induced neighborhoods search (RINS), proposed by \cite{danna2005exploring}. The algorithm is based on the fact that, during the exploration of the branch-and-cut tree, two solutions are typically at our disposal. We try to get information about the optimal solution using both the solutions that we have already obtained. Therefore, after a bit amount of time that we use to find almost two feasible solution, we check the edges that are selected or not in both the solution and we add a constraints to the MIP model with the soft fixing strategy a little modified.\\
 In the asymmetric case it looks only for the 1 values.
 It is possible to realize also the Symmetric RINS that consider also the $0$ values. Anyway, we have discarded this option from the tests because for this specific practice case the selected arcs are more important than the ones not selected.
 \section{Results}
 The MathEuristic method was born to have a better solution with less time, unless certificate the optimality of the solution. The purpose is use the \textsc{CPLEX} normal execution inserting and removing some conditions. In the table we can see a Hard and Soft Fixing method with and without using the RINS strategy.\\
-The best result that we have obtained is with the Hard Fixing with the RINS strategy but also here the result obtained is similar. While if we compare this results with the precedent we see that the MathEuristic method return the best results.
+The best result that we have obtained is with the Hard Fixing with the RINS strategy but also here the result obtained is similar. The performance profile \ref{img:mathperfprof3} highlights the speed of the Hard Fixing method. \\
+If we compare this results with the precedent we see that the Matheuristic methods return the best results.
 
 \begin{table}[!h]
 \caption{Matheuristic methods results with \textit{timelimit} 10 minutes}
@@ -94,6 +95,6 @@ data\_29 & 538               & 2.03E+09             & 360                       
 
 \begin{center}
 	\includegraphics[scale=0.7]{Graphics/Matheuristic.pdf}
-	\captionof{figure}{Matheuristics performace profile}
-	\label{img:mathperfprof}
+	\captionof{figure}{Matheuristics methods performance profile}
+	\label{img:mathperfprof3}
 \end{center}

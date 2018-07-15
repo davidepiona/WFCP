@@ -10,7 +10,7 @@
 We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production needs to be routed by some cables to the substation and then directed to the coast.
 To do that, each turbine must be connected through a cable to another turbine, and eventually to a substation.\\
 
-The problem complexity of the cable routing problem is strongly NP-hard according to \cite{wfcp}. They have proved that the problem is NP-hard in two formulations. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
+The complexity of the cable routing problem is strongly NP-hard according to \cite{wfcp}. They have proved that the problem is NP-hard in two formulations. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
 
 When designing a feasible cable routing, it's necessary to take in account a number of constraints. Here we list some of them and then we'll describe the mathematical model that realizes those constraints. Our model is based on the following requirements:
 
@@ -47,7 +47,7 @@ Definition of $x^k_{ij}$ :
 \]
 Definition of $f_{ij}$ :
 \[
-	f_{ij} \geq 0, \quad \forall i,j= 1, ... n
+	f_{ij} \geq 0, \quad \forall \ i,j= 1, ... n
 \]
 
 %\[
@@ -62,17 +62,17 @@ Constraints:
 \begin{equation}\label{eq:numberCable}
 	\sum^n_{j = 1} y_{hj} = 
 	\begin{cases}
-   1 \quad \mbox{if } P_h \geq 0, \quad \forall h=1,...,n \\
+   1 \quad \mbox{if } P_h \geq 0, \quad \forall \ h=1,...,n \\
    0 \quad \mbox{if } P_h = -1
    \end{cases}
 \end{equation}
 
 \begin{equation}\label{eq:basestation}
-	\sum^n_{i =1} y_{ih} \leq C, \quad \forall h \ | \ P_h = -1
+	\sum^n_{i =1} y_{ih} \leq C, \quad \forall \ h \ | \ P_h = -1
 \end{equation}
 
 \begin{equation}\label{eq:flux}
-	\sum^n_{j=1} f_{hj} = \sum^n_{i=1} f_{ih}+ P_h, \quad \forall h \ | \ P_h \geq 0
+	\sum^n_{j=1} f_{hj} = \sum^n_{i=1} f_{ih}+ P_h, \quad \forall \ h \ | \ P_h \geq 0
 \end{equation}
 
 \begin{equation}\label{eq:oneCable}
@@ -80,7 +80,7 @@ Constraints:
 \end{equation}
 
 \begin{equation}\label{eq:capacity}
-	\sum^K_{k=1} cap(k)x^k_{ij} \geq f_{ij}, \quad \forall i,j = 1,...,n
+	\sum^K_{k=1} cap(k)x^k_{ij} \geq f_{ij}, \quad \forall \ i,j = 1,...,n
 \end{equation}
 
 The objective function \ref{eq:obj} minimizes the total cable layout cost, where $dist(i, j)$ is the Euclidean distance between nodes $i$ and $j$ and $cost(k)$ is the unit cost for the cable $k$. 
@@ -97,9 +97,9 @@ Constraint \ref{eq:basestation} imposes the maximum number of cables ($C$) that 
 \end{center}
 	
 \section{Crossing Cables}
-According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged, in practice as building one cable on top of another is more expensive and increases the risks of cable damages.\\
+According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged, in practice building one cable on top of another is more expensive and increases the risks of cable damages.\\
 
-In order to evaluate if two arches cross, we used the Cramer Method: given the arc $a$ between $P_1$ and $P_2$ and the arc $b$ between $P_3$ and $P_4$. We define the coordinates of a general point as: $P_j = (X_i, y_i)$. \\
+In order to evaluate if two arches cross, we used the Cramer Method: given the arc $a$ between $P_1$ and $P_2$ and the arc $b$ between $P_3$ and $P_4$. We define the coordinates of a general point as: $P_j = (x_i, y_i)$. \\
 Using the Cramer method we have:
 \[
 {x \choose y} = {x_1 \choose y_1}+ \lambda {x_2 - x_1 \choose y_2 - y_1} \quad \lambda \in \ ]0, 1[
