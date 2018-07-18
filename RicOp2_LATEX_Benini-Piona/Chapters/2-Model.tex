@@ -2,15 +2,14 @@
 % !TEX root = ../ArsClassica.tex
 
 %************************************************
-\chapter{Mathematical Model}
+\chapter{The problem}
 \label{chp:2-Model}
 %************************************************
 
-\section{Wind Farm Cable Problem Introduction}
 We have studied the Wind Farms Cable Problem, which is represented by a number of wind farms in the sea that produces energy; the power production needs to be routed by some cables to the substation and then directed to the coast.
 To do that, each turbine must be connected through a cable to another turbine, and eventually to a substation.\\
 
-The complexity of the cable routing problem is strongly NP-hard according to \cite{wfcp}. They have proved that the problem is NP-hard in two formulations. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
+The complexity of the cable routing problem is strongly NP-hard according to [\cite{wfcp}]. They have proved that the problem is NP-hard in two formulations. First, in the case where all turbines have the same power production and the nodes are not associated with points in the plane. Second, in the case where the turbines can have different power production and are associated with point in the plane. 
 
 When designing a feasible cable routing, it's necessary to take in account a number of constraints. Here we list some of them and then we'll describe the mathematical model that realizes those constraints. Our model is based on the following requirements:
 
@@ -45,7 +44,7 @@ Definition of $x^k_{ij}$ :
    \end{cases}
    \forall \,i,j = 1, ..., n \ \forall \ k = 1,... K
 \]
-Definition of $f_{ij}$ :
+Definition of $f_{ij}$ (current flow on arc $(i,j)$):
 \[
 	f_{ij} \geq 0, \quad \forall \ i,j= 1, ... n
 \]
@@ -83,37 +82,37 @@ Constraints:
 	\sum^K_{k=1} cap(k)x^k_{ij} \geq f_{ij}, \quad \forall \ i,j = 1,...,n
 \end{equation}
 
-The objective function \ref{eq:obj} minimizes the total cable layout cost, where $dist(i, j)$ is the Euclidean distance between nodes $i$ and $j$ and $cost(k)$ is the unit cost for the cable $k$. 
-Constraints \ref{eq:oneCable} impose that only one type of cable can be selected for each build arc.
-Constraints \ref{eq:flux} are flow conservation constraints: the energy exiting each node $h$ is equal to the energy entering $h$ plus the power production of the node. 
-Constraints \ref{eq:capacity} ensure that the flow does not exceed the capacity of the installed cable.
-Constraints \ref{eq:numberCable} impose that only one cable can exit a turbine and that no one cable can exit from the substation. 
-Constraint \ref{eq:basestation} imposes the maximum number of cables ($C$) that can enter in a substation, depending on the data of the instance. The image \ref{img:wfcp} shows an example of a graphical solution to the cable routing problem.
+The objective function (\ref{eq:obj}) minimizes the total cable layout cost, where $dist(i, j)$ is the Euclidean distance between nodes $i$ and $j$ and $cost(k)$ is the unit cost for the cable $k$. 
+Constraints (\ref{eq:oneCable}) impose that only one type of cable can be selected for each built arc.
+Constraints (\ref{eq:flux}) are flow conservation constraints: the energy exiting each node $h$ is equal to the energy entering $h$ plus the power production of the node. 
+Constraints (\ref{eq:capacity}) ensure that the flow does not exceed the capacity of the installed cable.
+Constraints (\ref{eq:numberCable}) impose that only one cable can exit a turbine and that no cable can exit from the substation. 
+Constraint (\ref{eq:basestation}) imposes the maximum number of cables ($C$) that can enter in a substation, depending on the data of the instance. The figure below shows an example of a graphical solution to the cable routing problem.
 
 \begin{center}
-	\includegraphics[scale=0.4]{Graphics/wfcp.png}
+	\includegraphics[scale=0.3]{Graphics/wfcp.png}
 	\captionof{figure}{Example solutions to a cable routing problem}
 	\label{img:wfcp}
 \end{center}
 	
 \section{Crossing Cables}
-According to \cite{wfcp}, an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged, in practice building one cable on top of another is more expensive and increases the risks of cable damages.\\
+According to [\cite{wfcp}], an important constraint is that cable crossings should be avoided. In principle, cable crossing is not impossible, but is strongly discouraged, as building one cable on top of another is more expensive and increases the risk of cable damages.\\
 
 In order to evaluate if two arches cross, we used the Cramer Method: given the arc $a$ between $P_1$ and $P_2$ and the arc $b$ between $P_3$ and $P_4$. We define the coordinates of a general point as: $P_j = (x_i, y_i)$. \\
-Using the Cramer method we have:
+Thus we have:
 \[
 {x \choose y} = {x_1 \choose y_1}+ \lambda {x_2 - x_1 \choose y_2 - y_1} \quad \lambda \in \ ]0, 1[
 \]   
 \[
 {x \choose y} = {x_3 \choose y_3}+ \mu {x_4 - x_3 \choose y_4 - y_3} \quad \mu \in \ ]0, 1[
 \]    
-Then we evaluate if the determinant is equal to zero value. By using a calculator we will check if the determinant is smaller than a constant epsilon with value $\simeq 10^{-9}$. We can have two situations:
+Then we evaluate if the determinant of the above linear system of equations is equal to zero. (For numerical reasons, we actually check if the determinant is smaller than a constant epsilon with value $\simeq 10^{-9}$). We can have two situations:
 \begin{enumerate}
 \item if $det=0 \quad \Rightarrow$ no crossing 
-\item if $det \neq 0 \quad \Rightarrow (\lambda, \mu) \ if \ (\lambda \in \ ]0, 1[) \ \&\& \ (\mu \in \ ]0, 1[) \Rightarrow $ crossing
+\item if $det \neq 0 \quad \Rightarrow compute \ the \ unique \ solution \ (\lambda, \mu): \\ if \ (\lambda \in \ ]0, 1[) \ \&\& \ (\mu \in \ ]0, 1[) \Rightarrow $ crossing
 \end{enumerate}                                                   
-
+In case of crossing, the following no-cross constraints can be added to the model: 
 \[
-y(a,b)+ y(c,d) \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] \ cross \ [P_c, P_d]
+y_{ab}+ y_{cd} \leq 1, \quad \forall (a,b,c,d): [P_a, P_b] \ cross \ [P_c, P_d]
 \]
 

@@ -24,6 +24,7 @@ do
 	if [ $count -gt 17 ]; then
 		cSub="-C 10"	
 	fi
+	count=$((count+1))
 	cd ${path}'/src'
 	./wfcp -ft ${path}'/data/'${c}'.turb' -fc ${path}'/data/'${c}'.cbl' ${cSub} ${settings} > ../runs/${dir}/run_${c}.log
 done

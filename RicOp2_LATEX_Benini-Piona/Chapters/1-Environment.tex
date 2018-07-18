@@ -5,7 +5,7 @@
 \chapter{Development Environment}
 \label{chp:1-Environment}
 %************************************************
-To allow replicability of our experiments, we have added some information about the system and the environment that we used for the following research. 
+To allow replicability of our experiments, we have added some information about the system and the environment that we used for our research. 
 We used the following development environment:
 \begin{itemize}
 \item \textsc{CPLEX} :  version 0.1-2018
@@ -17,7 +17,7 @@ We used the following development environment:
 \end{itemize}
 
 \section{Real World Info}
-As in \cite{wfcp} research, we used a library of real-life instances that are publicly available for benchmarking.
+As in [\cite{wfcp}] research, we used a library of real-life instances that are publicly available for benchmarking.
 For benchmark purposes, we collected the data of five real wind farms in operation in United Kingdom (wf02, wf03, wf05) and Denmark (wf01, wf04). Different types of cable with different costs, capacities and electrical resistances are available on the market; we considered 5 sets of real cables, named cb01, cb02, cb03, cb04, and cb05. The turbines in each wind park are of the same type, so we can express the cable capacities as the maximum number of turbines that it can support. Finally, we list the maximum number of connections to the substation, or to be specific, the input parameter C. The table 1 contains all the information.
 \begin{table}[!htbp]\label{tab:realWorld}
 \center
@@ -34,8 +34,8 @@ wf05 & Thanet       & Vestas 90-3MW & 100             & 10 & cb04-cb05          
 \end{table}
 
 \section{Instance TEST BED}
-The test that we were able to use are the combinations between the 5 instances of wind farms and the 5 sets of real cables. For simplicity reasons and in order to eliminate mistakes, we adopted the same a numeration as the \cite{wfcp} article. This solution allows us to easily compare our results with the results in that research. 
-Table 2 reports the resulting numbers of the different instances. For example we renamed the 01 wind farm as \textit{data\_01.turb} and the corresponding cables as \textit{data\_01.cbl}. Images \ref{img:ex1} and \ref{img:ex2} shows two instances from TEST BED.
+The test that we were able to use are the combinations between the 5 instances of wind farms and the 5 sets of real cables. For simplicity reasons and in order to eliminate mistakes, we adopted the same a numeration as the [\cite{wfcp}] article. This solution allows us to easily compare our results with the results in that research. 
+Table 2 reports the resulting numbers of the different instances. For example we renamed the 01 wind farm as \textit{data\_01.turb} and the corresponding cables as \textit{data\_01.cbl}. Figures \ref{img:ex1} and \ref{img:ex2} shows two instances from TEST BED.
 
 \begin{table}[!htbp]\label{tab:testBed}
 \center
