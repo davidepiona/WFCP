@@ -50,7 +50,7 @@ In our implementation the algorithm start from Prim-Dijkstra solution and applie
 The capacity of the algorithm to go away from the local optimum is determined by the number of moves that the memory structure can store, and it directly influences the diversification stage. This parameter, called \textit{tabu tenure}, is really difficult to decide a-priori for two reasons: if the \textit{tabu tenure} is large then the risk is to "freeze" the algorithm, because only few moves are allowed and, if it is too small then it will is not assure that the algorithm can escape from all the local optima. So, the choice of \textit{tabu tenure} needs to be tuned through some runs of the algorithm, depending on the instance that has to be solved. We defined a variable \textit{tabu tenure} that starts from 10 and each time the algorithm stops in a local optimum is increased by 10 until it reaches 70. At that moment the Tabu table likely contains too many moves, so we reset the tenure to 10. As we can see in the plot below, the solution improves even if sometimes makes bad moves caused by the Tabu list.
 
 \begin{center}
-	\includegraphics[scale=0.5]{Graphics/graph.png}
+	\includegraphics[scale=0.5]{Graphics/graph2.jpeg}
 	\captionof{figure}{Solution cost history in Tabu search algorithm}
 	\label{img:wfcp}
 \end{center}
